@@ -1,33 +1,33 @@
-import { maskValue, prepareInputMask } from '@/components/maskedText/utils';
-import { Input } from 'antd/lib';
-import React, { useEffect, useState } from 'react';
+import MaskedInput from 'antd-mask-input';
+import {
+    IConfigurableFormComponent,
+    useForm
+} from '@/providers';
+import React from 'react';
+import { getStyle } from '@/providers/form/utils';
+import { prepareInputMask } from './utils';
 
-export interface IMaskedTextProps {
-    value: string
+export interface IMaskedTextProps extends IConfigurableFormComponent {
+    value: string,
+    disabled: boolean
+    mask?: string
+    model: any
 }
 
-const MaskedText: React.FC<IMaskedTextProps> = ({ value}) => {
-    const [valid, setValid] = useState<boolean>(false);
+const MaskedText: React.FC<IMaskedTextProps> = ({ value, style, disabled, mask }) => {
 
-    value = '9801155450085';
-    const masked = maskValue(value, 3, 7, "*");
-
-    const onChange = (e) => {
-        if(e.target.value.length >= 4 && e.target.value === value.slice(3, 8)) {
-            console.log("Valid")
-            setValid(true);
-        }else setValid(false)
-    }
-
-    useEffect(() => {
-        console.log(valid)
-    }, [valid])
+    const useFormLocal = useForm(false);
+    const formData = useFormLocal?.formData;
+    const computedStyle = getStyle(style, formData) ?? {}
 
     return (
-        <>
-            <span>{masked}</span>
-            <Input onChange={onChange} style={{border: `${valid ? '1px solid green' : '1px solid red'}`}}/>
-        </>
+            <MaskedInput
+                className="masked-input"
+                mask={mask? mask : prepareInputMask(value)}
+                style={{ width: '100%', ...computedStyle }}
+                disabled={disabled}
+                />
+        
     );
 };
 

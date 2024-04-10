@@ -1,18 +1,20 @@
 import React from 'react';
 import { validateConfigurableComponentSettings } from '@/formDesignerUtils';
 import {  IToolboxComponent } from '@/interfaces/formDesigner';
-import { FormMarkup, IConfigurableFormComponent } from '@/providers/form/models';
+import { IConfigurableFormComponent } from '@/providers/form/models';
 import { ConfigurableFormItem } from '@/index';
-import settingsFormMarkup from './settings.json';
+import {getSettings} from './settings';
 import { LineHeightOutlined } from '@ant-design/icons';
 import MaskedText from '@/components/maskedText';
 
 export interface IMaskedTextComponetProps extends IConfigurableFormComponent {
     startMask: number;
     endMask: number;
+    mask: string;
+    value: string;
+    disabled: boolean;
 }
 
-const settingsForm = settingsFormMarkup as FormMarkup;
 
 const MaskedTextComponent: IToolboxComponent<IMaskedTextComponetProps> = {
   type: 'maskedText',
@@ -21,24 +23,14 @@ const MaskedTextComponent: IToolboxComponent<IMaskedTextComponetProps> = {
   isInput: true,
   tooltip: 'Complete Typography component that combines Text, Paragraph and Title',
   Factory: ({ model }) => (
-    <ConfigurableFormItem model={{ ...model, hideLabel: true }}>
-      {(value) => <MaskedText {...model} value={value}/>}
+    <ConfigurableFormItem model={{ ...model, hideLabel: model.hideLabel }}>
+      {
+      (value) => <MaskedText {...model} value={value? value : "Phumudzo"} disabled={model.readOnly} mask={model.mask} model={model}/>
+      }
     </ConfigurableFormItem>
   ),
-   settingsFormMarkup: settingsForm,
-  validateSettings: model => validateConfigurableComponentSettings(settingsForm, model),
-  initModel: model => ({
-    code: false,
-    copyable: false,
-    delete: false,
-    ellipsis: false,
-    mark: false,
-    italic: false,
-    underline: false,
-    level: 1,
-    textType: 'span',
-    ...model,
-  })
+   settingsFormMarkup: getSettings(),
+  validateSettings: model => validateConfigurableComponentSettings(getSettings(), model)
 };
 
 export default MaskedTextComponent;

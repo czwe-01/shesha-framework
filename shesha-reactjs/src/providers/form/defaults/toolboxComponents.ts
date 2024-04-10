@@ -84,7 +84,7 @@ import EntityReferenceComponent from '@/designer-components/entityReference/enti
 import FileUpload from '@/designer-components/fileUpload';
 import HtmlRender from '@/designer-components/htmlRender';
 import { LabelValueEditorComponent } from '@/designer-components/labelValueEditor/labelValueEditorComponent';
-import MaskedText from '@/designer-components/maskedText/MaskedText';
+import MaskedText from '@/components/formDesigner/components/maskedText/MaskedText';
 import { MetadataEditorComponent } from '@/designer-components/metadataEditor';
 import NumberFieldComponent from '@/designer-components/numberField/numberField';
 import QueryBuilderComponent from '@/designer-components/queryBuilder/queryBuilderComponent';
