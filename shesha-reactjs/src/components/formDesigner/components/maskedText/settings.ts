@@ -54,13 +54,37 @@ export const getSettings = () =>
             propertyName: 'description',
             parentId: 'abc54bf6-f76d-4139-a850-c99bf06c8b69',
             label: 'Description',
-          })
+          }).addDropdown({
+          id: '8615d12f-6ea0-4b11-a1a1-6088c7160fy9',
+          propertyName: 'value',
+          parentId: 'pnl44bf6-f76d-4139-a850-c99bf06c8b69',
+          label: 'Value',
+          allowClear: true,
+          values: [
+            {
+              label: 'Thulasizwe',
+              value: 'Thulasizwe',
+              id: '4f11403c-95fd-4e49-bb60-cb8c25f0f3c3',
+            },
+            {
+              label: 'number',
+              value: '9801155450085',
+              id: '8f85c476-e632-4fa7-89ad-2be6cfb7f1f1',
+            },
+            {
+              label: 'Jack',
+              value: 'Jack',
+              id: 'f01e54aa-a1a4-4bd6-ba73-c395e48af8ce',
+            },
+          ],
+          dataSourceType: 'values',
+        })
           .addTextField({
             id: '53cd10ce-25af-474b-af75-8e7b1f19e52d',
             propertyName: 'mask',
             label: 'Mask',
             parentId: 'root',
-            description: 'The masking pattern to be applied to the <input>'})          
+            description: "The masking pattern to be applied to the <input>, use '_' for letters and '#' for numbers",})          
           .addCheckbox({
             id: 'cfd7d45e-c7e3-4a27-987b-dc525c412448',
             propertyName: 'hidden',

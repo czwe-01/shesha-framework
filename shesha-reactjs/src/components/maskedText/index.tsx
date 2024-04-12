@@ -1,86 +1,67 @@
 import { IConfigurableFormComponent } from "@/providers";
-import React, { useRef, useState, useEffect } from "react";
-import ReactDOM from "react-dom";
-import MaskedInput from "react-text-mask";
-import styled from "styled-components";
+import React from "react";
 import { prepareInputMask } from "./utils";
+import { SizeType } from "antd/lib/config-provider/SizeContext";
+import { Variant } from "antd/lib/form/hooks/useVariants";
+import { useStyles } from "./styles/style";
+import { getStyle } from "@/providers/form/utils";
+import { StyledMaskedInput } from "./styleInput";
 
 export interface IMaskedTextProps extends IConfigurableFormComponent {
     value: string,
     disabled: boolean
     mask?: string
     readOnly: boolean
-}
+    className?: string,
+    placeholder?: string,
+    variant?: Variant,
+    maxLength?: number,
+    size?: SizeType,
+    formData?: any
+    };
 
-const MaskedText: React.FC<IMaskedTextProps> = ({ value, style, disabled, mask, readOnly }) => {
+const MaskedText: React.FC<IMaskedTextProps> = ({ value, mask, readOnly, style, formData, size }) => {
 
-  const [val, setVal] = useState(value);
-  const myRef = useRef(null);
+    const inputRef = React.useRef(null);
+    const computedStyle = getStyle(style, formData);
+    const styling = {
+        ...computedStyle,
+        height: size === 'small' ? '24px' : size === 'large'? '40px': '32px', width: '100%'
+    }
 
-  const handleChange = e => setVal(e.target.value);
+    const {styles} = useStyles();
 
-  useEffect(() => {
-    console.log({ myRef }); // myRef.current;
-  }, [myRef]);
-
-
-  const getPlaceholder = (value) => {
-    value.map((char: any) => {
-        return typeof char === 'object' ? '_' : char
-    })
-  }
-
-  const masker = (value: string, mask: any) => {
-    if(Array.isArray(mask) && mask.length !== 0){
-        console.log("Array mask provided", mask)
-        const arr = mask.map((val) => {
-            if(typeof val === 'string' && val.length > 1){
-                return val.split('')
+    const moveCursorToIndex = (index: number) => {
+        if (inputRef.current) {
+            const input = inputRef.current.inputElement;
+            if (input) {
+                input.setSelectionRange(index, index);
             }
-            return val
-        }).flat();
-
-        const placeholder = getPlaceholder(arr);
-        return {mask: arr, placeholder}
-    }
-
-    if (!mask) {
-        const arr = value.split("").map((char) => {
-        if (char.match(/[aeiou]/i)) {
-            return /[aeiou]/;
         }
-        return char;
-        });
-
-        const placeholder = getPlaceholder(arr)
-        return {mask: arr, placeholder}
-    }
-
-    const arr = mask.split("").map((char) => {
-        if (char === '#') {
-        return /\d/;
-        }
-
-        if(char === '_') {
-        return /[aeiou]/;
-        }
+};
 
 
-        return char;
-    });
+    const masker = prepareInputMask(value, mask).mask;
+    const placeholder = prepareInputMask(value, mask).placeholder;
 
-    const placeholder = getPlaceholder(arr)
-    return {mask: arr, placeholder}
-  }
-
-  console.log({ mask, value, masker: masker(value, mask) });
   return (
-      <MaskedInput
-        mask={masker(value, mask).mask}
-        placeholder={masker(value, mask).placeholder}
+    readOnly ? 
+      <StyledMaskedInput
+        mask={masker}
+        placeholder={placeholder}
+        style={styling}
+        className={ styles.input}
+        disabled
+      />
+      :
+     <StyledMaskedInput
+        mask={masker}
+        placeholder={placeholder}
         guide={true}
-        onChange={handleChange}
-        style={style}
+        style={styling}
+        className={ styles.input}
+        ref={inputRef}
+        onFocus={()=> moveCursorToIndex(placeholder.indexOf('_'))}
       />
   );
 }
