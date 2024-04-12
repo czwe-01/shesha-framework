@@ -25,7 +25,7 @@ const MaskedTextComponent: IToolboxComponent<IMaskedTextComponetProps> = {
   Factory: ({ model }) => (
     <ConfigurableFormItem model={{ ...model, hideLabel: model.hideLabel }}>
       {
-      (value) => <MaskedText {...model} value={value? value : "Phumudzo"} disabled={model.disabled || model.readOnly} mask={model.mask} readOnly={model.readOnly}/>
+      (value) => <MaskedText {...model} value={value? value : "Thulasizwe"} disabled={model.disabled || model.readOnly} mask={model.mask} readOnly={model.readOnly}/>
       }
     </ConfigurableFormItem>
   ),
