@@ -79,7 +79,7 @@ export const Dropdown: FC<IDropdownProps> = ({
         return {
             // fix for designer when switch mode
             value: typeof itemValue === 'object' ? null : itemValue,
-            label: item?.label ?? 'unknown',
+            label: item?.label ?? null,
             data: item?.data,
         };
     }, [incomeValueFunc]);
