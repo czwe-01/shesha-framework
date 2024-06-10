@@ -56,7 +56,7 @@ export const Dropdown: FC<IDropdownProps> = ({
             return !!value ? value.itemValue : null;
         }
         if (valueFormat === 'custom') {
-            return executeExpression<string>(incomeCustomJs, {...args, value}, null, null );
+            return executeExpression<string>(incomeCustomJs, { ...args, value }, null, null);
         }
         return value;
     }, [valueFormat, incomeCustomJs]);
@@ -64,27 +64,30 @@ export const Dropdown: FC<IDropdownProps> = ({
     const outcomeValueFunc: OutcomeValueFunc = useCallback((value: ReferenceListItemDto, args?: any) => {
         if (valueFormat === 'listItem') {
             return !!value
-              ? {item: value.item, itemValue: value.itemValue}
-              : null;
+                ? { item: value.item, itemValue: value.itemValue }
+                : null;
         }
         if (valueFormat === 'custom') {
-            return executeExpression(outcomeCustomJs, {...args, value}, null, null );
+            return executeExpression(outcomeCustomJs, { ...args, value }, null, null);
         }
         return !!value ? value.itemValue : null;
     }, [valueFormat, outcomeCustomJs]);
 
     const getLabeledValue = useCallback((value: any, options: ISelectOption<any>[]) => {
-        if (value === undefined) 
+        if (value === undefined)
             return undefined;
         const itemValue = incomeValueFunc(value, {});
         const item = options?.find(i => i.value === itemValue);
         return {
             // fix for designer when switch mode
             value: typeof itemValue === 'object' ? null : itemValue,
-            label: item?.label ?? 'unknown',
+            label: item?.label ?? null,
             data: item?.data,
         };
     }, [incomeValueFunc]);
+
+    const disableValue = (item => ({ ...item, disabled: disabledValues.includes(item.value) }));
+
 
     const getOptionFromFetchedItem = useCallback((fetchedItem: ReferenceListItemDto, args?: any): ISelectOption<any> => {
         const label = (!!labelCustomJs
@@ -118,16 +121,16 @@ export const Dropdown: FC<IDropdownProps> = ({
                 variant={hideBorder ? 'borderless' : undefined}
                 defaultValue={defaultValue}
                 mode={selectedMode}
-                disabledValues={disableItemValue? disabledValues : [] }
+                disabledValues={disableItemValue ? disabledValues : []}
                 filters={ignoredValues}
                 placeholder={placeholder}
                 readOnly={readOnly}
                 size={size}
                 style={style}
-                allowClear={allowClear} 
+                allowClear={allowClear}
                 getLabeledValue={getLabeledValue}
                 getOptionFromFetchedItem={getOptionFromFetchedItem}
-
+                disableValue={disableValue}
                 incomeValueFunc={incomeValueFunc}
                 outcomeValueFunc={outcomeValueFunc}
             />
@@ -160,7 +163,7 @@ export const Dropdown: FC<IDropdownProps> = ({
             style={style}
             size={size}
         >
-            {options.map((option, index) => (
+            {options.map(disableValue).map((option, index) => (
                 <Select.Option key={index} value={option.value}>
                     {option.label}
                 </Select.Option>

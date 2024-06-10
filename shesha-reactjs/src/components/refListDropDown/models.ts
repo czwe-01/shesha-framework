@@ -20,6 +20,7 @@ export interface IGenericRefListDropDownProps<TValue = any> extends IRefListDrop
    */
   getOptionFromFetchedItem: (fetchedItem: ReferenceListItemDto, args?: any) => ISelectOption<TValue>;
 
+  disableValue: (item: ISelectOption<TValue>) => ISelectOption<TValue>;
   incomeValueFunc: IncomeValueFunc;
   outcomeValueFunc: OutcomeValueFunc;
 
