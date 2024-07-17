@@ -26,4 +26,5 @@ export interface IKeyInformationBarProps extends IConfigurableFormComponent {
   style?: string;
   stylingBox?: any;
   backgroundColor?: string;
+  overflow?: 'animated' | 'none' | 'hidden';
 }

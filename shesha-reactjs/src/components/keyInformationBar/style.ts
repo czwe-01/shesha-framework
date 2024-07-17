@@ -8,8 +8,13 @@ export const useStyles = createStyles(({ css, cx, token }) => {
     const content = "content";
     const flexContainer = cx("flex-container", css`
         background-color: ${token.colorTextLightSolid};
-        flex-wrap: wrap;
-        
+
+        @keyframes scrollHorizontal {
+            to {
+            transform: translateX(calc(-50%));
+            }
+        }
+
         .${flexItemWrapper}, .${flexItemWrapperVertical} {
             display: flex;
             min-width: 0px;

@@ -28,19 +28,29 @@ const KeyInformationBarSettings: FC<ISettingsFormFactoryArgs<IKeyInformationBarP
                 <Checkbox disabled={readOnly} />
             </SettingsFormItem>
 
+            <SettingsFormItem name="columns" label="Columns">
+                <ColumnsList readOnly={readOnly} />
+            </SettingsFormItem>
             <SettingsFormItem name="orientation" label="Orientation">
                 <Select >
+
                     <Option value="horizontal">Horizontal</Option>
                     <Option value="vertical">Vertical</Option>
                 </Select>
             </SettingsFormItem>
 
+            <Show when={values.orientation === "horizontal"}>
+                <SettingsFormItem name="overflow" label="Overflow">
+                    <Select >
+                        <Option value="animated">Animated</Option>
+                        <Option value="hidden">Hidden</Option>
+                        <Option value="none">None</Option>
+                    </Select>
+                </SettingsFormItem>
+            </Show>
+
             <SettingsFormItem name="backgroundColor" label="Background Color" jsSetting >
                 <ColorPicker readOnly={readOnly} allowClear />
-            </SettingsFormItem>
-
-            <SettingsFormItem name="columns" label="Columns">
-                <ColumnsList readOnly={readOnly} />
             </SettingsFormItem>
 
             <Show when={values.orientation === "horizontal"}>

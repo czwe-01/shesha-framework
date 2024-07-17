@@ -2,19 +2,21 @@ import { IKeyInformationBarProps } from '@/designer-components/keyInformationBar
 import { ComponentsContainer, useFormData } from '@/index';
 import { getStyle, pickStyleFromModel } from '@/providers/form/utils';
 import { Flex } from 'antd';
-import React, { FC } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import { useStyles } from './style';
-import { addPx } from './utils';
+import { addAnimation, addPx } from './utils';
 export const KeyInformationBar: FC<IKeyInformationBarProps> = (props) => {
 
+    const scrollerRef = useRef<HTMLDivElement>(null);
+    const scrollerInner = useRef<HTMLDivElement>(null);
+
     const { data } = useFormData();
-    const { columns, hidden, orientation, style, dividerMargin, dividerHeight, dividerWidth, dividerThickness = '0.62px', dividerColor, gap, stylingBox, alignItems, backgroundColor } = props;
+    const { columns, overflow, hidden, orientation, style, dividerMargin, dividerHeight, dividerWidth, dividerThickness, dividerColor, gap, stylingBox, alignItems, backgroundColor } = props;
     const { styles } = useStyles();
 
     const width = addPx(dividerWidth);
     const height = addPx(dividerHeight);
     const margin = dividerMargin ? addPx(dividerMargin) : 0;
-
 
     if (hidden) return null;
 
@@ -32,34 +34,42 @@ export const KeyInformationBar: FC<IKeyInformationBarProps> = (props) => {
         textOverflow: "ellipsis",
     });
 
-    const divThickness = addPx(dividerThickness) !== '100%' ? addPx(dividerThickness) : '0.62px';
+    const divThickness = addPx(dividerThickness || '0.62px');
 
     const dividerStyle = {
         backgroundColor: dividerColor ?? '#b4b4b4',
-        width: !vertical && width ? divThickness ?? '0.62px' : width,
-        height: vertical && height ? divThickness ?? '0.62px' : height,
+        width: !vertical && width ? divThickness : width,
+        height: vertical && height ? divThickness : height,
         margin: vertical ? `${margin} 0` : `0 ${margin}`,
     };
 
+    useEffect(() => {
+        if (!vertical) addAnimation(scrollerRef, 10, scrollerInner, overflow);
+    }, [overflow]);
+
     return (
-        <Flex vertical={vertical} className={styles.flexContainer} style={{ ...computedStyle, ...barStyle }} >
-            {columns?.map((item, i) => {
-                const itemWidth = vertical ? "100%" : addPx(item.width);
-                return (
-                    <div key={item.id} className={vertical ? styles.flexItemWrapperVertical : styles.flexItemWrapper} style={vertical ? { width: itemWidth, justifyContent: alignItems } : { maxWidth: itemWidth }}>
-                        <div key={"divider" + i} className={styles.divider} style={{ ...dividerStyle, alignSelf: "center" }} />
-                        <div className={styles.content} style={{ justifyContent: item.textAlign }}>
-                            <ComponentsContainer
-                                containerId={item.id}
-                                gap={gap}
-                                wrapperStyle={{ padding: item.padding, maxWidth: vertical ? '100%' : addPx(item.width), boxSizing: "border-box" }}
-                                style={containerStyle(item)}
-                                dynamicComponents={props?.isDynamic ? item?.components : []}
-                            />
-                        </div>
-                    </div>);
-            })}
-        </Flex>
+        <div style={{ width: '100%', overflow: 'hidden' }} ref={scrollerRef}>
+            <Flex ref={scrollerInner} vertical={vertical} className={styles.flexContainer} style={{ ...computedStyle, ...barStyle }} >
+                {columns.map((item, i) => {
+                    const itemWidth = vertical ? "100%" : addPx(item.width);
+                    return (
+                        <div key={item.id} className={vertical ? styles.flexItemWrapperVertical : styles.flexItemWrapper} style={vertical ? { width: itemWidth, justifyContent: alignItems } : {
+                            ...(overflow === 'animated' ? { minWidth: itemWidth } : { maxWidth: itemWidth })
+                        }}>
+                            <div key={"divider" + i} className={styles.divider} style={{ ...dividerStyle, alignSelf: "center" }} />
+                            <div className={styles.content} style={{ justifyContent: item.textAlign }}>
+                                <ComponentsContainer
+                                    containerId={item.id}
+                                    gap={gap}
+                                    wrapperStyle={{ padding: item.padding, maxWidth: vertical ? '100%' : addPx(item.width), boxSizing: "border-box" }}
+                                    style={containerStyle(item)}
+                                    dynamicComponents={props?.isDynamic ? item?.components : []}
+                                />
+                            </div>
+                        </div>);
+                })}
+            </Flex>
+        </div>
     );
 };
 
