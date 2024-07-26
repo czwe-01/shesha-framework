@@ -20,7 +20,7 @@ export interface IComponentsContainerProps extends IComponentsContainerBaseProps
 }
 
 const ComponentsContainer: FC<IComponentsContainerProps> = (props) => {
-4
+  4
   const { getStoredFile } = useStoredFile(false) ?? {};
   const [storedFile, setStoredFile] = useState<string>();
 
@@ -42,8 +42,8 @@ const ComponentsContainer: FC<IComponentsContainerProps> = (props) => {
   const ContainerComponent = useComponentContainer();
 
   const updatedProps = useMemo(() => {
-    const updatedStyles = { ...props.style, background: `url(data:image/png;base64,${storedFile})` };
-    return { ...{ ...props, style: isStoredFileId === true ? updatedStyles : props.style } };
+    const updatedStyles = { ...props.wrapperStyle, background: `url(data:image/png;base64,${storedFile})` };
+    return { ...{ ...props, wrapperStyle: isStoredFileId === true ? updatedStyles : props.wrapperStyle } };
   }, [props, props?.storedFileId, storedFile]);
 
   return (

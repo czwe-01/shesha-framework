@@ -3,6 +3,7 @@ import { Form } from "antd";
 import { DEFAULT_FORM_LAYOUT_SETTINGS, ISettingsFormFactoryArgs } from "@/interfaces";
 import { getValuesFromSettings, updateSettingsFromVlues } from './utils';
 import { createNamedContext } from '@/utils/react';
+import { merge } from 'lodash';
 
 interface SettingsFormState<TModel> {
     model?: TModel;
@@ -37,8 +38,8 @@ const SettingsForm = <TModel,>(props: PropsWithChildren<SettingsFormProps<TModel
     } = props;
 
     const [form] = Form.useForm();
-    const [state, setState] = useState<SettingsFormState<TModel>>({model, values: getValuesFromSettings(model)});
-  
+    const [state, setState] = useState<SettingsFormState<TModel>>({ model, values: getValuesFromSettings(model) });
+
     if (formRef)
         formRef.current = {
             submit: () => form.submit(),
@@ -47,16 +48,16 @@ const SettingsForm = <TModel,>(props: PropsWithChildren<SettingsFormProps<TModel
 
     const valuesChange = (changedValues) => {
         const incomingState = updateSettingsFromVlues(state.model, changedValues);
-        setState({model: incomingState, values: getValuesFromSettings(incomingState)});
+        setState({ model: incomingState, values: getValuesFromSettings(incomingState) });
         onValuesChange(changedValues, incomingState);
         form.setFieldsValue(incomingState);
     };
-    
+
     const settingsChange = (changedValues) => {
-      const incomingState = {...state.model, ...changedValues};
-      setState({model: incomingState, values: getValuesFromSettings(incomingState)});
-      onValuesChange(changedValues, incomingState);
-      form.setFieldsValue(incomingState);
+        const incomingState = merge({ ...state.model }, changedValues);
+        setState({ model: incomingState, values: getValuesFromSettings(incomingState) });
+        onValuesChange(changedValues, incomingState);
+        form.setFieldsValue(incomingState);
     };
 
     const onSaveInternal = () => {
@@ -88,13 +89,13 @@ const SettingsForm = <TModel,>(props: PropsWithChildren<SettingsFormProps<TModel
 export function useSettingsForm<TModel>(require: boolean = true) {
     const actionsContext = useContext(SettingsFormActionsContext);
     const stateContext = useContext<SettingsFormState<TModel>>(SettingsFormStateContext);
-  
+
     if ((actionsContext === undefined || stateContext === undefined) && require) {
-      throw new Error('useSettingsForm must be used within a SettingsForm');
+        throw new Error('useSettingsForm must be used within a SettingsForm');
     }
     return actionsContext !== undefined && stateContext !== undefined
-      ? { ...actionsContext, ...stateContext }
-      : undefined;
+        ? { ...actionsContext, ...stateContext }
+        : undefined;
 }
 
 export default SettingsForm;

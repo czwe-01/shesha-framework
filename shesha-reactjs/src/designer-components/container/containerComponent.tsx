@@ -30,7 +30,8 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
     const borderStyles = useMemo(() => getBorderStyle(model?.border), [model.border, formData]);
     const [backgroundStyles, setBackgroundStyles] = useState({});
 
-    console.log("CONTAINER MODEL", model);
+    console.log('ContainerComponent -> model', model);
+
     useEffect(() => {
       const fetchStyles = async () => {
         getBackgroundStyle(model?.background).then((style) => {
@@ -66,7 +67,7 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
     let val;
     const backgroundType = model?.background?.type;
     if (backgroundType === "storedFile") {
-      val = model?.background?.storedFile.id;
+      val = model?.background?.storedFile?.id;
     } else if (backgroundType === "color") {
       val = model?.background?.color;
     } else if (backgroundType === "url") {
@@ -81,9 +82,9 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
           baseUrl={backendUrl}
           ownerId={Boolean(ownerId) ? ownerId : Boolean(data?.id) ? data?.id : ''}
           ownerType={
-            Boolean(model.background.storedFile.ownerType) ? model.background.storedFile.ownerType : Boolean(formSettings?.modelType) ? formSettings?.modelType : ''
+            Boolean(model?.background?.storedFile?.ownerType) ? model.background.storedFile.ownerType : Boolean(formSettings?.modelType) ? formSettings?.modelType : ''
           }
-          fileCategory={model.background.storedFile.fileCatergory}
+          fileCategory={model?.background?.storedFile?.fileCatergory}
           propertyName={!model.context ? model.propertyName : null}
         >
           {child}

@@ -13,9 +13,10 @@ const units = ['px', '%', 'em', 'rem', 'vh', 'svh', 'vw', 'svw', 'auto'];
 interface IBorderProps {
     onChange?: (value: IBorderValue) => void;
     value?: IBorderValue;
+    readOnly?: boolean;
 }
 
-const BorderComponent: FC<IBorderProps> = ({ onChange, value = {
+const BorderComponent: FC<IBorderProps> = ({ onChange, readOnly, value = {
     radius: { all: 0 },
     border: {
         all: { width: 1, unit: 'px', color: '#000000', style: 'solid' }
@@ -57,13 +58,15 @@ const BorderComponent: FC<IBorderProps> = ({ onChange, value = {
         value: string,
         onChange: (e: RadioChangeEvent) => void
     ) => (
-        <Radio.Group onChange={onChange} value={value}>
-            {options.map(option => (
-                <Radio.Button key={option.value} value={option.value} title={option.title}>
-                    {option.icon}
-                </Radio.Button>
-            ))}
-        </Radio.Group>
+        <SettingsFormItem name={`border.${value}`} label={`Border ${value}`} jsSetting>
+            <Radio.Group onChange={onChange} value={value}>
+                {options.map(option => (
+                    <Radio.Button key={option.value} value={option.value} title={option.title}>
+                        {option.icon}
+                    </Radio.Button>
+                ))}
+            </Radio.Group>
+        </SettingsFormItem>
     );
 
     const radiusOptions = [
@@ -97,8 +100,8 @@ const BorderComponent: FC<IBorderProps> = ({ onChange, value = {
             </Col>
             <Col className="gutter-row" span={24}>
                 <Row>
-                    <SettingsFormItem name={`border.${radiusType}.radius`} label="Radius" jsSetting>
-                        <Col span={12}>
+                    <SettingsFormItem readOnly={readOnly} name={`border.radius.${radiusType}`} label="Radius">
+                        <Col span={18}>
                             <Slider
                                 min={0}
                                 max={100}
@@ -123,34 +126,28 @@ const BorderComponent: FC<IBorderProps> = ({ onChange, value = {
                 {renderRadioGroup(borderOptions, borderType, (e) => setBorderType(e.target.value))}
             </Col>
             <Col className="gutter-row" span={24}>
-                <Col className="gutter-row" span={12}>
+                <SettingsFormItem name={`border.${borderType}.width`} label="Width" jsSetting>
                     <Input
                         addonAfter={
                             <Select
                                 value={localValue.border[borderType]?.unit || 'px'}
-                                onChange={(unit) => updateBorder(borderType, { ...localValue.border[borderType], unit })}
                             >
                                 {units.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
                             </Select>
                         }
                         className={styles.input}
                         value={localValue.border[borderType]?.width}
-                        onChange={(e) => updateBorder(borderType, { ...localValue.border[borderType], width: e.target.value })}
                     />
-                </Col>
+                </SettingsFormItem>
             </Col>
             <Col className="gutter-row" span={24}>
-                <span>Color</span>
-                <div style={{ width: 'calc(100% - 35px)' }}>
+                <SettingsFormItem name={`border.${borderType}.color`} label="Color" jsSetting>
                     <ColorPicker
                         allowClear
                         value={localValue.border[borderType]?.color || '#000000'}
                         onChange={(color) => updateBorder(borderType, { ...localValue.border[borderType], color })}
                     />
-                </div>
-            </Col>
-            <Col className="gutter-row" span={24}>
-                <span>Style</span>
+                </SettingsFormItem>
             </Col>
             <Col className="gutter-row" span={24}>
                 {renderRadioGroup(styleOptions, localValue.border[borderType]?.style || 'solid', (e) => updateBorder(borderType, { ...localValue.border[borderType], style: e.target.value }))}

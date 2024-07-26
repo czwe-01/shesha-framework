@@ -63,9 +63,6 @@ const DropdownSettings: FC<ISettingsFormFactoryArgs<IContainerComponentProps>> =
                 <SettingsFormItem name="hidden" label="Hidden">
                     <Checkbox disabled={readOnly} />
                 </SettingsFormItem>
-                <SettingsFormItem name="background" label="Background">
-                    <BackgroundConfigurator value={model?.background} model={model} onValuesChange={onValuesChange} />
-                </SettingsFormItem>
                 <SettingsFormItem name="editMode" label="Edit mode">
                     <ReadOnlyModeSelector readOnly={readOnly} />
                 </SettingsFormItem>
@@ -123,25 +120,19 @@ const DropdownSettings: FC<ISettingsFormFactoryArgs<IContainerComponentProps>> =
                     <Input readOnly={readOnly} />
                 </SettingsFormItem>
                 <SettingsFormItem name="style" label="Style" tooltip="The style that will be applied to the container">
-                    <CodeEditor />
+                    <CodeEditor mode='dialog' />
                 </SettingsFormItem>
                 <SettingsFormItem name="wrapperStyle" label="Wrapper Style" tooltip="The style that will be applied to the container wrapper" hidden={model?.noDefaultStyling}>
-                    <CodeEditor />
+                    <CodeEditor mode='dialog' />
                 </SettingsFormItem>
                 <SettingsCollapsiblePanel header="Dimensions" ghost collapsible="header" expandIconPosition="start">
-                    {/* <SettingsFormItem name="dimensions">
-                        <SizeComponent />
-                    </SettingsFormItem> */}
+                    <SizeComponent readOnly={readOnly} />
                 </SettingsCollapsiblePanel>
-                <SettingsCollapsiblePanel header="Border" ghost collapsible="header" expandIconPosition="start" >
-                    {/* <SettingsFormItem name="border" tooltip="Customize the borders of your object by specifying the width, style, and color for each side. You can also add border radius to create rounded corners.">
-                        <BorderComponent />
-                    </SettingsFormItem> */}
+                <SettingsCollapsiblePanel header="Border" ghost collapsible="header" expandIconPosition="start">
+                    <BorderComponent />
                 </SettingsCollapsiblePanel>
                 <SettingsCollapsiblePanel header="Background" ghost collapsible="header" expandIconPosition="start" >
-                    <SettingsFormItem name="background" label="Background">
-                        <BackgroundConfigurator />
-                    </SettingsFormItem>
+                    <BackgroundConfigurator readOnly={readOnly} onValuesChange={onValuesChange} value={model.background} model={model} />
                 </SettingsCollapsiblePanel>
                 <SettingsFormItem name="stylingBox">
                     <StyleBox />

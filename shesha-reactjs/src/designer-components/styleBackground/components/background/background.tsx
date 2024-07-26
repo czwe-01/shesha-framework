@@ -48,44 +48,49 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
         updateValue({ gradient: { ...value?.gradient, colors: newColors } });
     };
 
-
     const renderBackgroundInput = () => {
         switch (value?.type) {
             case 'gradient':
                 return (
-                    <Col className="gutter-row" span={24}>
-                        <SettingsFormItem name="background.gradient.direction" label="Direction" jsSetting>
-                            <Input
-                                className={styles.input}
-                                style={{ width: '100%' }}
-                                value={value?.gradient?.direction}
-                                onChange={(e) => updateValue({ gradient: { ...value?.gradient, direction: e.target.value } })}
-                            />
-                        </SettingsFormItem>
-                        <SettingsFormItem name="background.gradient.colors" label="Colors" jsSetting>
-                            <div className={styles.flex}>
-                                {colors.map((color, i) => (
-                                    <Tag
-                                        key={i}
-                                        bordered={false}
-                                        closable
-                                        onClose={(e) => {
-                                            e.preventDefault();
-                                            removeColor(i);
-                                        }}
-                                        className={styles.tag}
-                                    >
-                                        <ColorPicker
-                                            allowClear
-                                            value={color}
-                                            onChange={(newColor) => updateColor(newColor.toString(), i)}
-                                        />
-                                    </Tag>
-                                ))}
-                            </div>
-                        </SettingsFormItem>
+                    <>
+                        <Col className="gutter-row" span={24}>
+                            <SettingsFormItem name="background.gradient.direction" label="Direction" jsSetting>
+                                <Input
+                                    className={styles.input}
+                                    style={{ width: '100%' }}
+                                    value={value?.gradient?.direction}
+                                    readOnly={readOnly}
+                                    onChange={(e) => updateValue({ gradient: { ...value?.gradient, direction: e.target.value } })}
+                                />
+                            </SettingsFormItem>
+                        </Col>
+                        <Col className="gutter-row" span={24}>
+                            <SettingsFormItem name="background.gradient.colors" label="Colors" jsSetting>
+                                <div className={styles.flex}>
+                                    {colors.map((color, i) => (
+                                        <Tag
+                                            key={i}
+                                            bordered={false}
+                                            closable
+                                            onClose={(e) => {
+                                                e.preventDefault();
+                                                removeColor(i);
+                                            }}
+                                            className={styles.tag}
+                                        >
+                                            <ColorPicker
+                                                allowClear
+                                                value={color}
+                                                readOnly={readOnly}
+                                                onChange={(newColor) => updateColor(newColor.toString(), i)}
+                                            />
+                                        </Tag>
+                                    ))}
+                                </div>
+                            </SettingsFormItem>
+                        </Col>
                         <Button onClick={addColor}>Add color</Button>
-                    </Col>
+                    </>
                 );
             case 'url':
                 return (
@@ -95,6 +100,7 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                                 className={styles.input}
                                 style={{ width: '100%' }}
                                 value={value?.url}
+                                readOnly={readOnly}
                                 onChange={(e) => updateValue({ url: e.target.value })}
                             />
                         </SettingsFormItem>
@@ -111,44 +117,53 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                             />
                         </SettingsFormItem>
                     </Col>
-
                 );
             case 'storedFile':
                 return (
-                    <Col className="gutter-row" span={24}>
-                        <SettingsFormItem name="background.storedFile.id" label="File Id" jsSetting>
-                            <Input
-                                className={styles.input}
-                                style={{ width: '100%' }}
-                                value={value?.storedFile?.id}
-                                onChange={(e) => updateValue({ storedFile: { ...value?.storedFile, id: e.target.value } })} />
-                        </SettingsFormItem>
-                        <SettingsFormItem name="background.storedFile.ownerType" label="Owner Type" jsSetting>
-                            <Autocomplete.Raw
-                                dataSourceType="url"
-                                dataSourceUrl="/api/services/app/Metadata/TypeAutocomplete"
-                                className={styles.input}
-                                style={{ width: '100%' }}
-                                value={value?.storedFile?.ownerType}
-                                onChange={(e) => updateValue({ storedFile: { ...value?.storedFile, ownerType: e } })} />
-                        </SettingsFormItem>
-
-                        <SettingsFormItem name="background.storedFile.ownerId" label="Owner Id" jsSetting>
-                            <Input
-                                className={styles.input}
-                                style={{ width: '100%' }}
-                                value={value?.storedFile?.ownerId}
-                                onChange={(e) => updateValue({ storedFile: { ...value?.storedFile, ownerId: e.target.value } })} />
-                        </SettingsFormItem>
-
-                        <SettingsFormItem name="background.storedFile.fileCatergory" label="File Catergory" jsSetting>
-                            <Input
-                                className={styles.input}
-                                style={{ width: '100%' }}
-                                value={value?.storedFile?.fileCatergory}
-                                onChange={(e) => updateValue({ storedFile: { ...value?.storedFile, fileCatergory: e.target.value } })} />
-                        </SettingsFormItem>
-                    </Col>
+                    <>
+                        <Col className="gutter-row" span={24}>
+                            <SettingsFormItem name="background.storedFile.id" label="File Id" jsSetting>
+                                <Input
+                                    className={styles.input}
+                                    style={{ width: '100%' }}
+                                    readOnly={readOnly}
+                                    value={value?.storedFile?.id}
+                                    onChange={(e) => updateValue({ storedFile: { ...value?.storedFile, id: e.target.value } })} />
+                            </SettingsFormItem>
+                        </Col>
+                        <Col className="gutter-row" span={24}>
+                            <SettingsFormItem name="background.storedFile.ownerType" label="Owner Type" jsSetting>
+                                <Autocomplete.Raw
+                                    dataSourceType="url"
+                                    dataSourceUrl="/api/services/app/Metadata/TypeAutocomplete"
+                                    className={styles.input}
+                                    readOnly={readOnly}
+                                    style={{ width: '100%' }}
+                                    value={value?.storedFile?.ownerType}
+                                    onChange={(e) => updateValue({ storedFile: { ...value?.storedFile, ownerType: e } })} />
+                            </SettingsFormItem>
+                        </Col>
+                        <Col className="gutter-row" span={24}>
+                            <SettingsFormItem name="background.storedFile.ownerId" label="Owner Id" jsSetting>
+                                <Input
+                                    className={styles.input}
+                                    style={{ width: '100%' }}
+                                    readOnly={readOnly}
+                                    value={value?.storedFile?.ownerId}
+                                    onChange={(e) => updateValue({ storedFile: { ...value?.storedFile, ownerId: e.target.value } })} />
+                            </SettingsFormItem>
+                        </Col>
+                        <Col className="gutter-row" span={24}>
+                            <SettingsFormItem name="background.storedFile.fileCatergory" label="File Catergory" jsSetting>
+                                <Input
+                                    className={styles.input}
+                                    style={{ width: '100%' }}
+                                    readOnly={readOnly}
+                                    value={value?.storedFile?.fileCatergory}
+                                    onChange={(e) => updateValue({ storedFile: { ...value?.storedFile, fileCatergory: e.target.value } })} />
+                            </SettingsFormItem>
+                        </Col>
+                    </>
                 );
             default:
                 return (
@@ -156,6 +171,7 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                         <SettingsFormItem name="background.color" label="Color" jsSetting>
                             <ColorPicker
                                 allowClear
+                                readOnly={readOnly}
                                 value={value?.color}
                                 onChange={(color) => updateValue({ color: color.toString() })}
                             />
@@ -167,20 +183,20 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
 
     return (
         <Row gutter={[8, 8]} style={{ fontSize: '11px' }} className={styles.container}>
-            <Col className="gutter-row" span={24}>
-                <SettingsFormItem name="background.backgroundType" label="Background Type" jsSetting>
-                    <Radio.Group onChange={onTypeChange} value={value?.type}>
+            <SettingsFormItem readOnly={readOnly} name="background.type" label="Type" jsSetting>
+                <Col className="gutter-row" span={24}>
+                    <Radio.Group onChange={onTypeChange} disabled={readOnly} value={value?.type}>
                         <Radio.Button value="color" title='Background color'><FormatPainterOutlined /></Radio.Button>
                         <Radio.Button value="gradient" title='Gradient background'><BgColorsOutlined /></Radio.Button>
                         <Radio.Button value="url" title='Image url'><LinkOutlined /></Radio.Button>
                         <Radio.Button value="upload" title='Image upload'><UploadOutlined /></Radio.Button>
                         <Radio.Button value="storedFile" title='Stored File'><DatabaseOutlined /></Radio.Button>
                     </Radio.Group>
-                </SettingsFormItem>
-            </Col>
 
+                </Col>
+            </SettingsFormItem>
             {renderBackgroundInput()}
-            <SizeAndRepeat updateValue={updateValue} backgroundSize={value?.size} backgroundPosition={value?.position} backgroundRepeat={value?.repeat} />
+            <SizeAndRepeat readOnly={readOnly} updateValue={updateValue} backgroundSize={value?.size} backgroundPosition={value?.position} backgroundRepeat={value?.repeat} />
         </Row>
     );
 };
