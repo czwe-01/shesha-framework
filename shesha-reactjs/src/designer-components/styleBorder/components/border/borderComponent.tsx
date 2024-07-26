@@ -4,6 +4,7 @@ import { useStyles } from './styles';
 import { BorderBottomOutlined, BorderLeftOutlined, BorderOutlined, BorderRightOutlined, BorderTopOutlined, DashOutlined, ExpandOutlined, MinusOutlined, RadiusBottomleftOutlined, RadiusBottomrightOutlined, RadiusUpleftOutlined, RadiusUprightOutlined, SmallDashOutlined } from '@ant-design/icons';
 import { ColorPicker } from '@/components';
 import { IBorderValue } from './interfaces';
+import SettingsFormItem from '@/designer-components/_settings/settingsFormItem';
 
 const { Option } = Select;
 
@@ -90,44 +91,38 @@ const BorderComponent: FC<IBorderProps> = ({ onChange, value = {
 
     return (
         <Row gutter={[8, 8]} style={{ fontSize: '11px' }} className={styles.container}>
-            <Col className="gutter-row" span={24}>
-                <span>Radius</span>
-            </Col>
+
             <Col className="gutter-row" span={24}>
                 {renderRadioGroup(radiusOptions, radiusType, (e) => setRadiusType(e.target.value))}
             </Col>
             <Col className="gutter-row" span={24}>
                 <Row>
-                    <Col span={12}>
-                        <Slider
-                            min={0}
-                            max={100}
-                            value={localValue.radius[radiusType] || 0}
-                            onChange={(value) => updateRadius(radiusType, value)}
-                        />
-                    </Col>
-                    <Col span={4}>
-                        <InputNumber
-                            min={0}
-                            max={100}
-                            style={{ margin: '0 16px' }}
-                            value={localValue.radius[radiusType] || 0}
-                            onChange={(value) => updateRadius(radiusType, value)}
-                            className={styles.input}
-                        />
-                    </Col>
+                    <SettingsFormItem name={`border.${radiusType}.radius`} label="Radius" jsSetting>
+                        <Col span={12}>
+                            <Slider
+                                min={0}
+                                max={100}
+                                value={localValue.radius[radiusType] || 0}
+                                onChange={(value) => updateRadius(radiusType, value)}
+                            />
+                        </Col>
+                        <Col span={4}>
+                            <InputNumber
+                                min={0}
+                                max={100}
+                                style={{ margin: '0 16px' }}
+                                value={localValue.radius[radiusType] || 0}
+                                onChange={(value) => updateRadius(radiusType, value)}
+                                className={styles.input}
+                            />
+                        </Col>
+                    </SettingsFormItem>
                 </Row>
-            </Col>
-            <Col className="gutter-row" span={24}>
-                <span>Border</span>
             </Col>
             <Col className="gutter-row" span={24}>
                 {renderRadioGroup(borderOptions, borderType, (e) => setBorderType(e.target.value))}
             </Col>
             <Col className="gutter-row" span={24}>
-                <Col className="gutter-row" span={6}>
-                    <span>Width</span>
-                </Col>
                 <Col className="gutter-row" span={12}>
                     <Input
                         addonAfter={

@@ -39,7 +39,6 @@ export const useStyles = createStyles(({ css, cx }) => {
             width: 50px;
             height: 24px;
         }
-
     `);
 
     const tag = cx(css`
@@ -83,11 +82,17 @@ export const useStyles = createStyles(({ css, cx }) => {
         height: 100%;
     `);
 
+    const select = cx(css`
+        .ant-select {
+            width: 60px;
+        `);
+
     return {
         container,
         input,
         radioBtn,
         tag,
-        flex
+        flex,
+        select
     };
 });

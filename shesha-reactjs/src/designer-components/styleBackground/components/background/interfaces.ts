@@ -1,7 +1,7 @@
 import { IConfigurableFormComponent } from "@/providers";
 
 export interface IBackgroundValue {
-    type: 'color' | 'url' | 'upload' | 'base64' | 'gradient';
+    type: 'color' | 'url' | 'upload' | 'storedFile' | 'gradient';
     size?: 'cover' | 'contain' | 'auto' | { width: { value: number, unit: string }, height: { value: number, unit: string } };
     position: 'center' | 'top' | 'bottom' | 'left' | 'right' | 'top left' | 'top right' | 'bottom left' | 'bottom right' | { width: { value: number, unit: string }, height: { value: number, unit: string } };
     repeat?: 'no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y';
@@ -9,7 +9,7 @@ export interface IBackgroundValue {
     color?: string;
     url?: string;
     file?: string;
-    base64?: string;
+    storedFile?: { id: string, ownerId: string, fileCatergory: string, ownerType: string };
 }
 
 export interface IBackgroundProps extends IConfigurableFormComponent {

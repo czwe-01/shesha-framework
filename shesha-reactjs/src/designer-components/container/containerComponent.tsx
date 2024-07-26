@@ -1,8 +1,7 @@
 import { GroupOutlined } from '@ant-design/icons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ICommonContainerProps, IContainerComponentProps, IToolboxComponent } from '@/interfaces';
-import { getStyle, getLayoutStyle, validateConfigurableComponentSettings, evaluateValue } from '@/providers/form/utils';
-import { getSettings } from './settingsForm';
+import { getStyle, getLayoutStyle, evaluateValue } from '@/providers/form/utils';
 import { migrateCustomFunctions, migratePropertyName } from '@/designer-components/_common-migrations/migrateSettings';
 import { StoredFileProvider, useForm, useFormData, useGlobalState, useSheshaApplication } from '@/providers';
 import { ComponentsContainer, ValidationErrors } from '@/components';
@@ -14,6 +13,7 @@ import { isValidGuid } from '@/components/formDesigner/components/utils';
 import { getBorderStyle } from '../styleBorder/components/border/utils';
 import { getBackgroundStyle } from '../styleBackground/components/background/utils';
 import { getSizeStyle } from '../styleDimensions/components/size/utils';
+import { ContainerSettingsForm } from './settingsForm';
 
 const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
   type: 'container',
@@ -24,12 +24,13 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
     const { globalState } = useGlobalState();
     const { formSettings } = useForm();
     const { backendUrl } = useSheshaApplication();
-    const ownerId = evaluateValue(model.ownerId, { data, globalState });
+    const ownerId = evaluateValue(model?.background?.storedFile?.ownerId, { data, globalState });
 
     const sizeStyles = useMemo(() => getSizeStyle(model?.dimensions), [model.dimensions]);
     const borderStyles = useMemo(() => getBorderStyle(model?.border), [model.border, formData]);
     const [backgroundStyles, setBackgroundStyles] = useState({});
 
+    console.log("CONTAINER MODEL", model);
     useEffect(() => {
       const fetchStyles = async () => {
         getBackgroundStyle(model?.background).then((style) => {
@@ -39,7 +40,7 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
       fetchStyles();
     }, [model.background]);
 
-    if (model.dataSource === 'storedFileId' && model.storedFileId && !isValidGuid(model.storedFileId)) {
+    if (model?.background?.type === 'storedFile' && model.background.storedFile?.id && !isValidGuid(model.background.storedFile.id)) {
       return <ValidationErrors error="The provided StoredFileId is invalid" />;
     }
 
@@ -63,12 +64,13 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
 
 
     let val;
-    if (model?.dataSource === "storedFileId") {
-      val = model?.storedFileId;
-    } else if (model?.dataSource === "base64") {
-      val = model?.base64;
-    } else if (model?.dataSource === "url") {
-      val = model?.backgroundUrl;
+    const backgroundType = model?.background?.type;
+    if (backgroundType === "storedFile") {
+      val = model?.background?.storedFile.id;
+    } else if (backgroundType === "color") {
+      val = model?.background?.color;
+    } else if (backgroundType === "url") {
+      val = model?.background?.url;
     }
 
     const fileProvider = (child) => {
@@ -79,9 +81,9 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
           baseUrl={backendUrl}
           ownerId={Boolean(ownerId) ? ownerId : Boolean(data?.id) ? data?.id : ''}
           ownerType={
-            Boolean(model.ownerType) ? model.ownerType : Boolean(formSettings?.modelType) ? formSettings?.modelType : ''
+            Boolean(model.background.storedFile.ownerType) ? model.background.storedFile.ownerType : Boolean(formSettings?.modelType) ? formSettings?.modelType : ''
           }
-          fileCategory={model.fileCategory}
+          fileCategory={model.background.storedFile.fileCatergory}
           propertyName={!model.context ? model.propertyName : null}
         >
           {child}
@@ -93,7 +95,7 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
     return (
       <ParentProvider model={model}>
         <ConditionalWrap
-          condition={model.dataSource === 'storedFileId'}
+          condition={backgroundType === 'storedFile'}
           wrap={fileProvider}
         >
           <ComponentsContainer
@@ -116,8 +118,7 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
       </ParentProvider>
     );
   },
-  settingsFormMarkup: (data) => getSettings(data),
-  validateSettings: (model) => validateConfigurableComponentSettings(getSettings(model), model),
+  settingsFormFactory: (props) => (<ContainerSettingsForm {...props} />),
   migrator: (m) =>
     m
       .add<IContainerComponentProps>(0, (prev) => ({

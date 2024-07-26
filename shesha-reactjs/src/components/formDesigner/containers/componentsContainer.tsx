@@ -5,6 +5,7 @@ import { useComponentContainer } from '@/providers/form/nesting/containerContext
 import { ICommonContainerProps } from '@/designer-components/container/interfaces';
 import { useStoredFile } from '@/index';
 import { isValidGuid } from '../components/utils';
+import { IBackgroundValue } from '@/designer-components/styleBackground/components/background/interfaces';
 
 export interface IComponentsContainerProps extends IComponentsContainerBaseProps, ICommonContainerProps {
   className?: string;
@@ -15,18 +16,20 @@ export interface IComponentsContainerProps extends IComponentsContainerBaseProps
   style?: CSSProperties;
   dataSource?: string;
   storedFileId?: string;
+  background?: IBackgroundValue;
 }
 
 const ComponentsContainer: FC<IComponentsContainerProps> = (props) => {
-
+4
   const { getStoredFile } = useStoredFile(false) ?? {};
   const [storedFile, setStoredFile] = useState<string>();
 
-  const isStoredFileId = props?.dataSource === 'storedFileId' && Boolean(props?.storedFileId);
+  const storedFileId = props?.background?.storedFile?.id;
+  const isStoredFileId = props?.background?.type === 'storedFile' && Boolean(storedFileId);
 
   const fetchStoredFile = () => {
-    if (isStoredFileId && isValidGuid(props?.storedFileId)) {
-      getStoredFile({ id: props?.storedFileId }).then((file: string) => {
+    if (isStoredFileId && isValidGuid(storedFileId)) {
+      getStoredFile({ id: storedFileId }).then((file: string) => {
         setStoredFile(() => file);
       });
     }

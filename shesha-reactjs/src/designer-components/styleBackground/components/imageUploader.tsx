@@ -4,7 +4,7 @@ import { Image, Upload } from 'antd';
 import type { UploadFile, UploadProps } from 'antd';
 import { toBase64 } from './background/utils';
 
-const ImageUploader = ({ updateValue, backgroundImage }) => {
+const ImageUploader = ({ updateValue, backgroundImage, readOnly }) => {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -56,6 +56,7 @@ const ImageUploader = ({ updateValue, backgroundImage }) => {
                 onPreview={handlePreview}
                 onChange={handleChange}
                 beforeUpload={() => false}
+                disabled={readOnly}
             >
                 {fileList.length >= 1 ? null : uploadButton}
             </Upload>

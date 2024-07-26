@@ -5,15 +5,16 @@ import { useStyles } from './styles';
 
 type SizeAndRepeatProps = {
     updateValue: (value: any) => void;
-    backgroundSize: string;
-    backgroundPosition: string;
+    backgroundSize: any;
+    backgroundPosition: any;
     backgroundRepeat: string;
+    readOnly?: boolean;
 };
 
 const units = ['px', '%', 'em', 'rem', 'vh', 'svh', 'vw', 'svw', 'auto'];
 const { Option } = Select;
 
-const SizeAndRepeat: FC<SizeAndRepeatProps> = ({ updateValue, backgroundSize, backgroundPosition, backgroundRepeat }) => {
+const SizeAndRepeat: FC<SizeAndRepeatProps> = ({ updateValue, backgroundSize, backgroundPosition, backgroundRepeat, readOnly }) => {
     const { styles } = useStyles();
 
     const defaultSizes = ['cover', 'contain', 'auto'];
@@ -76,7 +77,7 @@ const SizeAndRepeat: FC<SizeAndRepeatProps> = ({ updateValue, backgroundSize, ba
         }
     };
 
-    const renderMenu = (menu, value, setValue, label) => (
+    const renderOptions = (menu, value, setValue, label) => (
         <>
             {menu}
             <Divider style={{ margin: '8px 0' }} />
@@ -86,18 +87,23 @@ const SizeAndRepeat: FC<SizeAndRepeatProps> = ({ updateValue, backgroundSize, ba
                         addonAfter={
                             <Select
                                 value={value.width.unit}
+                                className={styles.select}
+                                disabled={readOnly}
                                 onChange={(unit) => setValue(prev => ({ ...prev, width: { ...prev.width, unit } }))}
                             >
+
                                 {units.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
                             </Select>
                         }
                         className={styles.input}
+                        readOnly={readOnly}
                         value={value.width.value}
                         onChange={(e) => setValue(prev => ({ ...prev, width: { ...prev.width, value: e.target.value } }))}
                     />
                     <Input
                         addonAfter={
                             <Select
+                                className={styles.select}
                                 value={value.height.unit}
                                 onChange={(unit) => setValue(prev => ({ ...prev, height: { ...prev.height, unit } }))}
                             >
@@ -106,6 +112,7 @@ const SizeAndRepeat: FC<SizeAndRepeatProps> = ({ updateValue, backgroundSize, ba
                         }
                         className={styles.input}
                         value={value.height.value}
+                        disabled={readOnly}
                         onChange={(e) => setValue(prev => ({ ...prev, height: { ...prev.height, value: e.target.value } }))}
                     />
                 </Space.Compact>
@@ -117,25 +124,21 @@ const SizeAndRepeat: FC<SizeAndRepeatProps> = ({ updateValue, backgroundSize, ba
     );
 
     return (
-        <Row gutter={[8, 8]} style={{ width: 200, fontSize: '11px' }}>
-            <Col className="gutter-row" span={24}>
-                <span>Size</span>
-            </Col>
+        <Row gutter={[8, 8]} style={{ fontSize: '11px' }}>
             <Col className="gutter-row" span={24}>
                 <Select
                     value={backgroundSize || 'auto'}
+                    disabled={readOnly}
                     onChange={(size) => updateValue({ size })}
-                    dropdownRender={(menu) => renderMenu(menu, size, setSize, 'size')}
+                    dropdownRender={(menu) => renderOptions(menu, size, setSize, 'size')}
                     options={sizes.map((item) => ({ label: item, value: item }))}
                 />
-            </Col>
-            <Col className="gutter-row" span={24}>
-                <span>Repeat</span>
             </Col>
             <Col className="gutter-row" span={24}>
                 <Select
                     onChange={(repeat) => updateValue({ repeat })}
                     value={backgroundRepeat || 'no-repeat'}
+                    disabled={readOnly}
                     options={[
                         { label: 'No repeat', value: 'no-repeat' },
                         { label: 'Repeat', value: 'repeat' },
@@ -145,13 +148,11 @@ const SizeAndRepeat: FC<SizeAndRepeatProps> = ({ updateValue, backgroundSize, ba
                 />
             </Col>
             <Col className="gutter-row" span={24}>
-                <span>Position</span>
-            </Col>
-            <Col className="gutter-row" span={24}>
                 <Select
                     value={backgroundPosition || 'auto'}
+                    disabled={readOnly}
                     onChange={(position) => updateValue({ position })}
-                    dropdownRender={(menu) => renderMenu(menu, position, setPosition, 'position')}
+                    dropdownRender={(option) => renderOptions(option, position, setPosition, 'position')}
                     options={positions.map((item) => ({ label: item, value: item }))}
                 />
             </Col>
