@@ -26,6 +26,7 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
     const { backendUrl } = useSheshaApplication();
     const ownerId = evaluateValue(model?.background?.storedFile?.ownerId, { data, globalState });
 
+    console.log("CONTAINER COMPONENT", model);
     const sizeStyles = useMemo(() => getSizeStyle(model?.dimensions), [model.dimensions]);
     const borderStyles = useMemo(() => getBorderStyle(model?.border), [model.border, formData]);
     const [backgroundStyles, setBackgroundStyles] = useState({});
@@ -63,7 +64,6 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
       gap: model?.gap,
     };
 
-
     let val;
     const backgroundType = model?.background?.type;
     if (backgroundType === "storedFile") {
@@ -73,7 +73,6 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
     } else if (backgroundType === "url") {
       val = model?.background?.url;
     }
-
     const fileProvider = (child) => {
       return (
         <StoredFileProvider
@@ -102,6 +101,7 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
           <ComponentsContainer
             containerId={model.id}
             {...flexAndGridStyles}
+            {...backgroundStyles}
             className={model.className}
             {...model}
             wrapperStyle={{

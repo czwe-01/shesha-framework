@@ -62,6 +62,9 @@ export const useStyles = createStyles(({ css, cx }) => {
         // font-size: 12px;
         }
 
+        .ant-select-selection-item {
+            padding: 0 4px !important;
+            width: 100px !important;
         .ant-select-dropdown {
             // padding: 0 4px !important;
             // background:red;
@@ -78,6 +81,19 @@ export const useStyles = createStyles(({ css, cx }) => {
         }
 
         .ant-upload-list-item {
+            width: 32px !important;
+            height: 32px !important;
+        }
+    `);
+
+    const select = cx(css`
+        width: 60px;
+        overflow-y: auto;
+        scrollbar-width: none !important;
+ 
+        &::-webkit-scrollbar {
+            display: none !important;
+      }
             // width: 32px !important;
             // height: 32px !important;
         }
@@ -95,6 +111,7 @@ export const useStyles = createStyles(({ css, cx }) => {
     return {
         container,
         input,
+        select,
         radioBtn,
         tag,
         flex,

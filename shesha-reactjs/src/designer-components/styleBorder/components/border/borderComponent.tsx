@@ -1,6 +1,5 @@
 import { Col, Input, InputNumber, Radio, RadioChangeEvent, Row, Select, Slider } from 'antd';
 import React, { FC, useState } from 'react'
-import { useStyles } from './styles';
 import { BorderBottomOutlined, BorderLeftOutlined, BorderOutlined, BorderRightOutlined, BorderTopOutlined, DashOutlined, ExpandOutlined, MinusOutlined, RadiusBottomleftOutlined, RadiusBottomrightOutlined, RadiusUpleftOutlined, RadiusUprightOutlined, SmallDashOutlined } from '@ant-design/icons';
 import { ColorPicker } from '@/components';
 import { IBorderValue } from './interfaces';
@@ -22,7 +21,6 @@ const BorderComponent: FC<IBorderProps> = ({ onChange, readOnly, value = {
         all: { width: 1, unit: 'px', color: '#000000', style: 'solid' }
     }
 } }) => {
-    const { styles } = useStyles();
     const [localValue, setLocalValue] = useState<IBorderValue>(value);
     const [radiusType, setRadiusType] = useState<string>('all');
     const [borderType, setBorderType] = useState<string>('all');
@@ -93,7 +91,7 @@ const BorderComponent: FC<IBorderProps> = ({ onChange, readOnly, value = {
 
 
     return (
-        <Row gutter={[8, 8]} style={{ fontSize: '11px' }} className={styles.container}>
+        <Row gutter={[8, 8]} style={{ fontSize: '11px' }}>
 
             <Col className="gutter-row" span={24}>
                 {renderRadioGroup(radiusOptions, radiusType, (e) => setRadiusType(e.target.value))}
@@ -116,7 +114,6 @@ const BorderComponent: FC<IBorderProps> = ({ onChange, readOnly, value = {
                                 style={{ margin: '0 16px' }}
                                 value={localValue.radius[radiusType] || 0}
                                 onChange={(value) => updateRadius(radiusType, value)}
-                                className={styles.input}
                             />
                         </Col>
                     </SettingsFormItem>
@@ -135,7 +132,6 @@ const BorderComponent: FC<IBorderProps> = ({ onChange, readOnly, value = {
                                 {units.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
                             </Select>
                         }
-                        className={styles.input}
                         value={localValue.border[borderType]?.width}
                     />
                 </SettingsFormItem>

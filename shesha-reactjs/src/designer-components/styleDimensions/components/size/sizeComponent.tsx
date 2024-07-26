@@ -1,7 +1,6 @@
-import { Col, Input, Radio, RadioChangeEvent, Row, Select } from 'antd';
+import { Col, Input, Radio, Row, Select } from 'antd';
 import React, { FC, useState } from 'react';
-import { useStyles } from './styles';
-import { BorderlessTableOutlined, CodepenOutlined, ColumnWidthOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
+import { BorderlessTableOutlined, ColumnWidthOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import SettingsFormItem from '@/designer-components/_settings/settingsFormItem';
 
 const { Option } = Select;
@@ -30,7 +29,7 @@ export interface ISizeType {
 }
 
 const SizeComponent: FC<ISizeType> = ({ onChange, readOnly, value = { width: null, height: null, minWidth: null, minHeight: null, maxHeight: null, maxWidth: null } }) => {
-    const { styles } = useStyles();
+
     const [localValue, setLocalValue] = useState<ISizeValue>(value);
 
     const updateValue = (key: keyof ISizeValue, newValue: ISizeValueWithUnit | string) => {
@@ -56,7 +55,6 @@ const SizeComponent: FC<ISizeType> = ({ onChange, readOnly, value = { width: nul
                 <SettingsFormItem name={`dimensions.${property}`} label={label} jsSetting>
                     <Input
                         addonAfter={selectAfter}
-                        className={styles.input}
                         value={currentValue.value}
                         readOnly={readOnly}
                     />
@@ -66,7 +64,7 @@ const SizeComponent: FC<ISizeType> = ({ onChange, readOnly, value = { width: nul
     };
 
     return (
-        <Row gutter={[8, 8]} style={{ fontSize: '11px' }} className={styles.container}>
+        <Row gutter={[8, 8]} style={{ fontSize: '11px' }}>
             {renderSizeInputWithUnits('Width', 'width')}
             {renderSizeInputWithUnits('Height', 'height')}
             {renderSizeInputWithUnits('Min W', 'minWidth')}

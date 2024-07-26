@@ -40,11 +40,13 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
         const newColors = colors?.map((c, i) => (i === index ? color : c));
         setColors(newColors);
         updateValue({ gradient: { ...value?.gradient, colors: newColors } });
+        updateValue({ gradient: { ...value?.gradient, colors: newColors } });
     };
 
     const removeColor = (index: number) => {
         const newColors = colors?.filter((_, i) => i !== index);
         setColors(newColors);
+        updateValue({ gradient: { ...value?.gradient, colors: newColors } });
         updateValue({ gradient: { ...value?.gradient, colors: newColors } });
     };
 
@@ -117,7 +119,9 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                             />
                         </SettingsFormItem>
                     </Col>
+
                 );
+            case 'storedFile':
             case 'storedFile':
                 return (
                     <>
@@ -169,12 +173,15 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                 return (
                     <Col className="gutter-row" span={24}>
                         <SettingsFormItem name="background.color" label="Color" jsSetting>
+                    <Col className="gutter-row" span={24}>
+                        <SettingsFormItem name="background.color" label="Color" jsSetting>
                             <ColorPicker
                                 allowClear
                                 readOnly={readOnly}
                                 value={value?.color}
                                 onChange={(color) => updateValue({ color: color.toString() })}
                             />
+                        </SettingsFormItem>
                         </SettingsFormItem>
                     </Col>
                 );

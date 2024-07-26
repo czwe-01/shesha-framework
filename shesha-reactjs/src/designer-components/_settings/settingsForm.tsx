@@ -54,10 +54,10 @@ const SettingsForm = <TModel,>(props: PropsWithChildren<SettingsFormProps<TModel
     };
 
     const settingsChange = (changedValues) => {
-        const incomingState = merge({ ...state.model }, changedValues);
-        setState({ model: incomingState, values: getValuesFromSettings(incomingState) });
-        onValuesChange(changedValues, incomingState);
-        form.setFieldsValue(incomingState);
+      const incomingState = merge({...state.model}, changedValues);
+      setState({model: incomingState, values: getValuesFromSettings(incomingState)});
+      onValuesChange(changedValues, incomingState);
+      form.setFieldsValue(incomingState);
     };
 
     const onSaveInternal = () => {
