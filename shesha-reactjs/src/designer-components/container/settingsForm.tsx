@@ -126,10 +126,10 @@ const DropdownSettings: FC<ISettingsFormFactoryArgs<IContainerComponentProps>> =
                     <CodeEditor mode='dialog' />
                 </SettingsFormItem>
                 <SettingsCollapsiblePanel header="Dimensions" ghost collapsible="header" expandIconPosition="start">
-                    <SizeComponent readOnly={readOnly} />
+                    <SizeComponent readOnly={readOnly} onChange={onValuesChange} value={model.dimensions} />
                 </SettingsCollapsiblePanel>
                 <SettingsCollapsiblePanel header="Border" ghost collapsible="header" expandIconPosition="start">
-                    <BorderComponent />
+                    <BorderComponent readOnly={readOnly} onChange={onValuesChange} value={model.border} />
                 </SettingsCollapsiblePanel>
                 <SettingsCollapsiblePanel header="Background" ghost collapsible="header" expandIconPosition="start" >
                     <BackgroundConfigurator readOnly={readOnly} onValuesChange={onValuesChange} value={model.background} model={model} />

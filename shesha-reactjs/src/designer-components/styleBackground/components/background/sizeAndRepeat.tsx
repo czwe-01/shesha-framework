@@ -1,7 +1,6 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Col, Divider, Input, Select, Space } from 'antd';
-import { useStyles } from './styles';
 import SettingsFormItem from '@/designer-components/_settings/settingsFormItem';
 import { IBackgroundValue } from './interfaces';
 
@@ -17,101 +16,84 @@ const units = ['px', '%', 'em', 'rem', 'vh', 'svh', 'vw', 'svw', 'auto'];
 const { Option } = Select;
 
 const SizeAndRepeat: FC<SizeAndRepeatProps> = ({ updateValue, backgroundSize, backgroundPosition, backgroundRepeat, readOnly }) => {
-    const { styles } = useStyles();
-
     const defaultSizes = ['cover', 'contain', 'auto'];
-    const [sizes, setSizes] = useState<string[]>(() => {
-        const initialSizes = [...defaultSizes];
-        if (backgroundSize && !defaultSizes.includes(backgroundSize)) {
-            initialSizes.push(backgroundSize);
-        }
-        return initialSizes;
-    });
-
     const defaultPositions = ['center', 'top', 'left', 'right', 'bottom', 'top left', 'top right', 'bottom left', 'bottom right'];
-    const [positions, setPositions] = useState<string[]>(() => {
-        const initialPositions = [...defaultPositions];
-        if (backgroundPosition && !defaultPositions.includes(backgroundPosition)) {
-            initialPositions.push(backgroundPosition);
-        }
-        return initialPositions;
-    });
 
-    const [size, setSize] = useState<{ width: { value: string, unit: string }, height: { value: string, unit: string } }>({ width: { value: '', unit: 'px' }, height: { value: '', unit: 'px' } });
-    const [position, setPosition] = useState<{ width: { value: string, unit: string }, height: { value: string, unit: string } }>({ width: { value: '', unit: 'px' }, height: { value: '', unit: 'px' } });
+    const [sizes, setSizes] = useState<string[]>([...defaultSizes]);
+    const [positions, setPositions] = useState<string[]>([...defaultPositions]);
 
     useEffect(() => {
-        if (backgroundSize && !defaultSizes.includes(backgroundSize)) {
-            const [width, height] = backgroundSize.split(' ');
-            const [widthValue, widthUnit] = width.match(/[a-zA-Z]+|\d+/g);
-            const [heightValue, heightUnit] = height.match(/[a-zA-Z]+|\d+/g);
-            setSize({
-                width: { value: widthValue, unit: widthUnit },
-                height: { value: heightValue, unit: heightUnit }
-            });
+        if (backgroundSize && !sizes.includes(backgroundSize)) {
+            setSizes(() => [...defaultSizes, backgroundSize]);
         }
-
-        if (backgroundPosition && !defaultPositions.includes(backgroundPosition)) {
-            const [width, height] = backgroundPosition.split(' ');
-            const [widthValue, widthUnit] = width.match(/[a-zA-Z]+|\d+/g);
-            const [heightValue, heightUnit] = height.match(/[a-zA-Z]+|\d+/g);
-            setPosition({
-                width: { value: widthValue, unit: widthUnit },
-                height: { value: heightValue, unit: heightUnit }
-            });
+        if (backgroundPosition && !positions.includes(backgroundPosition)) {
+            setPositions(() => [...defaultPositions, backgroundPosition]);
         }
     }, [backgroundSize, backgroundPosition]);
 
+    const [size, setSize] = useState({ width: { value: '', unit: 'px' }, height: { value: '', unit: 'px' } });
+    const [position, setPosition] = useState({ width: { value: '', unit: 'px' }, height: { value: '', unit: 'px' } });
+
+
+    const clearInputs = (type: 'size' | 'position') => {
+        const emptyState = { width: { value: '', unit: 'px' }, height: { value: '', unit: 'px' } };
+        type === 'size' ? setSize(emptyState) : setPosition(emptyState);
+    };
+
     const addItem = (type: 'size' | 'position') => {
+        const { width, height } = type === 'size' ? size : position;
+        const newValue = `${width.value}${width.unit} ${height.value}${height.unit}`;
+
         if (type === 'size') {
-            const newSize = `${size.width.value}${size.width.unit} ${size.height.value}${size.height.unit}`;
-            if (!sizes.includes(newSize)) {
-                setSizes(prevSizes => [...prevSizes, newSize]);
-                updateValue({ size: newSize });
+            if (!sizes.includes(newValue)) {
+                setSizes(() => [...defaultSizes, newValue]);
             }
+            updateValue({ size: newValue });
         } else {
-            const newPosition = `${position.width.value}${position.width.unit} ${position.height.value}${position.height.unit}`;
-            setPositions(prevPositions => [...prevPositions, newPosition]);
-            updateValue({ position: newPosition });
+            if (!positions.includes(newValue)) {
+                setPositions(() => [...defaultPositions, newValue]);
+            }
+            updateValue({ position: newValue });
         }
+
+        clearInputs(type);
     };
 
     const renderOptions = (menu, value, setValue, label: 'size' | 'position') => (
         <>
             {menu}
             <Divider style={{ margin: '8px 0' }} />
-            <Space style={{ padding: '0 8px 4px' }}>
+            <Space style={{ padding: '0 8px 4px' }} onClick={(e) => e.stopPropagation()}>
                 <Space.Compact size="large">
-                    <Input
-                        addonAfter={
-                            <Select
-                                value={value.width.unit}
-                                className={styles.select}
-                                disabled={readOnly}
-                            >
-                                {units.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
-                            </Select>
-                        }
-                        className={styles.input}
-                        readOnly={readOnly}
-                        value={value.width.value}
-                        onChange={(e) => setValue(prev => ({ ...prev, width: { ...prev.width, value: e.target.value } }))}
-                    />
-                    <Input
-                        addonAfter={
-                            <Select
-                                className={styles.select}
-                                value={value.height.unit}
-                            >
-                                {units.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
-                            </Select>
-                        }
-                        className={styles.input}
-                        value={value.height.value}
-                        disabled={readOnly}
-                    />
+                    {['width', 'height'].map((dim) => (
+                        <Input
+                            key={dim}
+                            addonAfter={
+                                <Select
+                                    value={value[dim].unit}
+                                    disabled={readOnly}
+                                    onChange={(unit) => setValue(prev => ({ ...prev, [dim]: { ...prev[dim], unit } }))}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                >
+                                    {units.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
+                                </Select>
+                            }
+                            readOnly={readOnly}
+                            value={value[dim].value}
+                            onChange={(e) => setValue(prev => ({ ...prev, [dim]: { ...prev[dim], value: e.target.value } }))}
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    ))}
                 </Space.Compact>
-                <Button type="text" icon={<PlusOutlined />} onClick={() => addItem(label)}>
+                <Button
+                    type="text"
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                        addItem(label);
+                    }}
+                    disabled={readOnly}
+                >
                     Apply {label}
                 </Button>
             </Space>
@@ -120,46 +102,33 @@ const SizeAndRepeat: FC<SizeAndRepeatProps> = ({ updateValue, backgroundSize, ba
 
     return (
         <>
-            <Col span={24} style={{ fontSize: '11px' }} className={styles.container}>
-                <SettingsFormItem name="background.size" readOnly={readOnly} label="Size" jsSetting>
-
-                    <Select
-                        value={backgroundSize || 'auto'}
-                        disabled={readOnly}
-                        onChange={(size) => updateValue({ size })}
-                        dropdownRender={(menu) => renderOptions(menu, size, setSize, 'size')}
-                        options={sizes.map((item) => ({ label: item, value: item }))}
-                    />
-                </SettingsFormItem>
-            </Col>
-            <Col span={24} style={{ fontSize: '11px' }} className={styles.container}>
-                <SettingsFormItem readOnly={readOnly} name="background.repeat" label="Repeat" jsSetting>
-                    <Select
-                        onChange={(repeat) => updateValue({ repeat })}
-                        value={backgroundRepeat || 'no-repeat'}
-                        disabled={readOnly}
-                        options={[
-                            { label: 'No repeat', value: 'no-repeat' },
-                            { label: 'Repeat', value: 'repeat' },
-                            { label: 'Repeat X', value: 'repeat-x' },
-                            { label: 'Repeat Y', value: 'repeat-y' },
-                        ]}
-                    />
-                </SettingsFormItem>
-            </Col>
-
-            <Col span={24} style={{ fontSize: '11px' }} className={styles.container}>
-                <SettingsFormItem readOnly={readOnly} name="background.position" label="Position" jsSetting>
-                    <Select
-                        value={backgroundPosition || 'auto'}
-                        disabled={readOnly}
-                        dropdownRender={(option) => renderOptions(option, position, setPosition, 'position')}
-                        options={positions.map((item) => ({ label: item, value: item }))}
-                    />
-                </SettingsFormItem>
-            </Col>
-
-
+            {[
+                { name: 'size', label: 'Size', value: backgroundSize, options: sizes, state: size, setState: setSize },
+                { name: 'position', label: 'Position', value: backgroundPosition, options: positions, state: position, setState: setPosition },
+                {
+                    name: 'repeat', label: 'Repeat', value: backgroundRepeat, options: [
+                        { label: 'No repeat', value: 'no-repeat' },
+                        { label: 'Repeat', value: 'repeat' },
+                        { label: 'Repeat X', value: 'repeat-x' },
+                        { label: 'Repeat Y', value: 'repeat-y' },
+                    ]
+                }
+            ].map(({ name, label, value, options, state, setState }) => (
+                <Col key={name} span={24} style={{ fontSize: '11px' }}>
+                    <SettingsFormItem name={`background.${name}`} readOnly={readOnly} label={label} jsSetting>
+                        <Select
+                            value={value || (name === 'repeat' ? 'no-repeat' : 'auto')}
+                            disabled={readOnly}
+                            onChange={(newValue) => {
+                                updateValue({ [name]: newValue });
+                                if (name !== 'repeat') clearInputs(name as 'size' | 'position');
+                            }}
+                            dropdownRender={name !== 'repeat' ? (menu) => renderOptions(menu, state, setState, name as 'size' | 'position') : undefined}
+                            options={options.map((item) => typeof item === 'string' ? { label: item, value: item } : item)}
+                        />
+                    </SettingsFormItem>
+                </Col>
+            ))}
         </>
     );
 };

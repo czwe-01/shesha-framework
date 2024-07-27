@@ -40,6 +40,8 @@ export interface IBorderValue {
             style: string;
         };
     };
+    activeRadius: string;
+    activeBorder: string;
 }
 
 export interface IBorderProps extends IConfigurableFormComponent {

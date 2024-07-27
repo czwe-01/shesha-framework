@@ -26,12 +26,11 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
     const { backendUrl } = useSheshaApplication();
     const ownerId = evaluateValue(model?.background?.storedFile?.ownerId, { data, globalState });
 
-    console.log("CONTAINER COMPONENT", model);
     const sizeStyles = useMemo(() => getSizeStyle(model?.dimensions), [model.dimensions]);
     const borderStyles = useMemo(() => getBorderStyle(model?.border), [model.border, formData]);
     const [backgroundStyles, setBackgroundStyles] = useState({});
 
-    console.log('ContainerComponent -> model', model);
+    if (model.propertyName == 'container6') console.log('ContainerComponent -> model', model);
 
     useEffect(() => {
       const fetchStyles = async () => {

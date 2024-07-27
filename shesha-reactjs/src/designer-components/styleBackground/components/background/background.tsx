@@ -1,7 +1,6 @@
 import { Button, Col, Input, Radio, RadioChangeEvent, Row, Tag } from 'antd';
 import { Autocomplete } from '@/components/autocomplete';
 import React, { FC, useState } from 'react';
-import { useStyles } from './styles';
 import { BgColorsOutlined, DatabaseOutlined, FormatPainterOutlined, LinkOutlined, UploadOutlined } from '@ant-design/icons';
 import { ColorPicker } from '@/components';
 import SizeAndRepeat from './sizeAndRepeat';
@@ -13,12 +12,11 @@ import { IContainerComponentProps } from '@/interfaces';
 interface IBackgroundProps {
     onValuesChange?: (value: IContainerComponentProps) => void;
     value?: IBackgroundValue;
-    model?: IContainerComponentProps;
+    model?: any;
     readOnly?: boolean;
 }
 
 const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, model, readOnly }) => {
-    const { styles } = useStyles();
     const [colors, setColors] = useState<string[]>(value?.gradient?.colors || []);
 
     const updateValue = (newValue: Partial<IBackgroundValue>) => {
@@ -58,7 +56,7 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                         <Col className="gutter-row" span={24}>
                             <SettingsFormItem name="background.gradient.direction" label="Direction" jsSetting>
                                 <Input
-                                    className={styles.input}
+
                                     style={{ width: '100%' }}
                                     value={value?.gradient?.direction}
                                     readOnly={readOnly}
@@ -68,7 +66,7 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                         </Col>
                         <Col className="gutter-row" span={24}>
                             <SettingsFormItem name="background.gradient.colors" label="Colors" jsSetting>
-                                <div className={styles.flex}>
+                                <div>
                                     {colors.map((color, i) => (
                                         <Tag
                                             key={i}
@@ -78,7 +76,6 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                                                 e.preventDefault();
                                                 removeColor(i);
                                             }}
-                                            className={styles.tag}
                                         >
                                             <ColorPicker
                                                 allowClear
@@ -99,7 +96,7 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                     <Col className="gutter-row" span={24}>
                         <SettingsFormItem name="background.url" label="URL" jsSetting>
                             <Input
-                                className={styles.input}
+
                                 style={{ width: '100%' }}
                                 value={value?.url}
                                 readOnly={readOnly}
@@ -128,7 +125,7 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                         <Col className="gutter-row" span={24}>
                             <SettingsFormItem name="background.storedFile.id" label="File Id" jsSetting>
                                 <Input
-                                    className={styles.input}
+
                                     style={{ width: '100%' }}
                                     readOnly={readOnly}
                                     value={value?.storedFile?.id}
@@ -140,7 +137,7 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                                 <Autocomplete.Raw
                                     dataSourceType="url"
                                     dataSourceUrl="/api/services/app/Metadata/TypeAutocomplete"
-                                    className={styles.input}
+
                                     readOnly={readOnly}
                                     style={{ width: '100%' }}
                                     value={value?.storedFile?.ownerType}
@@ -150,7 +147,7 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                         <Col className="gutter-row" span={24}>
                             <SettingsFormItem name="background.storedFile.ownerId" label="Owner Id" jsSetting>
                                 <Input
-                                    className={styles.input}
+
                                     style={{ width: '100%' }}
                                     readOnly={readOnly}
                                     value={value?.storedFile?.ownerId}
@@ -160,7 +157,7 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                         <Col className="gutter-row" span={24}>
                             <SettingsFormItem name="background.storedFile.fileCatergory" label="File Catergory" jsSetting>
                                 <Input
-                                    className={styles.input}
+
                                     style={{ width: '100%' }}
                                     readOnly={readOnly}
                                     value={value?.storedFile?.fileCatergory}
@@ -173,15 +170,16 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
                 return (
                     <Col className="gutter-row" span={24}>
                         <SettingsFormItem name="background.color" label="Color" jsSetting>
-                    <Col className="gutter-row" span={24}>
-                        <SettingsFormItem name="background.color" label="Color" jsSetting>
-                            <ColorPicker
-                                allowClear
-                                readOnly={readOnly}
-                                value={value?.color}
-                                onChange={(color) => updateValue({ color: color.toString() })}
-                            />
-                        </SettingsFormItem>
+                            <Col className="gutter-row" span={24}>
+                                <SettingsFormItem name="background.color" label="Color" jsSetting>
+                                    <ColorPicker
+                                        allowClear
+                                        readOnly={readOnly}
+                                        value={value?.color}
+                                        onChange={(color) => updateValue({ color: color.toString() })}
+                                    />
+                                </SettingsFormItem>
+                            </Col>
                         </SettingsFormItem>
                     </Col>
                 );
@@ -189,7 +187,7 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
     };
 
     return (
-        <Row gutter={[8, 8]} style={{ fontSize: '11px' }} className={styles.container}>
+        <Row gutter={[8, 8]} style={{ fontSize: '11px' }}>
             <SettingsFormItem readOnly={readOnly} name="background.type" label="Type" jsSetting>
                 <Col className="gutter-row" span={24}>
                     <Radio.Group onChange={onTypeChange} disabled={readOnly} value={value?.type}>

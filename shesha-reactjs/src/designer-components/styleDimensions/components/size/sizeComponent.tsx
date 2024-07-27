@@ -1,7 +1,8 @@
 import { Col, Input, Radio, Row, Select } from 'antd';
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import { BorderlessTableOutlined, ColumnWidthOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import SettingsFormItem from '@/designer-components/_settings/settingsFormItem';
+import { IContainerComponentProps } from '@/interfaces';
 
 const { Option } = Select;
 
@@ -23,28 +24,28 @@ export interface ISizeValue {
 }
 
 export interface ISizeType {
-    onChange?: (value: ISizeValue) => void;
+    onChange?: (value) => void;
     value?: ISizeValue;
     readOnly?: boolean;
+    model?: IContainerComponentProps;
 }
 
-const SizeComponent: FC<ISizeType> = ({ onChange, readOnly, value = { width: null, height: null, minWidth: null, minHeight: null, maxHeight: null, maxWidth: null } }) => {
+const SizeComponent: FC<ISizeType> = ({ onChange, readOnly, value, model }) => {
 
-    const [localValue, setLocalValue] = useState<ISizeValue>(value);
-
-    const updateValue = (key: keyof ISizeValue, newValue: ISizeValueWithUnit | string) => {
-        const updatedValue = { ...localValue, [key]: newValue };
-        setLocalValue(updatedValue);
-        onChange?.(updatedValue);
+    const updateValue = (key: keyof ISizeValue, newUnit: string) => {
+        const updatedValue = {
+            ...model, dimensions: { ...model?.dimensions, [key]: { ...value?.[key] as ISizeValueWithUnit, unit: newUnit } }
+        };
+        onChange(updatedValue);
     };
 
     const renderSizeInputWithUnits = (label: string, property: keyof ISizeValue) => {
-        const currentValue = localValue[property] && localValue[property] as ISizeValueWithUnit || { value: '', unit: 'px' };
+        const currentValue = value?.[property] && value?.[property] as ISizeValueWithUnit || { value: '', unit: 'px' };
 
         const selectAfter = (
             <Select
-                value={currentValue.unit}
-                onChange={(unit) => updateValue(property, { ...currentValue, unit })}
+                value={currentValue.unit || 'px'}
+                onChange={(unit) => updateValue(property, unit)}
             >
                 {units.map(unit => <Option key={unit} value={unit}>{unit}</Option>)}
             </Select>
@@ -52,7 +53,7 @@ const SizeComponent: FC<ISizeType> = ({ onChange, readOnly, value = { width: nul
 
         return (
             <Col className="gutter-row" span={12}>
-                <SettingsFormItem name={`dimensions.${property}`} label={label} jsSetting>
+                <SettingsFormItem name={`dimensions.${property}.value`} label={label} jsSetting>
                     <Input
                         addonAfter={selectAfter}
                         value={currentValue.value}
@@ -73,7 +74,7 @@ const SizeComponent: FC<ISizeType> = ({ onChange, readOnly, value = { width: nul
             {renderSizeInputWithUnits('Max H', 'maxHeight')}
             <Col className="gutter-row" span={24}>
                 <SettingsFormItem readOnly={readOnly} name="overflow" label="Overflow" jsSetting>
-                    <Radio.Group value={localValue.overflow} >
+                    <Radio.Group value={value?.overflow} >
                         <Radio.Button value="visible" title="Visible"><EyeOutlined /></Radio.Button>
                         <Radio.Button value="hidden" title="Hidden"><EyeInvisibleOutlined size={32} /></Radio.Button>
                         <Radio.Button value="scroll" title="Scroll"><ColumnWidthOutlined /></Radio.Button>
