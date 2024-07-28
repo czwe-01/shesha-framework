@@ -119,7 +119,6 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
 
                 );
             case 'storedFile':
-            case 'storedFile':
                 return (
                     <>
                         <Col className="gutter-row" span={24}>
@@ -169,18 +168,16 @@ const BackgroundConfigurator: FC<IBackgroundProps> = ({ onValuesChange, value, m
             default:
                 return (
                     <Col className="gutter-row" span={24}>
-                        <SettingsFormItem name="background.color" label="Color" jsSetting>
-                            <Col className="gutter-row" span={24}>
-                                <SettingsFormItem name="background.color" label="Color" jsSetting>
-                                    <ColorPicker
-                                        allowClear
-                                        readOnly={readOnly}
-                                        value={value?.color}
-                                        onChange={(color) => updateValue({ color: color.toString() })}
-                                    />
-                                </SettingsFormItem>
-                            </Col>
-                        </SettingsFormItem>
+                        <Col className="gutter-row" span={24}>
+                            <SettingsFormItem name="background.color" label="Color" jsSetting>
+                                <ColorPicker
+                                    allowClear
+                                    readOnly={readOnly}
+                                    value={value?.color}
+                                    onChange={(color) => updateValue({ color: color.toString() })}
+                                />
+                            </SettingsFormItem>
+                        </Col>
                     </Col>
                 );
         }
