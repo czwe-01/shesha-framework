@@ -4,7 +4,6 @@ import { BorderBottomOutlined, BorderLeftOutlined, BorderOutlined, BorderRightOu
 import { ColorPicker } from '@/components';
 import { IBorderValue } from './interfaces';
 import SettingsFormItem from '@/designer-components/_settings/settingsFormItem';
-import { IContainerComponentProps } from '@/interfaces';
 
 const { Option } = Select;
 
@@ -14,7 +13,7 @@ interface IBorderProps {
     onChange?: (value) => void;
     value?: IBorderValue;
     readOnly?: boolean;
-    model: IContainerComponentProps;
+    model?: any;
 }
 
 const BorderComponent: FC<IBorderProps> = ({ onChange, model, readOnly, value }) => {

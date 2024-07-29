@@ -27,14 +27,14 @@ export interface ISizeType {
     onChange?: (value) => void;
     value?: ISizeValue;
     readOnly?: boolean;
-    model?: IContainerComponentProps;
+    model?: any;
 }
 
 const SizeComponent: FC<ISizeType> = ({ onChange, readOnly, value, model }) => {
 
     const updateValue = (key: keyof ISizeValue, newUnit: string) => {
         const updatedValue = {
-            ...model, dimensions: { ...model?.dimensions, [key]: { ...value?.[key] as ISizeValueWithUnit, unit: newUnit } }
+            dimensions: { ...model?.dimensions, [key]: { ...value?.[key] as ISizeValueWithUnit, unit: newUnit } }
         };
         onChange(updatedValue);
     };

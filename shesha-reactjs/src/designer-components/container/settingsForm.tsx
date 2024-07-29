@@ -48,15 +48,14 @@ const DropdownSettings: FC<ISettingsFormFactoryArgs<IContainerComponentProps>> =
     const { formSettings } = useForm();
 
     return (
-        <SettingsCollapsiblePanel header="Display">
-            <ContextPropertyAutocomplete
-                id="415cc8ec-2fd1-4c5a-88e2-965153e16069"
-                readOnly={readOnly}
-                defaultModelType={designerModelType ?? formSettings.modelType}
-                formData={model}
-                onValuesChange={onValuesChange} />
-
+        <>
             <SettingsCollapsiblePanel header="Display" ghost collapsible="header" expandIconPosition="start">
+                <ContextPropertyAutocomplete
+                    id="415cc8ec-2fd1-4c5a-88e2-965153e16069"
+                    readOnly={readOnly}
+                    defaultModelType={designerModelType ?? formSettings.modelType}
+                    formData={model}
+                    onValuesChange={onValuesChange} />
                 <SettingsFormItem name="componentName" label="Component name" required>
                     <Input readOnly={readOnly} />
                 </SettingsFormItem>
@@ -144,7 +143,7 @@ const DropdownSettings: FC<ISettingsFormFactoryArgs<IContainerComponentProps>> =
                     <PermissionAutocomplete />
                 </SettingsFormItem>
             </SettingsCollapsiblePanel>
-        </SettingsCollapsiblePanel>
+        </>
     );
 };
 
