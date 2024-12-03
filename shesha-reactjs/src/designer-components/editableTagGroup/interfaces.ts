@@ -1,6 +1,6 @@
-import { IConfigurableFormComponent } from '@/providers/form/models';
+import { IConfigurableFormComponent, IStyleType } from '@/providers/form/models';
 
-export interface IEditableTagGroupComponentProps extends IConfigurableFormComponent {
+export interface IEditableTagGroupComponentProps extends IConfigurableFormComponent, IStyleType {
     value?: string[];
     defaultValue?: string;
     onChange?: (values?: string[]) => void;
