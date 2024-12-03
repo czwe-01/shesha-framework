@@ -19,6 +19,8 @@ import { getShadowStyle } from '../_settings/utils/shadow/utils';
 import { getBackgroundStyle } from '../_settings/utils/background/utils';
 import { isValidGuid } from '@/components/formDesigner/components/utils';
 import { removeUndefinedProps } from '@/utils/object';
+import { get } from 'nested-property';
+import { getSettings } from './settingsForm';
 
 const settingsForm = settingsFormJson as FormMarkup;
 
@@ -87,11 +89,11 @@ const EditableTagGroupComponent: IToolboxComponent<IEditableTagGroupComponentPro
 
     return (
       <ConfigurableFormItem model={model}>
-        {(value, onChange) => (<EditableTagGroup value={value} defaultValue={model?.defaultValue} onChange={onChange} readOnly={model.readOnly} styles={{ affixWrapper: finalStyle }} />)}
+        {(value, onChange) => (<EditableTagGroup value={value} defaultValue={model?.defaultValue} onChange={onChange} readOnly={model.readOnly} styles={{ prefix: finalStyle }} />)}
       </ConfigurableFormItem>
     );
   },
-  settingsFormMarkup: settingsForm,
+  settingsFormMarkup: (data) => getSettings(data),
   migrator: (m) => m
     .add<IEditableTagGroupComponentProps>(0, (prev) => migratePropertyName(migrateCustomFunctions(prev)))
     .add<IEditableTagGroupComponentProps>(1, (prev) => migrateVisibility(prev))
