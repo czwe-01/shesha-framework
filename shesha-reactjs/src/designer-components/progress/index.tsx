@@ -1,15 +1,15 @@
 import ConfigurableFormItem from '@/components/formDesigner/components/formItem';
 import React from 'react';
-import { progressSettingsForm } from './settings';
 import { IConfigurableFormComponent } from '@/providers/form/models';
+import { getSettings } from './settings';
 import { IToolboxComponent } from '@/interfaces';
 import { LineOutlined } from '@ant-design/icons';
 import { migrateCustomFunctions, migratePropertyName } from '@/designer-components/_common-migrations/migrateSettings';
 import { ProgressProps } from 'antd';
 import { ProgressType } from 'antd/lib/progress/progress';
 import { ProgressWrapper } from './progressWrapper';
-import { validateConfigurableComponentSettings } from '@/providers/form/utils';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
+import { validateConfigurableComponentSettings } from '@/formDesignerUtils';
 
 interface IProgressProps
   extends Omit<ProgressProps, 'style' | 'type' | 'size' | 'format' | 'success' | 'strokeColor'>,
@@ -107,8 +107,8 @@ const ProgressComponent: IToolboxComponent<IProgressProps> = {
       </ConfigurableFormItem>
     );
   },
-  settingsFormMarkup: progressSettingsForm,
-  validateSettings: model => validateConfigurableComponentSettings(progressSettingsForm, model),
+  settingsFormMarkup: (data) => getSettings(data) as unknown as any,
+  validateSettings: model => validateConfigurableComponentSettings(getSettings(model), model),
   migrator: (m) => m
     .add<IProgressProps>(0, (prev) => migratePropertyName(migrateCustomFunctions(prev)))
     .add<IProgressProps>(1, (prev) => ({...migrateFormApi.properties(prev)}))
