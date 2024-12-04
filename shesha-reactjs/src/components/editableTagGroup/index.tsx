@@ -19,6 +19,7 @@ interface IEditableTagGroupState {
 export const EditableTagGroup: FC<IEditableTagGroupProps> = ({ value = [], onChange, defaultValue, readOnly = false, ...rest }) => {
   const [state, setState] = useState<IEditableTagGroupState>({ inputVisible: false, inputValue: '' });
 
+  const { style } = rest;
   const inputRef = React.useRef<any>(null);
 
   const handleClose = removedTag => {
@@ -87,6 +88,7 @@ export const EditableTagGroup: FC<IEditableTagGroupProps> = ({ value = [], onCha
           if (!readOnly)
             onTagEdit(tag);
         }}
+        style={style}
       >
         {tag}
       </Tag>

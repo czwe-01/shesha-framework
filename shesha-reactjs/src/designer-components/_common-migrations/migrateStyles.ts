@@ -33,7 +33,7 @@ export const migratePrevStyles = <T extends ExtendedType>(prev: T, defaults?: IS
                     left: border('left'),
                     right: border('right'),
                 },
-                radius: { all: prevStyles?.borderRadius || 8 },
+                radius: { all: prevStyles?.borderRadius || defaults?.border?.radius?.all || 8 },
             },
             background: {
                 ...prev?.background,

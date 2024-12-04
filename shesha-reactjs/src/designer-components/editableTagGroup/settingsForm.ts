@@ -88,81 +88,6 @@ export const getSettings = (data: IEditableTagGroupComponentProps) => {
                                     },
                                 ],
                             })
-                            .addSettingsInputRow({
-                                id: 'type-default-value-s4gmBg31azZC0UjZjpfTm',
-                                parentId: 's4gmBg31azZC0UjZjpfTm',
-                                readOnly: { _code: 'return  getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
-                                inputs: [
-                                    {
-                                        type: 'dropdown',
-                                        id: 'type-s4gmBg31azZC0UjZjpfTm',
-                                        propertyName: 'textType',
-                                        label: 'Type',
-                                        size: 'small',
-                                        jsSetting: true,
-                                        dropdownOptions: [
-                                            {
-                                                label: 'text',
-                                                value: 'text',
-                                            },
-                                            {
-                                                label: 'password',
-                                                value: 'password',
-                                            },
-                                        ],
-                                    },
-                                    {
-                                        type: 'text',
-                                        id: 'initialValue-s4gmBg31azZC0UjZjpfTm',
-                                        propertyName: 'initialValue',
-                                        label: 'Default Value',
-                                        tooltip: 'Enter default value of component. (formData, formMode, globalState) are exposed',
-                                        jsSetting: true,
-                                    },
-                                ],
-                            })
-                            .addSettingsInputRow({
-                                id: 'prefix-s4gmBg31azZC0UjZjpfTm',
-                                parentId: 's4gmBg31azZC0UjZjpfTm',
-                                inputs: [
-                                    {
-                                        type: 'text',
-                                        id: 'prefix-s4gmBg31azZC0UjZjpfTm',
-                                        propertyName: 'prefix',
-                                        label: 'Prefix',
-                                        jsSetting: true,
-                                    },
-                                    {
-                                        type: 'iconPicker',
-                                        id: 'prefixIcon-s4gmBg31azZC0UjZjpfTm',
-                                        propertyName: 'prefixIcon',
-                                        label: 'Prefix Icon',
-                                        jsSetting: true,
-                                    },
-                                ],
-                                readOnly: { _code: 'return  getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
-                            })
-                            .addSettingsInputRow({
-                                id: 'suffix-s4gmBg31azZC0UjZjpfTm',
-                                parentId: 's4gmBg31azZC0UjZjpfTm',
-                                inputs: [
-                                    {
-                                        type: 'text',
-                                        id: 'suffix-s4gmBg31azZC0UjZjpfTm',
-                                        propertyName: 'suffix',
-                                        label: 'Suffix',
-                                        jsSetting: true,
-                                    },
-                                    {
-                                        type: 'iconPicker',
-                                        id: 'suffixIcon-s4gmBg31azZC0UjZjpfTm',
-                                        propertyName: 'suffixIcon',
-                                        label: 'Suffix Icon',
-                                        jsSetting: true,
-                                    },
-                                ],
-                                readOnly: { _code: 'return  getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
-                            })
                             .toJson()
                         ]
                     },
@@ -182,95 +107,11 @@ export const getSettings = (data: IEditableTagGroupComponentProps) => {
                                 jsSetting: true,
                                 parentId: '6eBJvoll3xtLJxdvOAlnB'
                             })
-                            .addSettingsInputRow({
-                                id: 'qOkkwAnHvKJ0vYXeXMLsd',
-                                parentId: '6eBJvoll3xtLJxdvOAlnB',
-                                inputs: [
-                                    {
-                                        type: 'number',
-                                        id: 'minLength-s4gmBg31azZC0UjZjpfTm',
-                                        propertyName: 'validate.minLength',
-                                        label: 'Min Length',
-                                        size: 'small',
-                                        jsSetting: true,
-                                    },
-                                    {
-                                        type: 'number',
-                                        id: 'maxLength-s4gmBg31azZC0UjZjpfTm',
-                                        propertyName: 'validate.maxLength',
-                                        label: 'Max Length',
-                                        size: 'small',
-                                        jsSetting: true,
-                                    },
-                                ],
-                                readOnly: { _code: 'return  getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
-                            })
-                            .addSettingsInputRow({
-                                id: 'Scip2BCqWk6HniFIJTgtA',
-                                parentId: '6eBJvoll3xtLJxdvOAlnB',
-                                inputs: [
-                                    {
-                                        type: 'text',
-                                        id: 'message-s4gmBg31azZC0UjZjpfTm',
-                                        propertyName: 'validate.message',
-                                        label: 'Message',
-                                        size: 'small',
-                                        jsSetting: true,
-                                    },
-                                    {
-                                        type: 'codeEditor',
-                                        id: 'validator-s4gmBg31azZC0UjZjpfTm',
-                                        propertyName: 'validate.validator',
-                                        label: 'Validator',
-                                        labelAlign: 'right',
-                                        tooltip: 'Enter custom validator logic for form.item rules. Returns a Promise',
-                                    }
-                                ],
-                                readOnly: { _code: 'return  getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
-                            })
                             .toJson()
                         ]
                     },
                     {
                         key: '3',
-                        title: 'Events',
-                        id: 'Cc47W08MWrKdhoGqFKMI2',
-                        components: [...new DesignerToolbarSettings()
-                            .addSettingsInput({
-                                readOnly: { _code: 'return  getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
-                                id: '3cef348b-6bba-4176-93f6-f3a8b21e33c9',
-                                inputType: 'codeEditor',
-                                propertyName: 'onChangeCustom',
-                                label: 'On Change',
-                                labelAlign: 'right',
-                                tooltip: 'Enter custom eventhandler on changing of event. (form, event) are exposed',
-                                parentId: 'Cc47W08MWrKdhoGqFKMI2'
-                            })
-                            .addSettingsInput({
-                                readOnly: { _code: 'return  getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
-                                id: '88c2d96c-b808-4316-8a36-701b09e5f6c7',
-                                inputType: 'codeEditor',
-                                propertyName: 'onFocusCustom',
-                                label: 'On Focus',
-                                labelAlign: 'right',
-                                tooltip: 'Enter custom eventhandler on focus of event. (form, event) are exposed',
-                                parentId: 'Cc47W08MWrKdhoGqFKMI2'
-                            })
-                            .addSettingsInput({
-                                readOnly: { _code: 'return  getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
-                                id: '4a2b7329-1a89-45d1-a5b0-f66db21744b0',
-                                inputType: 'codeEditor',
-                                propertyName: 'onBlurCustom',
-                                label: 'On Blur',
-                                labelAlign: 'right',
-                                tooltip: 'Enter custom eventhandler on blur of event. (form, event) are exposed',
-                                parentId: 'Cc47W08MWrKdhoGqFKMI2'
-                            })
-                            .toJson()
-                        ]
-                    },
-                    {
-                        key: '4',
                         title: 'Appearance',
                         id: 'elgrlievlfwehhh848r8hsdnflsdnclurbd',
                         components: [...new DesignerToolbarSettings()
@@ -289,6 +130,19 @@ export const getSettings = (data: IEditableTagGroupComponentProps) => {
                                 },
                                 components: [
                                     ...new DesignerToolbarSettings()
+                                        .addSettingsInput({
+                                            id: 'styled-input-s4gmBg31azZC0UjZjpfTm',
+                                            inputType: 'radio',
+                                            propertyName: 'currentInput',
+                                            label: 'Current Input',
+                                            parentId: 'styleRouter',
+                                            size: 'small',
+                                            hideLabel: true,
+                                            style: 'return { width: "100%", display: "flex", justifyContent: "center" }',
+                                            buttonGroupOptions: [{ value: 'input', title: 'Input', icon: 'Input' }, { value: 'tag', title: 'Tag', icon: 'Tag' }, { value: 'button', title: 'Button', icon: 'Button' }],
+                                            description: 'The currently selected input to be styled',
+                                            jsSetting: false,
+                                        })
                                         .addCollapsiblePanel({
                                             id: 'fontStyleCollapsiblePanel',
                                             propertyName: 'pnlFontStyle',

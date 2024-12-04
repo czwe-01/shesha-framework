@@ -1,9 +1,7 @@
 import React, { CSSProperties, useEffect, useMemo, useState } from 'react';
 import { IToolboxComponent } from '@/interfaces';
-import { FormMarkup } from '@/providers/form/models';
 import { HomeOutlined } from '@ant-design/icons';
 import ConfigurableFormItem from '@/components/formDesigner/components/formItem';
-import settingsFormJson from './settingsForm.json';
 import { EditableTagGroup, ValidationErrors } from '@/components';
 import { getStyle, pickStyleFromModel, validateConfigurableComponentSettings } from '@/providers/form/utils';
 import { DataTypes } from '@/interfaces/dataTypes';
@@ -19,10 +17,23 @@ import { getShadowStyle } from '../_settings/utils/shadow/utils';
 import { getBackgroundStyle } from '../_settings/utils/background/utils';
 import { isValidGuid } from '@/components/formDesigner/components/utils';
 import { removeUndefinedProps } from '@/utils/object';
-import { get } from 'nested-property';
 import { getSettings } from './settingsForm';
 
-const settingsForm = settingsFormJson as FormMarkup;
+import { IStyleType } from "@/index";
+import { migratePrevStyles } from '../_common-migrations/migrateStyles';
+
+export const defaultStyles = (): IStyleType => {
+  return {
+    background: { type: 'color', color: '#fafafa' },
+    font: { weight: '400', size: 12, color: 'rgba(0, 0, 0, 0.88)', type: 'Segoe UI' },
+    dimensions: { width: 'auto', height: 'auto', minHeight: '0px', maxHeight: 'auto', minWidth: '0px', maxWidth: 'auto' },
+    border: {
+      selectedCorner: 'all', selectedSide: 'all',
+      border: { all: { width: '1px', style: 'solid', color: 'd9d9d9' } },
+      radius: { all: 4 }
+    },
+  };
+};
 
 const EditableTagGroupComponent: IToolboxComponent<IEditableTagGroupComponentProps> = {
   type: 'editableTagGroup',
@@ -89,7 +100,7 @@ const EditableTagGroupComponent: IToolboxComponent<IEditableTagGroupComponentPro
 
     return (
       <ConfigurableFormItem model={model}>
-        {(value, onChange) => (<EditableTagGroup value={value} defaultValue={model?.defaultValue} onChange={onChange} readOnly={model.readOnly} styles={{ prefix: finalStyle }} />)}
+        {(value, onChange) => (<EditableTagGroup style={finalStyle} value={value} defaultValue={model?.defaultValue} onChange={onChange} readOnly={model.readOnly} styles={{ prefix: finalStyle }} />)}
       </ConfigurableFormItem>
     );
   },
@@ -99,8 +110,9 @@ const EditableTagGroupComponent: IToolboxComponent<IEditableTagGroupComponentPro
     .add<IEditableTagGroupComponentProps>(1, (prev) => migrateVisibility(prev))
     .add<IEditableTagGroupComponentProps>(2, (prev) => migrateReadOnly(prev))
     .add<IEditableTagGroupComponentProps>(3, (prev) => ({ ...migrateFormApi.eventsAndProperties(prev) }))
+    .add<IEditableTagGroupComponentProps>(4, (prev) => ({ ...migratePrevStyles(prev, defaultStyles()) }))
   ,
-  validateSettings: model => validateConfigurableComponentSettings(settingsForm, model),
+  validateSettings: model => validateConfigurableComponentSettings(getSettings(model), model),
 };
 
 export default EditableTagGroupComponent;

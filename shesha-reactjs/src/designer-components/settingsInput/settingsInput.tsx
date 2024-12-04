@@ -6,6 +6,7 @@ import { InputComponent } from '../inputComponent';
 import { CodeLanguages } from '../codeEditor/types';
 import { ResultType } from '@/components/codeEditor/models';
 import { SizeType } from 'antd/es/config-provider/SizeContext';
+import { getStyle } from '@/index';
 
 interface IRadioOption {
     value: string | number;
@@ -63,8 +64,10 @@ export const SettingInput: React.FC<ISettingsInputProps> = ({ children, label, h
     buttonGroupOptions, dropdownOptions, readOnly, hasUnits, jsSetting, tooltip, hidden, width,
     size, inline, validate, ...rest }) => {
 
+    const jsStyle = getStyle(rest.style);
+
     return hidden ? null :
-        <div key={label} style={type === 'button' ? { width: '24' } : { flex: `1 1 ${inline ? width : '120px'}`, width }}>
+        <div key={label} style={type === 'button' ? { width: '24' } : { flex: `1 1 ${inline ? width : '120px'}`, width, ...jsStyle }}>
             <FormItem
                 name={property}
                 hideLabel={hideLabel}
