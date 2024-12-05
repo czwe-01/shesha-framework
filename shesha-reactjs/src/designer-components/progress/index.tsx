@@ -112,6 +112,7 @@ const ProgressComponent: IToolboxComponent<IProgressProps> = {
   migrator: (m) => m
     .add<IProgressProps>(0, (prev) => migratePropertyName(migrateCustomFunctions(prev)))
     .add<IProgressProps>(1, (prev) => ({...migrateFormApi.properties(prev)}))
+    .add<IProgressProps>(2, (prev) => ({...prev, hideLabel: true}))
   ,
 };
 
