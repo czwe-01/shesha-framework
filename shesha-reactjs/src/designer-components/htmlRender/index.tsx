@@ -15,7 +15,7 @@ const HtmlComponent: IToolboxComponent<IHtmlComponentProps> = {
   isInput: false,
   isOutput: true,
   Factory: ({ model }) => {
-    const  ctx = useAvailableConstantsData();    
+    const  ctx = useAvailableConstantsData();
     return <ConfigurableFormItem model={{...model, hideLabel: true}}>
       {(value) => {
           return parse(model?.renderer

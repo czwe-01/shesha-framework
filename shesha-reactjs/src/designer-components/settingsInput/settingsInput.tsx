@@ -57,6 +57,8 @@ export interface ISettingsInputProps extends IComponentLabelProps, Omit<IConfigu
     iconAlt?: string | React.ReactNode;
     inline?: boolean;
     inputType?: InputType['type'];
+    min?: string;
+    max?: string;
 };
 
 export const SettingInput: React.FC<ISettingsInputProps> = ({ children, label, hideLabel, propertyName: property, type,
@@ -68,6 +70,7 @@ export const SettingInput: React.FC<ISettingsInputProps> = ({ children, label, h
             <FormItem
                 name={property}
                 hideLabel={hideLabel}
+            
                 label={label}
                 tooltip={tooltip}
                 hidden={hidden}
