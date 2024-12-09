@@ -1,5 +1,6 @@
 import { IConfigurableFormComponent } from '@/providers';
 import { IFormItem } from '@/interfaces';
+import { UploadFile } from 'antd';
 
 export interface IAnnotation {
     id: string;    // required,
@@ -43,5 +44,7 @@ export interface IImageProps extends IConfigurableFormComponent, IFormItem {
     allowAddingNotes: boolean;
     minPoints?: number;
     maxPoints?: number;
+    imageSource: 'url' | 'uploadedFile';
     url: string;
+    uploadedFile?: UploadFile;
 }

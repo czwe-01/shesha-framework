@@ -3,7 +3,6 @@ import { FileImageOutlined } from '@ant-design/icons';
 import ConfigurableFormItem from '@/components/formDesigner/components/formItem';
 import { validateConfigurableComponentSettings } from '@/providers/form/utils';
 import React from 'react';
-import { AnnotationSettingsForm } from './settings';
 import { useForm } from '@/providers';
 import { IImageProps } from './model';
 import ImageAnnotationControl from './control';
@@ -11,6 +10,7 @@ import { Alert } from 'antd';
 import { migrateCustomFunctions, migratePropertyName, migrateReadOnly } from '@/designer-components/_common-migrations/migrateSettings';
 import { migrateVisibility } from '@/designer-components/_common-migrations/migrateVisibility';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
+import { getSettings } from './settingsForm';
 
 const ImageAnnotationComponent: IToolboxComponent<IImageProps> = {
   type: 'imageAnnotation',
@@ -35,7 +35,7 @@ const ImageAnnotationComponent: IToolboxComponent<IImageProps> = {
 
     return (
       <ConfigurableFormItem model={model} >
-        {(value, onChange) => <ImageAnnotationControl model={model} value={value} onChange={onChange}/>}
+        {(value, onChange) => <ImageAnnotationControl model={model} value={value} onChange={onChange} />}
       </ConfigurableFormItem>
     );
   },
@@ -43,7 +43,7 @@ const ImageAnnotationComponent: IToolboxComponent<IImageProps> = {
     .add<IImageProps>(0, (prev) => migratePropertyName(migrateCustomFunctions(prev)) as IImageProps)
     .add<IImageProps>(1, (prev) => migrateVisibility(prev))
     .add<IImageProps>(2, (prev) => migrateReadOnly(prev))
-    .add<IImageProps>(3, (prev) => ({...migrateFormApi.properties(prev)}))
+    .add<IImageProps>(3, (prev) => ({ ...migrateFormApi.properties(prev) }))
   ,
   initModel: model => {
     const customModel: IImageProps = {
@@ -51,8 +51,8 @@ const ImageAnnotationComponent: IToolboxComponent<IImageProps> = {
     };
     return customModel;
   },
-  settingsFormMarkup: AnnotationSettingsForm,
-  validateSettings: model => validateConfigurableComponentSettings(AnnotationSettingsForm, model),
+  settingsFormMarkup: (data) => getSettings(data),
+  validateSettings: model => validateConfigurableComponentSettings(getSettings(model), model),
 };
 
 export default ImageAnnotationComponent;

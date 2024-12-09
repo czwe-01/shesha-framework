@@ -38,6 +38,8 @@ const ImageAnnotationControl: FC<IProps> = ({ model, onChange: onChangeForm, val
     maxPoints = 0,
     readOnly,
     style,
+    imageSource,
+    uploadedFile
   } = model;
 
   const { styles } = useStyles();
@@ -95,6 +97,7 @@ const ImageAnnotationControl: FC<IProps> = ({ model, onChange: onChangeForm, val
   }, [height, width]);
 
   const url: string = getString(model?.url, formData, globalState) || formData?.[model.propertyName];
+  const uploadedFileUrl = uploadedFile?.url;
 
   const setIsRequired = (required: boolean) => {
     model.validate.required = required;
@@ -156,8 +159,8 @@ const ImageAnnotationControl: FC<IProps> = ({ model, onChange: onChangeForm, val
   const maxReached =
     !!maxPoints && imageAnnotationData?.viewData?.filter(({ comment }) => !!comment).length === maxPoints;
   const newUrl = useMemo(() => {
-    return urlBits;
-  }, [urlBits]);
+    return imageSource === 'url' ? urlBits : uploadedFileUrl;
+  }, [urlBits, uploadedFileUrl, imageSource]);
 
   return (
     <>
