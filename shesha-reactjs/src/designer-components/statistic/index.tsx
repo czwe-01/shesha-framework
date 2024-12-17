@@ -6,7 +6,7 @@ import { migrateCustomFunctions, migratePropertyName } from '@/designer-componen
 import { IToolboxComponent } from '@/interfaces';
 import { IInputStyles, useFormData, useSheshaApplication } from '@/providers';
 import { IConfigurableFormComponent } from '@/providers/form/models';
-import { getStyle, pickStyleFromModel, useAvailableConstantsData, validateConfigurableComponentSettings } from '@/providers/form/utils';
+import { evaluateString, getStyle, pickStyleFromModel, useAvailableConstantsData, validateConfigurableComponentSettings } from '@/providers/form/utils';
 import { toSizeCssProp } from '@/utils/form';
 import { removeUndefinedProps } from '@/utils/object';
 import { BarChartOutlined } from '@ant-design/icons';
@@ -38,6 +38,8 @@ const StatisticComponent: IToolboxComponent<IStatisticComponentProps> = {
   isInput: true,
   isOutput: true,
   Factory: ({ model: passedModel }) => {
+    const allData = useAvailableConstantsData();
+    
     const { data: formData } = useFormData();
     const { style, valueStyle, titleStyle, prefixIcon, suffixIcon, ...model } = passedModel;
     const { backendUrl, httpHeaders } = useSheshaApplication();
@@ -91,7 +93,8 @@ const StatisticComponent: IToolboxComponent<IStatisticComponentProps> = {
       backgroundColor: model.backgroundColor,
       color: model.fontColor,
       fontWeight: model.fontWeight,
-      fontSize: model.font.size,
+      fontSize: model.font?.size,
+      textAlign: model.font?.align,
       ...stylingBoxAsCSS,
       ...dimensionsStyles,
       ...borderStyles,
@@ -107,7 +110,6 @@ const StatisticComponent: IToolboxComponent<IStatisticComponentProps> = {
                 Statistic: {
                   fontFamily: model?.font?.type,
                   contentFontSize: model?.font?.size,
-                  titleFontSize: model?.font?.size,
                   fontSize: model?.font?.size,
                   colorText: model?.font?.color,
                 },
@@ -116,43 +118,23 @@ const StatisticComponent: IToolboxComponent<IStatisticComponentProps> = {
                 colorText: model?.font?.color,
                 colorTextDescription: model?.font?.color,
                 fontSize: model?.font?.size,
-                colorTextHeading: model?.font?.color,
-                fontSizeLG: model?.font?.size,
               }
             }}
           >
             <ShaStatistic
               value={passedModel.value}
-              title={passedModel.title}
+              title={<div style={{textAlign: model.font.align, ...getStyle(titleStyle, formData)}}>{passedModel.title}</div>}
               prefix={prefixIcon ? <ShaIcon iconName={prefixIcon as any} /> : null}
               suffix={suffixIcon ? <ShaIcon iconName={suffixIcon as any} /> : null}
               style={{...getStyle(style, formData), ...additionalStyles}}
-              valueStyle={getStyle(valueStyle, formData)}
+              valueStyle={{textAlign: model.font.align, fontSize: model.font.size, ...getStyle(valueStyle, formData)}}
             />
-          </ConfigProvider>
+        </ConfigProvider>
     );
   },
   settingsFormMarkup: (data) => getSettings(data),
   validateSettings: (model) => validateConfigurableComponentSettings(getSettings(model), model),
   migrator: (m) => m
-    .add<IStatisticComponentProps>(4, (prev) => {
-            const styles: IInputStyles = {
-              size: prev.size,
-              width: prev.width,
-              height: prev.height,
-              hideBorder: prev.hideBorder,
-              borderSize: prev.borderSize,
-              borderRadius: prev.borderRadius,
-              borderColor: prev.borderColor,
-              fontSize: prev.fontSize,
-              fontColor: prev.fontColor,
-              backgroundColor: prev.backgroundColor,
-              stylingBox: prev.stylingBox,
-              style: prev.style,
-            };
-            return { ...prev, desktop: { ...styles }, tablet: { ...styles }, mobile: { ...styles } };
-          })
-          .add<IStatisticComponentProps>(0, (prev) => migratePropertyName(migrateCustomFunctions(prev)) as IStatisticComponentProps)
     .add<IStatisticComponentProps>(1, (prev) => ({ ...migrateFormApi.properties(prev) }))
     .add<IStatisticComponentProps>(2, (prev) => {
       const styles = {

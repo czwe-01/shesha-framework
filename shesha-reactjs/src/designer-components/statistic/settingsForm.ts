@@ -131,14 +131,6 @@ export const getSettings = (data: any) => {
                                   dropdownOptions: fontTypes,
                                 },
                                 {
-                                  type: 'number',
-                                  id: `fontSize-${styleRouterId}`,
-                                  label: 'Size',
-                                  propertyName: 'font.size',
-                                  hideLabel: true,
-                                  width: 50,
-                                },
-                                {
                                   type: 'dropdown',
                                   id: `fontWeight-${styleRouterId}`,
                                   label: 'Weight',
@@ -276,17 +268,18 @@ export const getSettings = (data: any) => {
                         ghost: true,
                         parentId: styleRouterId,
                         collapsible: 'header',
+                        hidden: false,
                         content: {
-                          id: borderStylePnlId,
+                          id: 'borderStylePnl',
                           components: [...new DesignerToolbarSettings()
                             .addSettingsInputRow({
+                              propertyName: 'border.hideBorder',
                               id: borderStyleRowId,
                               parentId: borderStylePnlId,
-                              hidden: { _code: 'return  !getSettingValue(data[`${contexts.canvasContext?.designerDevice || "desktop"}`]?.border?.hideBorder);', _mode: 'code', _value: false } as any,
                               readOnly: { _code: 'return getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
                               inputs: [
                                 {
-                                  type: 'switch',
+                                  type: 'button',
                                   id: 'borderStyleRow-hideBorder',
                                   label: "Border",
                                   hideLabel: true,
