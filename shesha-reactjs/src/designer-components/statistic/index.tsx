@@ -9,25 +9,31 @@ import { getStyle, pickStyleFromModel, validateConfigurableComponentSettings } f
 import { toSizeCssProp } from '@/utils/form';
 import { removeUndefinedProps } from '@/utils/object';
 import { BarChartOutlined } from '@ant-design/icons';
-import { ConfigProvider } from 'antd';
 import React, { useEffect, useMemo, useState } from 'react';
 import { CSSProperties } from 'styled-components';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
+import { migratePrevStyles } from '../_common-migrations/migrateStyles';
 import { getBackgroundStyle } from '../_settings/utils/background/utils';
 import { getBorderStyle } from '../_settings/utils/border/utils';
 import { getSizeStyle } from '../_settings/utils/dimensions/utils';
+import { IFontValue } from '../_settings/utils/font/interfaces';
 import { getFontStyle } from '../_settings/utils/font/utils';
 import { getShadowStyle } from '../_settings/utils/shadow/utils';
 import { getSettings } from './settingsForm';
-import { migratePrevStyles } from '../_common-migrations/migrateStyles';
+import { defaultStyles } from './utils';
 
-interface IStatisticComponentProps extends IInputStyles, IConfigurableFormComponent {
-  value?: string | number;
+interface IStatisticComponentProps extends Omit<IInputStyles, 'font'>, IConfigurableFormComponent {
+  value?: number | string;
+  precision?: number;
   title?: string | number;
   valueStyle?: string;
   titleStyle?: string;
+  prefix?: string;
+  suffix?: string;
   prefixIcon?: string;
   suffixIcon?: string;
+  titleFont?: IFontValue;
+  valueFont?: IFontValue;
 }
 
 const StatisticComponent: IToolboxComponent<IStatisticComponentProps> = {
@@ -38,19 +44,21 @@ const StatisticComponent: IToolboxComponent<IStatisticComponentProps> = {
   isOutput: true,
   Factory: ({ model: passedModel }) => {    
     const { data: formData } = useFormData();
-    const { style, valueStyle, titleStyle, prefixIcon, suffixIcon, ...model } = passedModel;
+    const { style, valueStyle, titleStyle, prefix, suffix, prefixIcon, suffixIcon, ...model } = passedModel;
     const { backendUrl, httpHeaders } = useSheshaApplication();
 
     const dimensions = model?.dimensions;
-    const border = model?.border || {};
-    const font = model?.font;
+    const border = model?.border;
+    const valueFont = model?.valueFont;
+    const titleFont = model?.titleFont;
     const shadow = model?.shadow;
     const background = model?.background;
     const jsStyle = getStyle(passedModel?.style, passedModel);
 
     const dimensionsStyles = useMemo(() => getSizeStyle(dimensions), [dimensions]);
-    const borderStyles = useMemo(() => getBorderStyle(border, jsStyle), [border, jsStyle]);
-    const fontStyles = useMemo(() => getFontStyle(font), [font]);
+    const borderStyles = useMemo(() => getBorderStyle(border, jsStyle), [border, jsStyle, formData]);
+    const valueFontStyles = useMemo(() => getFontStyle(valueFont), [valueFont]);
+    const titleFontStyles = useMemo(() => getFontStyle(titleFont), [titleFont]);
     const [backgroundStyles, setBackgroundStyles] = useState({});
     const shadowStyles = useMemo(() => getShadowStyle(shadow), [shadow]);
 
@@ -88,45 +96,23 @@ const StatisticComponent: IToolboxComponent<IStatisticComponentProps> = {
       borderStyle: model?.borderType,
       borderColor: model?.borderColor,
       backgroundColor: model?.backgroundColor,
-      color: model?.fontColor,
-      fontWeight: model?.fontWeight,
-      fontSize: model?.font?.size,
-      textAlign: model?.font?.align,
       ...stylingBoxAsCSS,
       ...dimensionsStyles,
       ...borderStyles,
-      ...fontStyles,
       ...backgroundStyles,
       ...shadowStyles
     });
 
     return (
-          <ConfigProvider
-            theme={{
-              components: {
-                Statistic: {
-                  fontFamily: model?.font?.type,
-                  contentFontSize: model?.font?.size,
-                  fontSize: model?.font?.size,
-                  colorText: model?.font?.color,
-                },
-              },
-              token: {
-                colorText: model?.font?.color,
-                colorTextDescription: model?.font?.color,
-                fontSize: model?.font?.size,
-              }
-            }}
-          >
-            <ShaStatistic
-              value={passedModel?.value}
-              title={<div style={{textAlign: model?.font?.align, fontSize: model?.font?.size, ...getStyle(titleStyle, formData)}}>{passedModel?.title}</div>}
-              prefix={prefixIcon ? <ShaIcon iconName={prefixIcon as any} /> : null}
-              suffix={suffixIcon ? <ShaIcon iconName={suffixIcon as any} /> : null}
-              style={{...getStyle(style, formData), ...additionalStyles}}
-              valueStyle={{textAlign: model?.font?.align, fontSize: model?.font?.size, ...getStyle(valueStyle, formData)}}
-            />
-        </ConfigProvider>
+      <ShaStatistic
+        value={passedModel?.value || 0}
+        precision={passedModel?.precision}
+        title={<div style={{...titleFontStyles, ...getStyle(titleStyle, formData)}}>{passedModel?.title}</div>}
+        prefix={<>{prefixIcon ? <ShaIcon iconName={prefixIcon as any} /> : null}<span style={{ marginRight: 5 }}>{prefix ? prefix : null}</span></>}
+        suffix={<>{suffixIcon ? <ShaIcon iconName={suffixIcon as any} /> : null}<span style={{ marginLeft: 5 }}>{suffix ? suffix : null}</span></>}
+        style={{...getStyle(style, formData), ...additionalStyles}}
+        valueStyle={{ ...valueFontStyles, ...getStyle(valueStyle, formData)}}
+      />
     );
   },
   settingsFormMarkup: (data) => getSettings(data),
@@ -143,7 +129,7 @@ const StatisticComponent: IToolboxComponent<IStatisticComponentProps> = {
 
       return { ...prev, desktop: { ...styles }, tablet: { ...styles }, mobile: { ...styles } };
     })
-    .add<IStatisticComponentProps>(3, (prev) => ({ ...migratePrevStyles(prev) }))
+    .add<IStatisticComponentProps>(3, (prev) => ({ ...migratePrevStyles(prev, defaultStyles()) })),
 };
 
 export default StatisticComponent;
