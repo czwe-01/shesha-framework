@@ -19,6 +19,7 @@ import { getSizeStyle } from '../_settings/utils/dimensions/utils';
 import { getFontStyle } from '../_settings/utils/font/utils';
 import { getShadowStyle } from '../_settings/utils/shadow/utils';
 import { getSettings } from './settingsForm';
+import { migratePrevStyles } from '../_common-migrations/migrateStyles';
 
 interface IStatisticComponentProps extends IInputStyles, IConfigurableFormComponent {
   value?: string | number;
@@ -41,7 +42,7 @@ const StatisticComponent: IToolboxComponent<IStatisticComponentProps> = {
     const { backendUrl, httpHeaders } = useSheshaApplication();
 
     const dimensions = model?.dimensions;
-    const border = model?.border;
+    const border = model?.border || {};
     const font = model?.font;
     const shadow = model?.shadow;
     const background = model?.background;
@@ -142,7 +143,7 @@ const StatisticComponent: IToolboxComponent<IStatisticComponentProps> = {
 
       return { ...prev, desktop: { ...styles }, tablet: { ...styles }, mobile: { ...styles } };
     })
-  ,
+    .add<IStatisticComponentProps>(3, (prev) => ({ ...migratePrevStyles(prev) }))
 };
 
 export default StatisticComponent;

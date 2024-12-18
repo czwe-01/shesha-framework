@@ -5,7 +5,7 @@ type ExtendedType = IStyleType & IConfigurableFormComponent;
 
 
 export const migratePrevStyles = <T extends ExtendedType>(prev: T, defaults?: IStyleType) => {
-
+    console.log('prev', prev);
     const migrateStyles = (screen?: 'desktop' | 'tablet' | 'mobile'): IStyleType => {
         const prevStyles: IInputStyles = screen ? prev[`${screen}`] : prev;
         const border = (side) => ({
