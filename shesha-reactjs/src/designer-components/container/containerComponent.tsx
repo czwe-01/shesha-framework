@@ -165,6 +165,16 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
         };
       })
       .add<IContainerComponentProps>(8, (prev) => {
+
+        const positionStyles = {
+          offset: 'top',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          value: 'relative'
+        };
+
         const flexAndGridStyles = {
           display: prev?.display,
           flexDirection: prev?.flexDirection,
@@ -178,9 +188,11 @@ const ContainerComponent: IToolboxComponent<IContainerComponentProps> = {
           noDefaultStyling: prev?.noDefaultStyling,
           gridColumnsCount: prev?.gridColumnsCount,
           flexWrap: prev?.flexWrap,
-          gap: prev?.gap
+          gap: prev?.gap,
+          position: positionStyles
         };
-        return { ...prev, desktop: { ...flexAndGridStyles }, tablet: { ...flexAndGridStyles }, mobile: { ...flexAndGridStyles } };
+
+        return { ...prev, desktop: { ...flexAndGridStyles, positionStyles }, tablet: { ...flexAndGridStyles, positionStyles }, mobile: { ...flexAndGridStyles, positionStyles } };
       })
   ,
 };

@@ -40,7 +40,7 @@ export const getPositionInputs = () => positions.map(value => {
                 label: "Offsets",
                 propertyName: "position.offset",
                 type: "radio",
-                defaultValue: "all",
+                defaultValue: "top",
                 tooltip: "Select a direction to apply the offset",
                 buttonGroupOptions: positions,
             },
