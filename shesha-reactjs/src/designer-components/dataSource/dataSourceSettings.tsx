@@ -1,20 +1,18 @@
-import { EndpointsAutocomplete } from '@/components/endpointsAutocomplete/endpointsAutocomplete';
 import React, { FC, useMemo } from 'react';
 import SettingsForm, { useSettingsForm } from '@/designer-components/_settings/settingsForm';
 import SettingsFormItem from '@/designer-components/_settings/settingsFormItem';
-import { Autocomplete } from '@/components/autocomplete';
 import {
   Divider,
-  Input,
   InputNumber,
-  Select
 } from 'antd';
 import { IDataSourceComponentProps } from './models';
 import { ISettingsFormFactoryArgs } from '@/interfaces';
 import { MetadataProvider } from '@/providers/metadata';
 import SettingsCollapsiblePanel from '@/designer-components/_settings/settingsCollapsiblePanel';
 import { PermissionAutocomplete } from '@/components/permissionAutocomplete';
-import { FiltersList } from '../dataTable/tableViewSelector/filters/filtersList';
+import LabelConfiguratorComponent from '../styleLabel/labelConfigurator';
+import { SettingInput } from '../settingsInput/settingsInput';
+import { nanoid } from '@/utils/uuid';
 
 const DataSourceSettings: FC<ISettingsFormFactoryArgs<IDataSourceComponentProps>> = (props) => {
   const { readOnly } = props;
@@ -23,34 +21,25 @@ const DataSourceSettings: FC<ISettingsFormFactoryArgs<IDataSourceComponentProps>
 
   const settings = (
     <>
-      <SettingsFormItem name="componentName" label='Component name' required>
-        <Input />
-      </SettingsFormItem>
-      <SettingsFormItem name="sourceType" label='Source Type'>
-        <Select>
-          <Select.Option key='Form' value='Form'>Form</Select.Option>
-          <Select.Option key='Entity' value='Entity'>Entity</Select.Option>
-          <Select.Option key='Url' value='Url'>Url</Select.Option>
-        </Select>
-      </SettingsFormItem>
+      <SettingInput type='text' propertyName='componentName' label='Component Name' id={nanoid()} />
+      <LabelConfiguratorComponent label='Label' />
+      <SettingInput type='dropdown' label='Source Type' propertyName='sourceType' id={nanoid()}
+        dropdownOptions={[{ label: 'Form', value: 'Form' }, { label: 'Entity', value: 'Entity' }, { label: 'Url', value: 'Url' }]} />
+
       {(state.sourceType === 'Entity') &&
-        <SettingsFormItem key='entityType' name="entityType" label='Entity Type' jsSetting>
-          <Autocomplete.Raw dataSourceType='url' dataSourceUrl="/api/services/app/Metadata/EntityTypeAutocomplete" />
-        </SettingsFormItem>
+        <SettingInput id='entityType' type='autocomplete' propertyName='entityType' label='Entity Type' dataSourceType='url' dataSourceUrl='/api/services/app/Metadata/EntityTypeAutocomplete' />
       }
       {(state.sourceType === 'Entity' || state.sourceType === 'Url') &&
-        <SettingsFormItem key='endpoint' name="endpoint" label='Endpoint' jsSetting>
-          <EndpointsAutocomplete />
-        </SettingsFormItem>
+        <SettingInput type='endpointsAutocomplete' id='endpoint' propertyName="endpoint" label='Endpoint' />
       }
       <SettingsCollapsiblePanel header='Filters'>
         <SettingsFormItem name="maxResultCount" label='Max result count' tooltip='Leave empty to get all records' jsSetting>
           <InputNumber min={0} />
         </SettingsFormItem>
+        <SettingInput type='number' min={0} id='mexResultCount' propertyName="maxResultCount" label='Max result count' tooltip='Leave empty to get all records' />
         <Divider />
-        <SettingsFormItem name="filters">
-          <FiltersList readOnly={props.readOnly} />
-        </SettingsFormItem>
+        <SettingInput propertyName="filters" type='filterList' id='filters' label='' />
+
       </SettingsCollapsiblePanel>
 
       <SettingsCollapsiblePanel header="Security">

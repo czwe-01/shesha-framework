@@ -5,6 +5,8 @@ export const useStyles = createStyles(({ css, cx }) => {
     const filterItem = cx("filter-item", css`
         display: flex;
         justify-content: space-between;
+        padding: 0;
+        margin: 0;
 
         .${controls} {
             transition: opacity 0.2s;
