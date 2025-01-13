@@ -1,8 +1,8 @@
-import React, { FC, useCallback } from 'react';
-import { Button, Input, InputNumber, Radio, Select, Space, Switch, Tooltip } from "antd";
+import React, { FC, useCallback, useState } from 'react';
+import { Button, Input, InputNumber, Modal, Radio, Select, Space, Switch, Tooltip } from "antd";
 import { ButtonGroupConfigurator, CodeEditor, ColorPicker, EditableTagGroup, EndpointsAutocomplete, FormAutocomplete, IconType, LabelValueEditor, PermissionAutocomplete, PropertyAutocomplete, SectionSeparator, ShaIcon } from '@/components';
 import TextArea from 'antd/es/input/TextArea';
-import { IObjectMetadata } from '@/interfaces/metadata';
+import { IObjectMetadata, IPropertyMetadata, isPropertiesArray } from '@/interfaces/metadata';
 import { executeScript, useAvailableConstantsData, useFormData } from '@/index';
 import { ICodeEditorProps } from '@/designer-components/codeEditor/interfaces';
 import { useMetadataBuilderFactory } from '@/utils/metadata/hooks';
@@ -28,6 +28,9 @@ import { DynamicActionsConfigurator } from '../dynamicActionsConfigurator/config
 import ColumnsList from '../columns/columnsList';
 import SizableColumnsList from '../sizableColumns/sizableColumnList';
 import { FiltersList } from '../dataTable/tableViewSelector/filters/filtersList';
+import { PropertiesEditor } from '@/components/modelConfigurator/propertiesEditor';
+import { IModelItem } from '@/interfaces/modelConfigurator';
+import { ConfigurableActionConfigurator } from '../configurableActionsConfigurator/configurator';
 
 export const InputComponent: FC<ISettingsInputProps> = (props) => {
     const icons = require('@ant-design/icons');
@@ -35,9 +38,19 @@ export const InputComponent: FC<ISettingsInputProps> = (props) => {
 
     const metadataBuilderFactory = useMetadataBuilderFactory();
     const { data: formData } = useFormData();
+    const [open, setOpen] = useState<boolean>(false);
+    const [properties, setProperties] = useState<IPropertyMetadata[]>([]);
+
+    const openModal = (value) => {
+        if (Array.isArray(value.items))
+            setProperties([...value.items]);
+        setOpen(true);
+    };
+
+
     const { size, className, value, type: type, dropdownOptions, buttonGroupOptions,
         propertyName, tooltip: description, onChange, readOnly, label, availableConstantsExpression,
-        allowClear, dropdownMode, variant, icon, iconAlt, tooltip, dataSourceType, dataSourceUrl } = props;
+        allowClear, dropdownMode, variant, icon, iconAlt, tooltip, dataSourceType, dataSourceUrl, level } = props;
 
     const iconElement = (icon: string | React.ReactNode, size?, hint?, style?) => {
 
@@ -176,6 +189,65 @@ export const InputComponent: FC<ISettingsInputProps> = (props) => {
             return <PropertyAutocomplete {...props} style={props.style as any} readOnly={readOnly} id="contextPropertyAutocomplete" />;
         case 'contextPropertyAutocomplete':
             return <ContextPropertyAutocomplete {...props} readOnly={readOnly} defaultModelType="defaultType" formData={formData} id="contextPropertyAutocomplete" />;
+        case 'contextMetadata':
+            const convertPropertyMetadataToModelItem = (property: IPropertyMetadata) => {
+                const res = { ...property, properties: [], name: property.path };
+                delete res.path;
+                if (isPropertiesArray(property.properties))
+                    res.properties = property.properties?.map((item) => convertPropertyMetadataToModelItem(item));
+                return res as IModelItem;
+            };
+
+            const convertModelItemToPropertyMetadata = (item: IModelItem) => {
+                const res = { ...item, properties: [], path: item.name };
+                delete res.name;
+                if (item.properties)
+                    res.properties = item.properties?.map((item) => convertModelItemToPropertyMetadata(item));
+                return res as IPropertyMetadata;
+            };
+
+            const items = value?.items?.map((item) => convertPropertyMetadataToModelItem(item));
+
+            return <>
+                <Button size={size} onClick={() => openModal(value)}>Configure Metadata</Button>
+                <Modal
+                    title="Configure metadata"
+                    open={open}
+                    onCancel={() => {
+                        onChange({ items: [...properties] });
+                        setOpen(false);
+                    }}
+                    onOk={() => setOpen(false)}
+                    width={'50%'}
+                    okButtonProps={{}}
+                >
+                    <PropertiesEditor allowAdd value={items} onChange={(value) => {
+                        onChange({ items: value?.map((item) => convertModelItemToPropertyMetadata(item)) });
+                    }} />
+                </Modal>
+            </>;
+        case 'configurableActionsConfigurator':
+            return <ConfigurableActionConfigurator
+                editorConfig={null}
+                level={level}
+                label={label}
+                onChange={onChange}
+                value={value}
+                readOnly={readOnly}
+                exposedVariables={[
+                    { name: "changedData", description: "Data context changed data", type: "object" },
+                    { name: "data", description: "Selected form values", type: "object" },
+                    { name: "contexts", description: "Contexts data", type: "object" },
+                    { name: "globalState", description: "Global state", type: "object" },
+                    { name: "setGlobalState", description: "Functiont to set globalState", type: "function" },
+                    { name: "formMode", description: "Form mode", type: "'designer' | 'edit' | 'readonly'" },
+                    { name: "form", description: "Form instance", type: "object" },
+                    { name: "selectedRow", description: "Selected row of nearest table (null if not available)", type: "object" },
+                    { name: "moment", description: "moment", type: "object" },
+                    { name: "http", description: "axiosHttp", type: "object" },
+                    { name: "message", description: "message framework", type: "object" },
+                ]}
+            />;
         case 'formAutocomplete':
             return <FormAutocomplete
                 readOnly={readOnly}
