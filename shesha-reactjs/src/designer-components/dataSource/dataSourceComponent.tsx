@@ -1,12 +1,13 @@
 import React from 'react';
 import { DataSource } from './dataSource';
-import { DataSourceSettingsForm } from './dataSourceSettings';
 import { IDataSourceComponentProps } from './models';
 import { IToolboxComponent } from '@/interfaces';
 import { LayoutOutlined } from '@ant-design/icons';
 import { migrateCustomFunctions, migratePropertyName } from '@/designer-components/_common-migrations/migrateSettings';
 import { migrateVisibility } from '@/designer-components/_common-migrations/migrateVisibility';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
+import { getSettings } from './settingsForm';
+import { validateConfigurableComponentSettings } from '@/formDesignerUtils';
 
 const DataSourceComponent: IToolboxComponent<IDataSourceComponentProps> = {
   type: 'dataSource',
@@ -21,14 +22,16 @@ const DataSourceComponent: IToolboxComponent<IDataSourceComponentProps> = {
       return {
         ...prev,
         name: prev['uniqueStateId'] ?? prev['name'],
-        sourceType: 'Entity'
+        sourceType: 'Entity',
+        filters: prev['filters'] ?? [],
       };
     })
       .add<IDataSourceComponentProps>(1, (prev) => migratePropertyName(migrateCustomFunctions(prev)))
       .add<IDataSourceComponentProps>(2, (prev) => migrateVisibility(prev))
-      .add<IDataSourceComponentProps>(3, (prev) => ({...migrateFormApi.properties(prev)}))
+      .add<IDataSourceComponentProps>(3, (prev) => ({ ...migrateFormApi.properties(prev) }))
   ,
-  settingsFormFactory: (props) => (<DataSourceSettingsForm {...props} />),
+  settingsFormMarkup: (data) => getSettings(data),
+  validateSettings: (model) => validateConfigurableComponentSettings(getSettings(model), model),
 };
 
 export default DataSourceComponent;

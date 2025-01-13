@@ -23,6 +23,8 @@ export interface ITabPaneProps
 
 export interface ITabsComponentProps extends IConfigurableFormComponent {
   tabs: ITabPaneProps[];
+  entityType: string;
+  sourceType: string;
   size?: SizeType;
   defaultActiveKey?: string;
   tabType?: 'line' | 'card';

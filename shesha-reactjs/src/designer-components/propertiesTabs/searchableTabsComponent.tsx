@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Tabs, Input, Empty } from 'antd';
 import ParentProvider from '@/providers/parentProvider';
 import { ComponentsContainer } from '@/components';
@@ -6,6 +6,7 @@ import { useStyles } from './style';
 import { SearchOutlined } from '@ant-design/icons';
 import { filterDynamicComponents } from './utils';
 import { ITabsComponentProps } from './models';
+import { MetadataProvider } from '@/providers';
 
 interface SearchableTabsProps {
     model: ITabsComponentProps;
@@ -48,7 +49,8 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model, onChange, data }
         }
     };
 
-    return (
+
+    const settings = (
         <>
             <div
                 className={styles.searchField}
@@ -71,6 +73,7 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model, onChange, data }
                     }
                 />
             </div>
+
             {newFilteredTabs.length === 0 && searchQuery ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Property Not Found" />
                 :
                 <Tabs
@@ -81,8 +84,13 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model, onChange, data }
                     items={newFilteredTabs}
                 />
             }
-        </>
-    );
+        </>);
+
+    const meta = useMemo(() => {
+        return <MetadataProvider id={model.id} modelType={model.entityType}>{settings}</MetadataProvider>;
+    }, [model.entityType, model.sourceType]);
+
+    return model.sourceType === 'Entity' && model.entityType ? meta : settings;
 };
 
 export default SearchableTabs;

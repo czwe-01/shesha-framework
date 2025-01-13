@@ -1,6 +1,6 @@
 import React, { FC, useCallback } from 'react';
 import { Button, Input, InputNumber, Radio, Select, Space, Switch, Tooltip } from "antd";
-import { ButtonGroupConfigurator, CodeEditor, ColorPicker, EditableTagGroup, FormAutocomplete, IconType, LabelValueEditor, PermissionAutocomplete, PropertyAutocomplete, SectionSeparator, ShaIcon } from '@/components';
+import { ButtonGroupConfigurator, CodeEditor, ColorPicker, EditableTagGroup, EndpointsAutocomplete, FormAutocomplete, IconType, LabelValueEditor, PermissionAutocomplete, PropertyAutocomplete, SectionSeparator, ShaIcon } from '@/components';
 import TextArea from 'antd/es/input/TextArea';
 import { IObjectMetadata } from '@/interfaces/metadata';
 import { executeScript, useAvailableConstantsData, useFormData } from '@/index';
@@ -27,6 +27,7 @@ import { ColumnsConfig } from '../dataTable/table/columnsEditor/columnsConfig';
 import { DynamicActionsConfigurator } from '../dynamicActionsConfigurator/configurator';
 import ColumnsList from '../columns/columnsList';
 import SizableColumnsList from '../sizableColumns/sizableColumnList';
+import { FiltersList } from '../dataTable/tableViewSelector/filters/filtersList';
 
 export const InputComponent: FC<ISettingsInputProps> = (props) => {
     const icons = require('@ant-design/icons');
@@ -168,9 +169,9 @@ export const InputComponent: FC<ISettingsInputProps> = (props) => {
         case 'columnsList':
             return <ColumnsList {...props} readOnly={readOnly} />;
         case 'sizableColumnsConfig':
-            return <SizableColumnsList {...props} readOnly={readOnly} />;            
+            return <SizableColumnsList {...props} readOnly={readOnly} />;
         case 'editableTagGroupProps':
-            return <EditableTagGroup  value={value} defaultValue={props?.defaultValue} onChange={onChange} readOnly={props.readOnly} />;
+            return <EditableTagGroup value={value} defaultValue={props?.defaultValue} onChange={onChange} readOnly={props.readOnly} />;
         case 'propertyAutocomplete':
             return <PropertyAutocomplete {...props} style={props.style as any} readOnly={readOnly} id="contextPropertyAutocomplete" />;
         case 'contextPropertyAutocomplete':
@@ -182,12 +183,16 @@ export const InputComponent: FC<ISettingsInputProps> = (props) => {
                 value={value}
                 onChange={onChange}
             />;
-        case 'labelValueEditor': 
-         return <LabelValueEditor {...props} exposedVariables={codeEditorProps.exposedVariables} />;
+        case 'labelValueEditor':
+            return <LabelValueEditor {...props} exposedVariables={codeEditorProps.exposedVariables} />;
         case 'permissions':
             return <PermissionAutocomplete value={value} readOnly={readOnly} onChange={onChange} size={size} />;
         case 'multiColorPicker':
             return <MultiColorInput value={value} onChange={onChange} readOnly={readOnly} propertyName={propertyName} />;
+        case 'endpointsAutocomplete':
+            return <EndpointsAutocomplete size={size} value={value} onChange={onChange} />;
+        case 'filtersList':
+            return <FiltersList value={value} onChange={onChange} readOnly={readOnly} />;
         default:
             return <Input
                 size={size}
