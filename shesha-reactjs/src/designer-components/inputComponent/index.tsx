@@ -33,6 +33,7 @@ import { FiltersList } from '../dataTable/tableViewSelector/filters/filtersList'
 import { ItemListConfiguratorModal } from '../itemListConfigurator/itemListConfiguratorModal';
 import { ITabPaneProps } from '../tabs/models';
 import { IWizardStepProps } from '../wizard/models';
+import RefListItemSelectorSettingsModal from '@/providers/refList/options/modal';
 
 export const InputComponent: FC<ISettingsInputProps> = (props) => {
     const icons = require('@ant-design/icons');
@@ -42,7 +43,7 @@ export const InputComponent: FC<ISettingsInputProps> = (props) => {
     const { data: formData } = useFormData();
     const { size, className, value, placeholder, type, dropdownOptions, buttonGroupOptions, defaultValue,
         propertyName, tooltip: description, onChange, readOnly, label, availableConstantsExpression,
-        allowClear, dropdownMode, variant, icon, iconAlt, tooltip, dataSourceType, dataSourceUrl, onAddNewItem, listItemSettingsMarkup } = props;
+        allowClear, dropdownMode, variant, icon, iconAlt, tooltip, dataSourceType, dataSourceUrl, onAddNewItem, listItemSettingsMarkup, referenceList } = props;
 
     const iconElement = (icon: string | React.ReactNode, size?, hint?, style?) => {
 
@@ -182,6 +183,9 @@ export const InputComponent: FC<ISettingsInputProps> = (props) => {
             return <EndpointsAutocomplete {...props} size={size} httpVerb={verb} value={value} onChange={onChange} />;
         case 'referenceListAutocomplete':
             return <ReferenceListAutocomplete {...props} value={value} onChange={onChange} readOnly={readOnly} size={size} />;
+        case 'refListItemSelectorSettingsModal':
+            console.log('props', referenceList);
+            return <RefListItemSelectorSettingsModal {...props} readOnly={readOnly} />;
         case 'queryBuilder':
             return <QueryBuilderWrapper>
                 <QueryBuilder {...props} hideLabel={true}

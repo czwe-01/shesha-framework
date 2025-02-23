@@ -74,6 +74,20 @@ export const getSettings = (data: IKanbanProps) => {
                   filter: { and: [{ '==': [{ var: 'isLast' }, true] }] },
                   readOnly: { _code: 'return  getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
                 })
+                .addSettingsInput({
+                  id: 'items-s4gmBg31azZC0UjZjpfTm',
+                  parentId: 's4gmBg31azZC0UjZjpfTm',
+                  propertyName: 'items',
+                  inputType: 'refListItemSelectorSettingsModal',
+                  label: 'Items',
+                  hideLabel: true,
+                  referenceList: {
+                    _code: 'return getSettingValue(data?.referenceList)._data.name;',
+                    _mode: 'code',
+                    _value: '',
+                  } as any,
+                  readOnly: { _code: 'return  getSettingValue(data?.readOnly);', _mode: 'code', _value: false } as any,
+                })
                 .addSettingsInputRow({
                   id: 'suffix-s4gmBg31azZC0UjZjpfTm',
                   parentId: 's4gmBg31azZC0UjZjpfTm',
