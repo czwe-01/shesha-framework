@@ -54,6 +54,7 @@ export interface ISettingsInputProps extends IComponentLabelProps, Omit<IConfigu
     valueName?: string;
     value?: any;
     placeholder?: string;
+    filter?: any;
     mode?: any;
     exposedVariables?: string[];
     dropdownMode?: 'multiple' | 'tags';

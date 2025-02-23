@@ -181,7 +181,7 @@ export const InputComponent: FC<ISettingsInputProps> = (props) => {
         case 'endpointsAutocomplete':
             return <EndpointsAutocomplete {...props} size={size} httpVerb={verb} value={value} onChange={onChange} />;
         case 'referenceListAutocomplete':
-            return <ReferenceListAutocomplete value={value} onChange={onChange} readOnly={readOnly} size={size} />;
+            return <ReferenceListAutocomplete {...props} value={value} onChange={onChange} readOnly={readOnly} size={size} />;
         case 'queryBuilder':
             return <QueryBuilderWrapper>
                 <QueryBuilder {...props} hideLabel={true}

@@ -1,12 +1,12 @@
 import { FormOutlined } from '@ant-design/icons';
 import React from 'react';
 import { ConfigurableFormItem } from '@/components';
-import { IToolboxComponent, useForm } from '@/index';
+import { IToolboxComponent, useForm, validateConfigurableComponentSettings } from '@/index';
 import { Alert } from 'antd';
 import KanbanReactComponent from '@/components/kanban';
 import { IKanbanProps } from '@/components/kanban/model';
-import { KanbanSettingsForm } from './settings';
 import { RefListItemGroupConfiguratorProvider } from '@/providers/refList/provider';
+import { getSettings } from './settingsForm';
 
 const KanbanComponent: IToolboxComponent<IKanbanProps> = {
   type: 'kanban',
@@ -52,9 +52,8 @@ const KanbanComponent: IToolboxComponent<IKanbanProps> = {
     ...model,
     hideLabel: true,
   }),
-  settingsFormFactory: (props) => {
-    return <KanbanSettingsForm {...props} />;
-  },
+  settingsFormMarkup: (data) => getSettings(data),
+  validateSettings: (model) => validateConfigurableComponentSettings(getSettings(model), model),
 };
 
 export default KanbanComponent;
