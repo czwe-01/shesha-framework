@@ -118,10 +118,9 @@ export const FormInfo: FC<FormInfoProps> = ({ formProps, onMarkupUpdated, childr
                 style={{ color: '#FFFFFF' }}
               />
             </div>
-
             {id && open && (
               <QuickEditDialog
-                formId={id}
+                formIds={['84d2aba3-b7fc-4ec4-a6b5-039735074732', 'c7d7daf8-091e-45b3-907d-02ec6fe900bd']}
                 open={open}
                 onCancel={() => setOpen(false)}
                 onUpdated={onUpdated}
