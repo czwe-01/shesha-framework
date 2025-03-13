@@ -224,7 +224,7 @@ export const getToolboxComponents = (
         Title,
         Toolbar,
         List,
-        EditableTagGroup,,
+        EditableTagGroup,
         FormAutocompleteComponent,
         ReferenceListAutocompleteComponent,
         NotificationAutocompleteComponent,
