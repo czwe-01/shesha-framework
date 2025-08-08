@@ -64,7 +64,6 @@ export interface IStoredFilesRendererBaseProps extends IInputStyles {
   primaryColor?: string;
   allStyles?: IFormComponentStyles;
   enableStyleOnReadonly?: boolean;
-  thumbnail?: IStyleType;
 }
 
 export const StoredFilesRendererBase: FC<IStoredFilesRendererBaseProps> = ({
@@ -91,10 +90,10 @@ export const StoredFilesRendererBase: FC<IStoredFilesRendererBaseProps> = ({
   allowedFileTypes = [],
   downloadZip,
   allowDelete,
-  layout = 'horizontal',
+  layout,
   listType,
   gap,
-  enableStyleOnReadonly = true,
+  enableStyleOnReadonly = false,
   ...rest
 }) => {
   const { message, notification } = App.useApp();
@@ -106,18 +105,21 @@ export const StoredFilesRendererBase: FC<IStoredFilesRendererBaseProps> = ({
   const model = rest;
   const hasFiles = !!fileList.length;
 
-  const { dimensionsStyles: containerDimensionsStyles, jsStyle: containerJsStyle, stylingBoxAsCSS } = useFormComponentStyles({ ...model.container });
-  const { dimensionsStyles: thumbnailDimensionsStyles } = useFormComponentStyles({ ...model });
+  const { dimensionsStyles: containerDimensionsStyles, stylingBoxAsCSS, fullStyle } = useFormComponentStyles({ ...model.container });
 
   const { styles } = useStyles({
-    containerStyles: {
+    containerStyles: !enableStyleOnReadonly && disabled ? {
       ...containerDimensionsStyles,
-      width: layout === 'vertical' ? '' : addPx(containerDimensionsStyles.width), height: layout === 'horizontal' ? '' : addPx(containerDimensionsStyles.height),
-      ...containerJsStyle, ...stylingBoxAsCSS,
+      width: layout === 'vertical' ? '' : addPx(containerDimensionsStyles?.width), height: layout === 'horizontal' ? '' : addPx(containerDimensionsStyles?.height),
+      ...stylingBoxAsCSS,
+    } : {
+      ...fullStyle,
+      width: layout === 'vertical' ? '' : addPx(containerDimensionsStyles?.width),
+      height: layout === 'horizontal' ? '' : addPx(containerDimensionsStyles?.height),
     },
-    style: enableStyleOnReadonly && disabled ?
+    style: !enableStyleOnReadonly && disabled ?
       { ...model.allStyles.dimensionsStyles, ...model.allStyles.fontStyles } :
-      { ...model?.allStyles?.fullStyle, ...thumbnailDimensionsStyles },
+      { ...model?.allStyles?.fullStyle },
     model: { gap: addPx(gap), layout: listType === 'thumbnail' && !isDragger, hideFileName: rest.hideFileName && listType === 'thumbnail', isDragger, isStub },
     primaryColor
   });
@@ -263,7 +265,7 @@ export const StoredFilesRendererBase: FC<IStoredFilesRendererBaseProps> = ({
       {isStub
         ? (isDragger
           ? <Dragger disabled><DraggerStub styles={styles} /></Dragger>
-          : disabled ? null : <div
+          : <div
             className={listType === 'thumbnail' ? 'ant-upload-list-item-thumbnail ant-upload-list-item thumbnail-stub' : ''}
           >
             {renderUploadContent()}
@@ -273,7 +275,7 @@ export const StoredFilesRendererBase: FC<IStoredFilesRendererBaseProps> = ({
               </span>}
           </div>)
         : (props.disabled && fileList.length === 0
-          ? disabled ? null : <div className={listType === 'thumbnail' ? styles.thumbnailReadOnly : ''}>
+          ? <div className={listType === 'thumbnail' ? styles.thumbnailReadOnly : ''}>
             {renderUploadContent()}
           </div>
           : props.disabled
