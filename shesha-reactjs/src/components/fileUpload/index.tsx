@@ -124,6 +124,7 @@ export const FileUpload: FC<IFileUploadProps> = ({
 
   const onDeleteClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     e.preventDefault();
+    e.stopPropagation();
     showDeleteConfirmation();
   };
 
