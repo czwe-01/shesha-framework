@@ -6,7 +6,7 @@ import ConfigurableFormItem from '@/components/formDesigner/components/formItem'
 import { IEventHandlers, getAllEventHandlers } from '@/components/formDesigner/components/utils';
 import { IToolboxComponent } from '@/interfaces';
 import { DataTypes, StringFormats } from '@/interfaces/dataTypes';
-import { IInputStyles } from '@/providers';
+import { IInputStyles, useShaFormInstance } from '@/providers';
 import { validateConfigurableComponentSettings } from '@/providers/form/utils';
 import { ITextFieldComponentProps } from './interfaces';
 import { migrateCustomFunctions, migratePropertyName, migrateReadOnly } from '@/designer-components/_common-migrations/migrateSettings';
@@ -38,13 +38,19 @@ const TextFieldComponent: IToolboxComponent<ITextFieldComponentProps, ITextField
       dataFormat === StringFormats.password),
   calculateModel: (model, allData) => ({ eventHandlers: getAllEventHandlers(model, allData) }),
   Factory: ({ model, calculatedModel }) => {
+    const shaForm = useShaFormInstance();
     const { styles } = useStyles({ fontFamily: model?.font?.type, fontWeight: model?.font?.weight, textAlign: model?.font?.align, color: model?.font?.color, fontSize: model?.font?.size });
     const InputComponentType = useMemo(() => model.textType === 'password' ? Input.Password : Input, [model.textType]);
 
+    // In designer mode, use 100% dimensions; otherwise use calculated dimensions
+    const inputDimensionStyles = shaForm.formMode === 'designer'
+      ? { width: '100%', height: '100%' }
+      : model.allStyles.dimensionsStyles;
+
     const finalStyle = useMemo(() => !model.enableStyleOnReadonly && model.readOnly ? {
       ...model.allStyles.fontStyles,
-      ...model.allStyles.dimensionsStyles,
-    } : model.allStyles.fullStyle, [model.enableStyleOnReadonly, model.readOnly, model.allStyles]);
+      ...inputDimensionStyles,
+    } : { ...model.allStyles.fullStyle, ...inputDimensionStyles }, [model.enableStyleOnReadonly, model.readOnly, model.allStyles, inputDimensionStyles]);
 
     if (model.hidden) return null;
 
@@ -58,12 +64,7 @@ const TextFieldComponent: IToolboxComponent<ITextFieldComponentProps, ITextField
       disabled: model.readOnly,
       readOnly: model.readOnly,
       spellCheck: model.spellCheck,
-      style: {
-        ...model.allStyles.fullStyle,
-        // Input controls should fill their container (FormItem handles sizing)
-        width: '100%',
-        height: '100%',
-      },
+      style: finalStyle,
       maxLength: model.validate?.maxLength,
       max: model.validate?.maxLength,
       minLength: model.validate?.minLength,

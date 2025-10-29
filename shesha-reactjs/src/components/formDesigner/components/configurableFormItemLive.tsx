@@ -50,7 +50,7 @@ export const ConfigurableFormItemLive: FC<IConfigurableFormItemProps> = ({
 
   const { hideLabel, hidden } = model;
   const hasLabel = !hideLabel && !!model.label;
-  const { styles } = useStyles({ layout: settings.layout, hasLabel });
+  const { styles } = useStyles({ layout: settings.layout, hasLabel, isDesignerMode: isInDesigner });
   if (hidden) return null;
 
   const propName = namePrefix && !model.initialContext
@@ -62,7 +62,7 @@ export const ConfigurableFormItemLive: FC<IConfigurableFormItemProps> = ({
     ? calcDimensionWithMargins('100%', marginLeft, marginRight)
     : width;
   const formItemHeight = isInDesigner
-    ? calcDimensionWithMargins('100%', marginTop, marginBottom)
+    ? '100%'
     : height;
 
   const formItemProps: FormItemProps = {
@@ -79,10 +79,12 @@ export const ConfigurableFormItemLive: FC<IConfigurableFormItemProps> = ({
     // layout: model.layout, this property appears to have been removed from the Ant component
     name: model.context ? undefined : getFieldNameFromExpression(propName),
     style: {
-      marginTop,
-      marginBottom,
-      marginLeft,
-      marginRight,
+      ...(!isInDesigner && {
+        marginTop,
+        marginBottom,
+        marginLeft,
+        marginRight,
+      }),
       width: formItemWidth,
       height: formItemHeight,
       minHeight,

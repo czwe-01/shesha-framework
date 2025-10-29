@@ -17,6 +17,7 @@ import { migratePrevStyles, migrateStyles } from '../_common-migrations/migrateS
 import { defaultStyles, defaultTagStyles } from './utils';
 import { CustomLabeledValue } from '@/components/refListDropDown/models';
 import { useFormComponentStyles } from '@/hooks/formComponentHooks';
+import { useShaFormInstance } from '@/providers';
 
 interface ITextFieldComponentCalulatedValues {
   eventHandlers?: { onChange: (value: CustomLabeledValue<any>, option: any) => any };
@@ -42,13 +43,18 @@ const DropdownComponent: IToolboxComponent<IDropdownComponentProps, ITextFieldCo
         : undefined,
   }),
   Factory: ({ model, calculatedModel }) => {
+    const shaForm = useShaFormInstance();
     const initialValue = model?.defaultValue ? { initialValue: model.defaultValue } : {};
     const tagStyle = useFormComponentStyles({ ...model.tag }).fullStyle;
 
+    // In designer mode, use 100% dimensions; otherwise use calculated dimensions
+    const dropdownDimensionStyles = shaForm.formMode === 'designer'
+      ? { width: '100%', height: '100%' }
+      : model.allStyles.dimensionsStyles;
+
     const finalStyle = model.enableStyleOnReadonly && model.readOnly
-      ? { ...model.allStyles.fontStyles, ...model.allStyles.dimensionsStyles }
-      : { ...model.allStyles.fullStyle, width: '100%', height: '100%', overflow: 'hidden',
-      };
+      ? { ...model.allStyles.fontStyles, ...dropdownDimensionStyles }
+      : { ...model.allStyles.fullStyle, ...dropdownDimensionStyles, overflow: 'hidden' };
 
     return (
       <ConfigurableFormItem model={model} {...initialValue}>

@@ -2,7 +2,6 @@ import { IFormItem, IToolboxComponent } from '@/interfaces';
 import { FormMarkup, IConfigurableFormComponent } from '@/providers/form/models';
 import { FileImageOutlined } from '@ant-design/icons';
 import ConfigurableFormItem from '@/components/formDesigner/components/formItem';
-import settingsFormJson from './settingsForm.json';
 import { evaluateValueAsString, validateConfigurableComponentSettings } from '@/providers/form/utils';
 import React, { ReactElement } from 'react';
 import {
@@ -57,7 +56,6 @@ export interface IImageProps extends IConfigurableFormComponent, IFormItem, IIma
   invert?: number;
 }
 
-const settingsForm = settingsFormJson as FormMarkup;
 
 const ImageComponent: IToolboxComponent<IImageProps> = {
   type: 'image',
@@ -176,7 +174,7 @@ const ImageComponent: IToolboxComponent<IImageProps> = {
     })
     .add<IImageProps>(6, (prev) => ({ ...migratePrevStyles(prev, defaultStyles(prev)) })),
   settingsFormMarkup: (data) => getSettings(data),
-  validateSettings: (model) => validateConfigurableComponentSettings(settingsForm, model),
+  validateSettings: (model) => validateConfigurableComponentSettings(getSettings(model), model),
 };
 
 export default ImageComponent;

@@ -12,9 +12,10 @@ export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
   model,
   valuePropName,
 }) => {
-  const { formData } = useShaFormInstance();
+  const { formData, formMode } = useShaFormInstance();
   const hasLabel = !!model.label;
-  const { styles } = useStyles({ layout: 'vertical', hasLabel });
+  const isDesignerMode = formMode === 'designer';
+  const { styles } = useStyles({ layout: 'vertical', hasLabel, isDesignerMode });
   if (model.hidden) return null;
 
   const { _mode: mode } = getPropertySettingsFromData(formData, model.propertyName);

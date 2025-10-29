@@ -4,7 +4,7 @@ import ConfigurableFormItem from '@/components/formDesigner/components/formItem'
 import ReadOnlyDisplayFormItem from '@/components/readOnlyDisplayFormItem';
 import { IToolboxComponent } from '@/interfaces';
 import { DataTypes } from '@/interfaces/dataTypes';
-import { IInputStyles, useMetadata } from '@/providers';
+import { IInputStyles, useMetadata, useShaFormInstance } from '@/providers';
 import { evaluateString, validateConfigurableComponentSettings } from '@/providers/form/utils';
 import { INumberFieldComponentProps } from './interfaces';
 import { migratePropertyName, migrateCustomFunctions, migrateReadOnly } from '@/designer-components/_common-migrations/migrateSettings';
@@ -45,6 +45,7 @@ const NumberFieldComponent: IToolboxComponent<INumberFieldComponentProps, INumbe
     };
   },
   Factory: ({ model, calculatedModel }) => {
+    const shaForm = useShaFormInstance();
     const { styles } = useStyles({
       fontFamily: model?.font?.type,
       fontWeight: model?.font?.weight,
@@ -80,10 +81,15 @@ const NumberFieldComponent: IToolboxComponent<INumberFieldComponentProps, INumbe
       suffix: <>{model.suffix}{model.suffixIcon && <ShaIcon iconName={model.suffixIcon} style={suffixStyle} />}</>,
     };
 
+    // In designer mode, use 100% dimensions; otherwise use calculated dimensions
+    const inputDimensionStyles = shaForm.formMode === 'designer'
+      ? { width: '100%', height: '100%' }
+      : model.allStyles.dimensionsStyles;
+
     const finalStyle = !model.enableStyleOnReadonly && model.readOnly ? {
       ...model.allStyles.fontStyles,
-      ...model.allStyles.dimensionsStyles,
-    } : model.allStyles.fullStyle;
+      ...inputDimensionStyles,
+    } : { ...model.allStyles.fullStyle, ...inputDimensionStyles };
 
     return (
       <ConfigurableFormItem model={model} initialValue={calculatedModel.defaultValue}>
@@ -103,7 +109,7 @@ const NumberFieldComponent: IToolboxComponent<INumberFieldComponentProps, INumbe
                 type="number"
                 value={value ?? model?.defaultValue}
                 {...inputProps}
-                style={{ ...model.allStyles.fullStyle, width: '100%', height: "100%" }}
+                style={finalStyle}
                 className={styles.numberField}
                 onChange={onChangeInternal}
               />
