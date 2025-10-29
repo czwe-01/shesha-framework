@@ -58,7 +58,12 @@ const TextFieldComponent: IToolboxComponent<ITextFieldComponentProps, ITextField
       disabled: model.readOnly,
       readOnly: model.readOnly,
       spellCheck: model.spellCheck,
-      style: model.allStyles.fullStyle,
+      style: {
+        ...model.allStyles.fullStyle,
+        // Input controls should fill their container (FormItem handles sizing)
+        width: '100%',
+        height: '100%',
+      },
       maxLength: model.validate?.maxLength,
       max: model.validate?.maxLength,
       minLength: model.validate?.minLength,
