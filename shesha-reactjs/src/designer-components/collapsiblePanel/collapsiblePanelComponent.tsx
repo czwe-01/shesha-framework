@@ -77,7 +77,7 @@ const CollapsiblePanelComponent: IToolboxComponent<ICollapsiblePanelComponentPro
           extra={extra}
           collapsible={collapsible === 'header' ? 'header' : 'icon'}
           ghost={ghost}
-          bodyStyle={{ ...model.allStyles.fullStyle }}
+          bodyStyle={{ ...model.allStyles.fullStyle, ...model.allStyles.dimensionsStyles }}
           headerStyle={{ ...headerStyles, width: '100%' }}
           className={className}
           bodyColor={bodyColor}

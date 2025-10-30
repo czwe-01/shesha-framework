@@ -26,9 +26,9 @@ const ButtonGroupComponent: IToolboxComponent<IButtonGroupComponentProps> = {
     const { styles } = useStyles();
     return model.hidden ? null
       : (
-        <ConfigurableFormItem model={{ ...model, hideLabel: true }} className={styles.shaHideEmpty}>
+        <div className={styles.shaHideEmpty}>
           <ButtonGroup {...model} styles={{ ...model.allStyles.fullStyle, width: '100%', height: '100%' }} form={form} />
-        </ConfigurableFormItem>
+        </div>
       );
   },
   actualModelPropertyFilter: (name) => name !== 'items', // handle items later to use buttonGroup's readOnly setting

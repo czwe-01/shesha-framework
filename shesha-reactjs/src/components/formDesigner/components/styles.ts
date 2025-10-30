@@ -45,7 +45,6 @@ export const useStyles = createStyles(({ css, cx }, { layout, hasLabel, isDesign
           .ant-form-item-row {
               width: 100%;
               display: flex;
-              align-items: center;
           }
 
           .ant-row .ant-form-item-control {
