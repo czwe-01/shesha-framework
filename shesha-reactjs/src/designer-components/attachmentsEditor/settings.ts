@@ -1103,19 +1103,6 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                                     }
                                   ],
                                 })
-                                .addSettingsInputRow({
-                                  id: nanoid(),
-                                  parentId: pnlDownloadedFileFontStylesId,
-                                  hidden: { _code: 'return !getSettingValue(data[`${contexts.canvasContext?.designerDevice || "desktop"}`]?.styleDownloadedFiles);', _mode: 'code', _value: false } as any,
-                                  inputs: [
-                                    {
-                                      type: 'iconPicker',
-                                      id: nanoid(),
-                                      label: 'Icon',
-                                      propertyName: 'downloadedIcon'
-                                    }
-                                  ]
-                                })
                                 .toJson()
                               ]
                             }
