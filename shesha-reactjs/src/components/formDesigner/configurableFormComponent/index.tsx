@@ -82,6 +82,44 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
     return result;
   }, [isSelected]);
 
+  // Apply dimensions to the outermost wrapper so width/height affect the actual component size
+  const shouldApplyDimensions = componentModel.type === 'container';
+
+  const deviceModel = isValidDeviceKey(activeDevice)
+    ? { ...componentModel, ...componentModel[activeDevice] }
+    : componentModel;
+
+  const dimensions = deviceModel?.container?.dimensions ?? deviceModel?.dimensions ?? {};
+
+  const componentStyle = useMemo(() => {
+    if (!shouldApplyDimensions) return { margin: '0px' };
+    return {
+      boxSizing: 'border-box' as const,
+      width: addPx(dimensions?.width),
+      minWidth: addPx(dimensions?.minWidth),
+      maxWidth: addPx(dimensions?.maxWidth),
+      height: addPx(dimensions?.height),
+      minHeight: addPx(dimensions?.minHeight),
+      maxHeight: addPx(dimensions?.maxHeight),
+      margin: '0px'
+    };
+  }, [dimensions, shouldApplyDimensions]);
+
+  const renderComponentModel = useMemo(() => {
+    if(!shouldApplyDimensions) return componentModel;
+    if (!isValidDeviceKey(activeDevice)) {
+      return componentModel;
+    }
+    const deviceOverrides = componentModel[activeDevice] ?? {};
+    return {
+      ...componentModel,
+      [activeDevice]: {
+        ...deviceOverrides,
+        dimensions: { ...dimensions, width: '100%', height: '100%' },
+      },
+    };
+  }, [componentModel, activeDevice, dimensions]);
+
   return (
     <div
       className={classNames(styles.shaComponent, {
