@@ -165,8 +165,12 @@ export const isButtonProps = (value: ISettingsInputBase): value is IButtonSettin
 
 // Button Group Configurator
 export interface IButtonGroupConfiguratorSettingsInputProps extends ISettingsInputBase {
-  type: 'buttonGroupConfigurator';
+  type: '58cf136e32de7a791b513057a16edd2f85a2f333';
   buttonGroupOptions?: IRadioOption[];
+  buttonText?: string;
+  buttonTextReadOnly?: string;
+  title?: string;
+  description?: string;
 }
 export const isButtonGroupConfiguratorProps = (value: ISettingsInputBase): value is IButtonGroupConfiguratorSettingsInputProps => value.type === 'buttonGroupConfigurator';
 
