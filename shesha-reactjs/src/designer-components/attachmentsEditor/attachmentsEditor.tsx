@@ -6,8 +6,9 @@ import { CustomFile } from '@/components';
 import ConfigurableFormItem from '@/components/formDesigner/components/formItem';
 import { IToolboxComponent } from '@/interfaces';
 import { IStyleType, useDataContextManagerActions, useForm, useFormData, useGlobalState, useHttpClient, useSheshaApplication } from '@/providers';
-import { IConfigurableFormComponent, IInputStyles } from '@/providers/form/models';
+import { FormIdentifier, IConfigurableFormComponent, IInputStyles } from '@/providers/form/models';
 import {
+  evaluateValue,
   evaluateValueAsString,
   executeScriptSync,
   validateConfigurableComponentSettings,
@@ -20,8 +21,9 @@ import { getFormApi } from '@/providers/form/formApi';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
 import { GHOST_PAYLOAD_KEY } from '@/utils/form';
 import { containerDefaultStyles, defaultStyles, downloadedFileDefaultStyles } from './utils';
+import { useFormComponentStyles } from '@/hooks/formComponentHooks';
+import { ButtonGroupItemProps } from '@/providers/buttonGroupConfigurator/models';
 import { IEntityTypeIdentifier } from '@/providers/sheshaApplication/publicApi/entities/models';
-import { isEntityTypeIdEmpty } from '@/providers/metadataDispatcher/entities/utils';
 
 export type layoutType = 'vertical' | 'horizontal' | 'grid';
 export type listType = 'text' | 'thumbnail';
@@ -54,23 +56,23 @@ type LegacyStyleProps = Partial<{
 const hasLegacyStyleProperties = (props: LegacyStyleProps): boolean => {
   const legacyContainerProps = [
     'stylingBox', 'style', 'width', 'height', 'maxWidth', 'maxHeight',
-    'minWidth', 'minHeight', 'containerStyle', 'containerClass',
+    'minWidth', 'minHeight', 'containerStyle', 'containerClass'
   ] as const;
 
   const legacyFontProps = [
-    'fontSize', 'fontColor', 'fontWeight', 'fontFamily', 'fontAlign',
+    'fontSize', 'fontColor', 'fontWeight', 'fontFamily', 'fontAlign'
   ] as const;
 
-  return legacyContainerProps.some((prop) => props[prop] !== undefined) ||
-    legacyFontProps.some((prop) => props[prop] !== undefined);
+  return legacyContainerProps.some(prop => props[prop] !== undefined) ||
+         legacyFontProps.some(prop => props[prop] !== undefined);
 };
 
 // Helper function to migrate container-related properties
 const migrateContainerProperties = (
   props: LegacyStyleProps,
   existingContainer: Partial<IStyleType>,
-  defaultContainer: IStyleType,
-): Partial<IStyleType> => {
+  defaultContainer: IStyleType
+) => {
   return {
     stylingBox: props.stylingBox || existingContainer.stylingBox || defaultContainer.stylingBox,
     style: props.style || props.containerStyle || existingContainer.style || defaultContainer.style,
@@ -81,34 +83,25 @@ const migrateContainerProperties = (
       maxWidth: props.maxWidth || existingContainer.dimensions?.maxWidth || 'auto',
       maxHeight: props.maxHeight || existingContainer.dimensions?.maxHeight || '140px',
       minWidth: props.minWidth || existingContainer.dimensions?.minWidth || '0px',
-      minHeight: props.minHeight || existingContainer.dimensions?.minHeight || '0px',
-    },
+      minHeight: props.minHeight || existingContainer.dimensions?.minHeight || '0px'
+    }
   };
 };
 
 // Helper function to migrate font properties
 const migrateFontProperties = (
   props: LegacyStyleProps,
-  existingFont: IStyleType['font'],
-): IStyleType['font'] => {
-  // Define valid text alignment values based on what AlignSetting accepts
-  const validAlignValues = ['left', 'center', 'right'] as const;
-  type ValidAlign = typeof validAlignValues[number];
-
-  const normalizeAlign = (align: string | undefined): ValidAlign => {
-    if (align && validAlignValues.includes(align as ValidAlign)) {
-      return align as ValidAlign;
-    }
-    return 'left'; // Default fallback
-  };
-
+  existingFont: IStyleType['font']
+) => {
   return {
-    ...existingFont,
-    size: props.fontSize || existingFont?.size,
-    color: props.fontColor || existingFont?.color,
-    weight: props.fontWeight || existingFont?.weight,
-    type: props.fontFamily || existingFont?.type,
-    align: normalizeAlign(props.fontAlign || existingFont?.align),
+    font: {
+      ...existingFont,
+      size: props.fontSize || existingFont.size,
+      color: props.fontColor || existingFont.color,
+      weight: props.fontWeight || existingFont.weight,
+      type: props.fontFamily || existingFont.type,
+      align: props.fontAlign || existingFont.align,
+    }
   };
 };
 
@@ -117,13 +110,18 @@ const removeLegacyProperties = (result: Record<string, unknown>): void => {
   const legacyProps = [
     'stylingBox', 'style', 'width', 'height', 'maxWidth', 'maxHeight',
     'minWidth', 'minHeight', 'containerStyle', 'containerClass',
-    'fontSize', 'fontColor', 'fontWeight', 'fontFamily', 'fontAlign',
+    'fontSize', 'fontColor', 'fontWeight', 'fontFamily', 'fontAlign'
   ];
 
-  legacyProps.forEach((prop) => {
+  legacyProps.forEach(prop => {
     delete result[prop];
   });
 };
+
+export interface IAttachmentContent {
+  id: string;
+  components?: IConfigurableFormComponent[];
+}
 export interface IAttachmentsEditorProps extends IConfigurableFormComponent, IInputStyles {
   ownerId: string;
   ownerType: string | IEntityTypeIdentifier;
@@ -134,6 +132,11 @@ export interface IAttachmentsEditorProps extends IConfigurableFormComponent, IIn
   allowDelete: boolean;
   allowReplace: boolean;
   allowRename: boolean;
+  allowViewHistory: boolean;
+  customActions?: ButtonGroupItemProps[];
+  customContent?: boolean;
+  extraFormId?: FormIdentifier;
+  isDynamic?: boolean;
   isDragger?: boolean;
   maxHeight?: string;
   onFileChanged?: string;
@@ -146,6 +149,8 @@ export interface IAttachmentsEditorProps extends IConfigurableFormComponent, IIn
   borderRadius?: number;
   hideFileName?: boolean;
   container?: IStyleType;
+  primaryColor?: string;
+  downloadedFileStyles?: IStyleType;
 }
 
 const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
@@ -162,9 +167,15 @@ const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
     const { message } = App.useApp();
     const pageContext = useDataContextManagerActions()?.getPageContext();
     const ownerId = evaluateValueAsString(`${model.ownerId}`, { data: data, globalState });
+
+    const {
+      fullStyle: downloadedFileFullStyle,
+    } = useFormComponentStyles(model.downloadedFileStyles ?? downloadedFileDefaultStyles());
+
     const enabled = !model.readOnly;
 
-    const executeScript = (script, value): void => {
+    const executeScript = (script, value) => {
+
       executeScriptSync(script, {
         value,
         data,
@@ -178,28 +189,30 @@ const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
       });
     };
 
+    const hasExtraContent = Boolean(model?.customContent);
+
     return (
       // Add GHOST_PAYLOAD_KEY to remove field from the payload
       // File list uses propertyName only for support Required feature
       <ConfigurableFormItem model={{ ...model, propertyName: `${GHOST_PAYLOAD_KEY}_${model.id}` }}>
         {(value, onChange) => {
-          const onFileListChanged = (fileList, isUserAction = false): void => {
+          const onFileListChanged = (fileList) => {
             onChange(fileList);
-            // Only execute custom script if this is a user action (upload/delete)
-            if (isUserAction && model.onChangeCustom) executeScript(model.onChangeCustom, fileList);
+            if (model.onChangeCustom) executeScript(model.onChangeCustom, fileList);
           };
 
-          const onDownload = (fileList, isUserAction = false): void => {
+          const onDownload = (fileList) => {
             onChange(fileList);
-            // Only execute custom script if this is a user action (download)
-            if (isUserAction && model.onDownload) executeScript(model.onDownload, fileList);
+            if (model.onDownload) executeScript(model.onDownload, fileList);
           };
 
           return (
             <StoredFilesProvider
               name={model.componentName}
               ownerId={Boolean(ownerId) ? ownerId : Boolean(data?.id) ? data?.id : ''}
-              ownerType={!isEntityTypeIdEmpty(model.ownerType) ? model.ownerType : !isEntityTypeIdEmpty(form?.formSettings?.modelType) ? form?.formSettings?.modelType : ''}
+              ownerType={
+                Boolean(model.ownerType) ? model.ownerType : Boolean(form?.formSettings?.modelType) ? form?.formSettings?.modelType : ''
+              }
               ownerName={model.ownerName}
               filesCategory={model.filesCategory}
               baseUrl={backendUrl}
@@ -215,15 +228,21 @@ const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
                 allowDelete={enabled && model.allowDelete}
                 allowReplace={enabled && model.allowReplace}
                 allowRename={enabled && model.allowRename}
+                allowViewHistory={model.allowViewHistory}
+                customActions={model.customActions}
                 allowedFileTypes={model.allowedFileTypes}
                 maxHeight={model.maxHeight}
                 isDragger={model?.isDragger}
                 downloadZip={model.downloadZip}
                 filesLayout={model.filesLayout}
                 listType={model.listType}
+                hasExtraContent={hasExtraContent}
+                isDynamic={model.isDynamic}
+                extraFormId={model.extraFormId}
                 {...model}
                 enableStyleOnReadonly={model.enableStyleOnReadonly}
                 ownerId={ownerId}
+                downloadedFileStyles={downloadedFileFullStyle}
               />
             </StoredFilesProvider>
           );
@@ -247,6 +266,8 @@ const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
         allowDelete: true,
         allowReplace: true,
         allowRename: true,
+        allowViewHistory: true,
+        customActions: [],
         isDragger: false,
         ownerId: '',
         ownerType: '',
@@ -266,43 +287,41 @@ const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
       onFileChanged: migrateFormApi.withoutFormData(prev?.onFileChanged),
     }))
     .add<IAttachmentsEditorProps>(6, (prev) => ({ ...prev, listType: !prev.listType ? 'text' : prev.listType, filesLayout: prev.filesLayout ?? 'horizontal' }))
-    .add<IAttachmentsEditorProps>(7, (prev) => ({ ...prev, desktop: { ...defaultStyles(), container: containerDefaultStyles() }, mobile: { ...defaultStyles() }, tablet: { ...defaultStyles() } }))
-    .add<IAttachmentsEditorProps>(8, (prev) => ({ ...prev, downloadZip: prev.downloadZip || false, propertyName: prev.propertyName ?? '', onChangeCustom: prev.onFileChanged }))
-    .add<IAttachmentsEditorProps>(9, (prev) => ({
+    .add<IAttachmentsEditorProps>(7, (prev) => ({
       ...prev,
       desktop: {
         ...defaultStyles(),
         container: {
           ...containerDefaultStyles(),
           stylingBox: prev.stylingBox || '{}',
-          style: prev.style || '',
-        },
+          style: prev.style || ''
+        }
       },
       mobile: {
         ...defaultStyles(),
         container: {
           ...containerDefaultStyles(),
           stylingBox: prev.stylingBox || '{}',
-          style: prev.style || '',
-        },
+          style: prev.style || ''
+        }
       },
       tablet: {
         ...defaultStyles(),
         container: {
           ...containerDefaultStyles(),
           stylingBox: prev.stylingBox || '{}',
-          style: prev.style || '',
-        },
-      },
+          style: prev.style || ''
+        }
+      }
     }))
-    .add<IAttachmentsEditorProps>(10, (prev) => ({ ...prev, downloadZip: prev.downloadZip || false, propertyName: prev.propertyName ?? '' }))
-    .add<IAttachmentsEditorProps>(11, (prev) => ({ ...prev, propertyName: prev.propertyName ?? '', onChangeCustom: prev?.onFileChanged }))
-    .add<IAttachmentsEditorProps>(12, (prev) => ({
+    .add<IAttachmentsEditorProps>(8, (prev) => ({ ...prev, downloadZip: prev.downloadZip || false, propertyName: prev.propertyName ?? '' }))
+    .add<IAttachmentsEditorProps>(9, (prev) => ({ ...prev, propertyName: prev.propertyName ?? '', onChangeCustom: prev?.onFileChanged }))
+    .add<IAttachmentsEditorProps>(10, (prev) => ({
       ...prev, desktop: { ...prev.desktop, downloadedFileStyles: { ...downloadedFileDefaultStyles() } },
       mobile: { ...prev.mobile, downloadedFileStyles: { ...downloadedFileDefaultStyles() } },
-      tablet: { ...prev.tablet, downloadedFileStyles: { ...downloadedFileDefaultStyles() } },
+      tablet: { ...prev.tablet, downloadedFileStyles: { ...downloadedFileDefaultStyles() } }
     }))
-    .add<IAttachmentsEditorProps>(13, (prev: IAttachmentsEditorProps & LegacyStyleProps) => {
+    .add<IAttachmentsEditorProps>(11, (prev: IAttachmentsEditorProps & LegacyStyleProps) => {
       // Handle components with root-level styling properties from legacy imports
       // This covers v0.43 imports that have styling properties at root level instead of device-specific structure
       if (!hasLegacyStyleProperties(prev)) return prev;
@@ -326,7 +345,7 @@ const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
         const fontUpdates = migrateFontProperties(prev, existingFont);
 
         result[device].container = { ...existingContainer, ...containerUpdates };
-        result[device].font = fontUpdates;
+        result[device] = { ...result[device], ...fontUpdates };
       });
 
       // Clean up legacy properties

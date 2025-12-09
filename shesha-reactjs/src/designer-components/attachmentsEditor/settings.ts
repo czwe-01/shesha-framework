@@ -22,7 +22,8 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
   const pnlShadowStyleId = nanoid();
   const customStylePnlId = nanoid();
   const pnlFontStyleId = nanoid();
-
+  const downloadedStylesPnlId = nanoid();
+  const pnlDownloadedFileFontStylesId = nanoid();
   return {
     components: fbf()
       .addSearchableTabs({
@@ -53,7 +54,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                   propertyName: 'hideLabel',
                   hideLabel: true,
                   label: 'Label',
-                  hideLabelPropName: 'hideLabel',
+                  hideLabelPropName: 'hideLabel'
                 })
                 .addSettingsInputRow({
                   id: nanoid(),
@@ -64,7 +65,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                       propertyName: 'description',
                       label: 'Tooltip',
                       type: 'textArea',
-                      jsSetting: true,
+                      jsSetting: true
                     },
                     {
                       id: nanoid(),
@@ -74,8 +75,8 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                       jsSetting: true,
                       description: 'Where the uploader should show a dragger instead of a button',
                       hidden: { _code: 'return getSettingValue(data?.listType) === "thumbnail";', _mode: 'code', _value: false } as any,
-                    },
-                  ],
+                    }
+                  ]
                 })
                 .addSettingsInputRow({
                   id: nanoid(),
@@ -100,8 +101,8 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                       type: 'switch',
                       jsSetting: true,
                       hidden: { _code: 'return getSettingValue(data?.listType) !== "thumbnail";', _mode: 'code', _value: false } as any,
-                    },
-                  ],
+                    }
+                  ]
                 })
                 .addSettingsInputRow({
                   id: nanoid(),
@@ -145,12 +146,128 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                     },
                   ],
                 })
-                .addSettingsInput({
+                .addSettingsInputRow({
                   id: nanoid(),
-                  propertyName: 'downloadZip',
-                  label: 'Download Zip',
-                  inputType: 'switch',
-                  jsSetting: true,
+                  parentId: commonTabId,
+                  inputs: [
+                    {
+                      id: nanoid(),
+                      propertyName: 'allowReplace',
+                      label: 'Allow Replace',
+                      type: 'switch',
+                      jsSetting: true,
+                      hidden: { _code: 'const r = getSettingValue(data?.readOnly); return r === true || r === "readOnly";', _mode: 'code', _value: false } as any,
+                    },
+                    {
+                      id: nanoid(),
+                      propertyName: 'allowRename',
+                      label: 'Allow Rename',
+                      type: 'switch',
+                      hidden: { _code: 'const r = getSettingValue(data?.readOnly); return r === true || r === "readOnly";', _mode: 'code', _value: false } as any,
+                      jsSetting: true,
+                    },
+                  ],
+                })
+                .addSettingsInputRow({
+                  id: nanoid(),
+                  parentId: commonTabId,
+                  inputs: [
+                    {
+                      id: nanoid(),
+                      propertyName: 'allowViewHistory',
+                      label: 'Allow View History',
+                      type: 'switch',
+                      jsSetting: true,
+                    },
+                    {
+                      id: nanoid(),
+                      propertyName: 'downloadZip',
+                      label: 'Download Zip',
+                      type: 'switch',
+                      jsSetting: true,
+                    },
+                  ],
+                })
+                .addCollapsiblePanel({
+                  id: nanoid(),
+                  propertyName: 'customActionsPanel',
+                  parentId: commonTabId,
+                  label: 'Custom',
+                  labelAlign: 'left',
+                  expandIconPosition: 'start',
+                  ghost: true,
+                  collapsible: 'header',
+                  content: {
+                    id: nanoid(),
+                    components: [
+                      ...fbf()
+                        .addSettingsInputRow({
+                          id: "customActionsPanel",
+                          inputs: [
+                            {
+                              id: nanoid(),
+                              propertyName: 'customActions',
+                              parentId: 'customActionsPanel',
+                              label: 'Actions Configuration',
+                              type: 'buttonGroupConfigurator',
+                              description: 'Configure custom actions that appear when hovering over files. Each action should have: id, name, label, icon (optional), tooltip (optional), hidden (optional), and actionConfiguration.',
+                              jsSetting: false,
+                            },
+                            {
+                              id: nanoid(),
+                              propertyName: 'customContent',
+                              parentId: 'customActionsPanel',
+                              label: 'Show Custom Content',
+                              type: 'switch',
+                              description: 'Enable to show custom content below each file.',
+                              jsSetting: false,
+                            }
+                          ]
+                        })
+                        .addSettingsInput({
+                          id: nanoid(),
+                          inputType: "dropdown",
+                          propertyName: "extraFormSelectionMode",
+                          parentId: 'customActionsPanel',
+                          label: "Form Selection Mode",
+                          tooltip: "Choose how to select the form for custom content",
+                          dropdownOptions: [
+                            { label: "Name", value: "name" },
+                            { label: "Dynamic", value: "dynamic" }
+                          ],
+                          hidden: { _code: 'return !getSettingValue(data?.customContent);', _mode: 'code', _value: false } as any,
+                        })
+                        .addSettingsInputRow({
+                          id: nanoid(),
+                          parentId: 'customActionsPanel',
+                          inputs: [
+                            {
+                              id: nanoid(),
+                              type: "formTypeAutocomplete",
+                              propertyName: "extraFormType",
+                              label: "Form Type",
+                              jsSetting: true,
+                            }
+                          ],
+                          hidden: { _code: 'return !getSettingValue(data?.customContent) || getSettingValue(data?.extraFormSelectionMode) !== "dynamic";', _mode: 'code', _value: false } as any,
+                        })
+                        .addSettingsInputRow({
+                          id: nanoid(),
+                          parentId: 'customActionsPanel',
+                          inputs: [
+                            {
+                              id: nanoid(),
+                              type: "formAutocomplete",
+                              propertyName: "extraFormId",
+                              label: "Form",
+                              jsSetting: true
+                            }
+                          ],
+                          hidden: { _code: 'return !getSettingValue(data?.customContent) || getSettingValue(data?.extraFormSelectionMode) === "dynamic";', _mode: 'code', _value: false } as any,
+                        })
+                        .toJson(),
+                    ],
+                  },
                 })
                 .toJson(),
             ],
@@ -172,7 +289,14 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                       type: 'propertyAutocomplete',
                       autoFillProps: false,
                     },
-                  ],
+                    {
+                      id: nanoid(),
+                      propertyName: 'ownerId',
+                      label: 'Owner ID',
+                      type: 'textField',
+                      jsSetting: true,
+                    },
+                  ]
                 })
                 .addSettingsInputRow({
                   id: nanoid(),
@@ -182,20 +306,10 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                       id: nanoid(),
                       propertyName: 'ownerType',
                       label: 'Owner Type',
-                      type: 'entityTypeAutocomplete',
-                      jsSetting: true,
-                    },
-                  ],
-                })
-                .addSettingsInputRow({
-                  id: nanoid(),
-                  parentId: dataTabId,
-                  inputs: [
-                    {
-                      id: nanoid(),
-                      propertyName: 'ownerId',
-                      label: 'Owner ID',
-                      type: 'textField',
+                      type: 'autocomplete',
+                      dataSourceType: 'url',
+                      dataSourceUrl: '/api/services/app/Metadata/EntityTypeAutocomplete',
+                      useRawValues: true,
                       jsSetting: true,
                     },
                     {
@@ -204,8 +318,8 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                       label: 'Files Category',
                       type: 'textField',
                       jsSetting: true,
-                    },
-                  ],
+                    }
+                  ]
                 })
                 .addSettingsInputRow({
                   id: nanoid(),
@@ -218,9 +332,8 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                       type: 'editableTagGroupProps',
                       description: 'File types that can be accepted.',
                       jsSetting: true,
-                      tooltip: "The file typeName should consist a dot before the name, for example .png",
-                    },
-                  ],
+                    }
+                  ]
                 })
                 .toJson(),
             ],
@@ -236,10 +349,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                   propertyName: 'validate.required',
                   label: 'Required',
                   inputType: 'switch',
-                  size: 'small',
-                  layout: 'horizontal',
                   jsSetting: true,
-                  parentId: validationTabId,
                 })
                 .toJson(),
             ],
@@ -265,7 +375,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                   functionName: 'onFileListChanged',
                   useAsyncDeclaration: true,
                 },
-                availableConstantsExpression: " return metadataBuilder.object(\"constants\")\r\n .addAllStandard()\r\n .addString(\"value\", \"Component current value\")\r\n .addObject(\"event\", \"Event callback when user input\", undefined)\r\n .build();",
+                availableConstantsExpression: " return metadataBuilder.object(\"constants\")\r\n .addAllStandard()\r\n .addString(\"value\", \"Component current value\")\r\n .addObject(\"event\", \"Event callback when user input\", undefined)\r\n .build();"
               })
               .addSettingsInput({
                 id: nanoid(),
@@ -273,7 +383,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                 propertyName: 'onDownload',
                 label: 'On Download',
                 labelAlign: 'right',
-                parentId: eventsTabId,
+                parentId: 'root',
                 hidden: false,
                 description: 'Callback that is triggered when a file is downloaded.',
                 validate: {},
@@ -283,10 +393,10 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                   functionName: 'onDownload',
                   useAsyncDeclaration: true,
                 },
-                availableConstantsExpression: " return metadataBuilder.object(\"constants\")\r\n .addAllStandard()\r\n .addString(\"value\", \"Component current value\")\r\n .addObject(\"event\", \"Event callback when user input\", undefined)\r\n .build();",
+                availableConstantsExpression: " return metadataBuilder.object(\"constants\")\r\n .addAllStandard()\r\n .addString(\"value\", \"Component current value\")\r\n .addObject(\"event\", \"Event callback when user input\", undefined)\r\n .build();"
               })
-              .toJson(),
-            ],
+              .toJson()
+            ]
           },
           {
             key: 'appearance',
@@ -377,9 +487,16 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                               },
                             ],
                           })
-                          .toJson(),
-                        ],
-                      },
+                          .addSettingsInput({
+                            id: nanoid(),
+                            propertyName: 'primaryColor',
+                            label: 'Primary Color',
+                            inputType: 'colorPicker',
+                            jsSetting: true,
+                          })
+                          .toJson()
+                        ]
+                      }
                     })
                     .addCollapsiblePanel({
                       id: nanoid(),
@@ -801,7 +918,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                                       width: 85,
                                       propertyName: "container.dimensions.width",
                                       icon: "widthIcon",
-                                      tooltip: "You can use any unit (%, px, em, etc). px by default if without unit",
+                                      tooltip: "You can use any unit (%, px, em, etc). px by default if without unit"
                                     },
                                     {
                                       type: 'textField',
@@ -820,8 +937,8 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                                       hideLabel: true,
                                       propertyName: "container.dimensions.maxWidth",
                                       icon: "maxWidthIcon",
-                                    },
-                                  ],
+                                    }
+                                  ]
                                 })
                                 .addSettingsInputRow({
                                   id: nanoid(),
@@ -836,7 +953,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                                       width: 85,
                                       propertyName: "container.dimensions.height",
                                       icon: "heightIcon",
-                                      tooltip: "You can use any unit (%, px, em, etc). px by default if without unit",
+                                      tooltip: "You can use any unit (%, px, em, etc). px by default if without unit"
                                     },
                                     {
                                       type: 'textField',
@@ -909,11 +1026,116 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                               ],
                             },
                           })
-                          .toJson()],
-                      },
+                          .toJson()]
+                      }
                     })
-                    .toJson()],
-              }).toJson()],
+                    .addCollapsiblePanel({
+                      id: nanoid(),
+                      propertyName: 'pnlDownloadedStyles',
+                      label: 'Downloaded File Styles',
+                      labelAlign: 'right',
+                      ghost: true,
+                      collapsedByDefault: true,
+                      parentId: styleRouterId,
+                      collapsible: 'header',
+                      content: {
+                        id: downloadedStylesPnlId,
+                        components: [...fbf()
+                          .addCollapsiblePanel({
+                            id: nanoid(),
+                            propertyName: 'pnlDownloadedFileFontStyles',
+                            label: 'Font',
+                            labelAlign: 'right',
+                            parentId: downloadedStylesPnlId,
+                            ghost: true,
+                            collapsible: 'header',
+                            content: {
+                              id: pnlDownloadedFileFontStylesId,
+                              components: [...fbf()
+                                .addSettingsInputRow({
+                                  id: nanoid(),
+                                  parentId: pnlDownloadedFileFontStylesId,
+                                  inline: true,
+                                  propertyName: 'downloadedFileStyles.font',
+                                  inputs: [
+                                    {
+                                      type: 'dropdown',
+                                      id: nanoid(),
+                                      label: 'Family',
+                                      propertyName: 'downloadedFileStyles.font.type',
+                                      hideLabel: true,
+                                      dropdownOptions: fontTypes,
+                                    },
+                                    {
+                                      type: 'numberField',
+                                      id: nanoid(),
+                                      label: 'Size',
+                                      propertyName: 'downloadedFileStyles.font.size',
+                                      hideLabel: true,
+                                      width: 50,
+                                    },
+                                    {
+                                      type: 'dropdown',
+                                      id: nanoid(),
+                                      label: 'Weight',
+                                      propertyName: 'downloadedFileStyles.font.weight',
+                                      hideLabel: true,
+                                      tooltip: "Controls text thickness (light, normal, bold, etc.)",
+                                      dropdownOptions: fontWeightsOptions,
+                                      width: 100,
+                                    },
+                                    {
+                                      type: 'colorPicker',
+                                      id: nanoid(),
+                                      label: 'Color',
+                                      hideLabel: true,
+                                      propertyName: 'downloadedFileStyles.font.color',
+                                    },
+                                    {
+                                      type: 'dropdown',
+                                      id: nanoid(),
+                                      label: 'Align',
+                                      propertyName: 'downloadedFileStyles.font.align',
+                                      hideLabel: true,
+                                      width: 60,
+                                      dropdownOptions: textAlignOptions,
+                                    },
+                                  ],
+                                })
+                                .toJson()
+                              ]
+                            }
+                          })
+                          .addCollapsiblePanel({
+                            id: nanoid(),
+                            propertyName: 'pnlDownloadedFileCustomStylePanel',
+                            label: 'Custom Styles',
+                            labelAlign: 'right',
+                            ghost: true,
+                            parentId: downloadedStylesPnlId,
+                            collapsible: 'header',
+                            content: {
+                              id: 'pnlDownloadedFileCustomStylePanel',
+                              components: [...fbf()
+                                .addSettingsInput({
+                                  id: nanoid(),
+                                  inputType: 'codeEditor',
+                                  propertyName: 'downloadedFileStyles.style',
+                                  hideLabel: false,
+                                  label: 'Style',
+                                  description: 'A script that returns the style of the element as an object. This should conform to CSSProperties',
+                                  parentId: 'pnlDownloadedFileCustomStylePanel'
+                                })
+                                .toJson()
+                              ]
+                            }
+                          })
+                          .toJson()
+                        ]
+                      }
+                    })
+                    .toJson()]
+              }).toJson()]
           },
           {
             key: 'security',
@@ -928,18 +1150,18 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                   label: 'Permissions',
                   jsSetting: true,
                   size: 'small',
-                  parentId: securityTabId,
+                  parentId: securityTabId
                 })
-                .toJson(),
-            ],
-          },
-        ],
+                .toJson()
+            ]
+          }
+        ]
       }).toJson(),
     formSettings: {
       colon: false,
       layout: 'vertical' as FormLayout,
       labelCol: { span: 24 },
-      wrapperCol: { span: 24 },
-    },
+      wrapperCol: { span: 24 }
+    }
   };
 };
