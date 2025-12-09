@@ -46,7 +46,7 @@ export const createPlaceholderFile = (): IStoredFile => ({
  * @returns The Upload component list type to use
  */
 export const getListTypeAndLayout = (
-  type: listType | undefined, isDragger: boolean
+  type: listType | undefined, isDragger: boolean,
 ): 'text' | 'picture' | 'picture-card' => {
   return type === 'text' || !type || isDragger ? 'text' : 'picture-card';
 };
@@ -66,7 +66,7 @@ export const getListTypeAndLayout = (
  */
 export const fetchStoredFile = async (
   url: string,
-  httpHeaders: Record<string, string> = {}
+  httpHeaders: Record<string, string> = {},
 ): Promise<string> => {
   const fetchUrl = buildUrl(url, { skipMarkDownload: 'true' });
   const response = await fetch(fetchUrl, {

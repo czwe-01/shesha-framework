@@ -101,12 +101,12 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
       height: addPx(dimensions?.height),
       minHeight: addPx(dimensions?.minHeight),
       maxHeight: addPx(dimensions?.maxHeight),
-      margin: '0px'
+      margin: '0px',
     };
   }, [dimensions, shouldApplyDimensions]);
 
   const renderComponentModel = useMemo(() => {
-    if(!shouldApplyDimensions) return componentModel;
+    if (!shouldApplyDimensions) return componentModel;
     if (!isValidDeviceKey(activeDevice)) {
       return componentModel;
     }

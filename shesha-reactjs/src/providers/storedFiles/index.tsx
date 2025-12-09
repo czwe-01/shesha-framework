@@ -324,7 +324,7 @@ const StoredFilesProvider: FC<PropsWithChildren<IStoredFilesProviderProps>> = ({
         // Update the fileList by replacing the old file with the new one
         const currentList = fileListRef.current ?? [];
         const updatedList = currentList.map((f) =>
-          f.id === fileId || f.uid === fileId ? { ...responseFile, uid: responseFile.id } : f
+          f.id === fileId || f.uid === fileId ? { ...responseFile, uid: responseFile.id } : f,
         );
         onChange?.(updatedList);
         message.success(`File "${normalizedFile.name}" replaced successfully`);

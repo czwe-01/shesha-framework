@@ -1,4 +1,4 @@
-import React, { CSSProperties, FC, } from 'react';
+import React, { CSSProperties, FC } from 'react';
 import { IUploadFilePayload } from '@/providers/storedFiles/contexts';
 import { IconType, StoredFilesRendererBase } from '@/components/';
 import { IInputStyles, IStyleType, useSheshaApplication, useStoredFilesStore } from '@/providers';
@@ -45,7 +45,7 @@ export interface ICustomFileProps extends IInputStyles {
 export const CustomFile: FC<ICustomFileProps> = (props) => {
   const {
     fileList,
-    //downloadFile,
+    // downloadFile,
     deleteFile,
     uploadFile,
     replaceFile,

@@ -56,22 +56,22 @@ type LegacyStyleProps = Partial<{
 const hasLegacyStyleProperties = (props: LegacyStyleProps): boolean => {
   const legacyContainerProps = [
     'stylingBox', 'style', 'width', 'height', 'maxWidth', 'maxHeight',
-    'minWidth', 'minHeight', 'containerStyle', 'containerClass'
+    'minWidth', 'minHeight', 'containerStyle', 'containerClass',
   ] as const;
 
   const legacyFontProps = [
-    'fontSize', 'fontColor', 'fontWeight', 'fontFamily', 'fontAlign'
+    'fontSize', 'fontColor', 'fontWeight', 'fontFamily', 'fontAlign',
   ] as const;
 
-  return legacyContainerProps.some(prop => props[prop] !== undefined) ||
-         legacyFontProps.some(prop => props[prop] !== undefined);
+  return legacyContainerProps.some((prop) => props[prop] !== undefined) ||
+    legacyFontProps.some((prop) => props[prop] !== undefined);
 };
 
 // Helper function to migrate container-related properties
 const migrateContainerProperties = (
   props: LegacyStyleProps,
   existingContainer: Partial<IStyleType>,
-  defaultContainer: IStyleType
+  defaultContainer: IStyleType,
 ) => {
   return {
     stylingBox: props.stylingBox || existingContainer.stylingBox || defaultContainer.stylingBox,
@@ -83,15 +83,15 @@ const migrateContainerProperties = (
       maxWidth: props.maxWidth || existingContainer.dimensions?.maxWidth || 'auto',
       maxHeight: props.maxHeight || existingContainer.dimensions?.maxHeight || '140px',
       minWidth: props.minWidth || existingContainer.dimensions?.minWidth || '0px',
-      minHeight: props.minHeight || existingContainer.dimensions?.minHeight || '0px'
-    }
+      minHeight: props.minHeight || existingContainer.dimensions?.minHeight || '0px',
+    },
   };
 };
 
 // Helper function to migrate font properties
 const migrateFontProperties = (
   props: LegacyStyleProps,
-  existingFont: IStyleType['font']
+  existingFont: IStyleType['font'],
 ) => {
   return {
     font: {
@@ -101,7 +101,7 @@ const migrateFontProperties = (
       weight: props.fontWeight || existingFont.weight,
       type: props.fontFamily || existingFont.type,
       align: props.fontAlign || existingFont.align,
-    }
+    },
   };
 };
 
@@ -110,10 +110,10 @@ const removeLegacyProperties = (result: Record<string, unknown>): void => {
   const legacyProps = [
     'stylingBox', 'style', 'width', 'height', 'maxWidth', 'maxHeight',
     'minWidth', 'minHeight', 'containerStyle', 'containerClass',
-    'fontSize', 'fontColor', 'fontWeight', 'fontFamily', 'fontAlign'
+    'fontSize', 'fontColor', 'fontWeight', 'fontFamily', 'fontAlign',
   ];
 
-  legacyProps.forEach(prop => {
+  legacyProps.forEach((prop) => {
     delete result[prop];
   });
 };
@@ -177,7 +177,6 @@ const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
     const enabled = !model.readOnly;
 
     const executeScript = (script, value) => {
-
       executeScriptSync(script, {
         value,
         data,
@@ -212,9 +211,7 @@ const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
             <StoredFilesProvider
               name={model.componentName}
               ownerId={Boolean(ownerId) ? ownerId : Boolean(data?.id) ? data?.id : ''}
-              ownerType={
-                Boolean(model.ownerType) ? model.ownerType : Boolean(form?.formSettings?.modelType) ? form?.formSettings?.modelType : ''
-              }
+              ownerType={Boolean(model.ownerType) ? model.ownerType : Boolean(form?.formSettings?.modelType) ? form?.formSettings?.modelType : ''}
               ownerName={model.ownerName}
               filesCategory={model.filesCategory}
               baseUrl={backendUrl}
@@ -245,7 +242,7 @@ const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
                 enableStyleOnReadonly={model.enableStyleOnReadonly}
                 ownerId={ownerId}
                 downloadedFileStyles={model.styleDownloadedFiles ? downloadedFileFullStyle : {}}
-                downloadedIcon={model.styleDownloadedFiles ? model.downloadedIcon : undefined }
+                downloadedIcon={model.styleDownloadedFiles ? model.downloadedIcon : undefined}
               />
             </StoredFilesProvider>
           );
@@ -297,32 +294,32 @@ const AttachmentsEditor: IToolboxComponent<IAttachmentsEditorProps> = {
         container: {
           ...containerDefaultStyles(),
           stylingBox: prev.stylingBox || '{}',
-          style: prev.style || ''
-        }
+          style: prev.style || '',
+        },
       },
       mobile: {
         ...defaultStyles(),
         container: {
           ...containerDefaultStyles(),
           stylingBox: prev.stylingBox || '{}',
-          style: prev.style || ''
-        }
+          style: prev.style || '',
+        },
       },
       tablet: {
         ...defaultStyles(),
         container: {
           ...containerDefaultStyles(),
           stylingBox: prev.stylingBox || '{}',
-          style: prev.style || ''
-        }
-      }
+          style: prev.style || '',
+        },
+      },
     }))
     .add<IAttachmentsEditorProps>(8, (prev) => ({ ...prev, downloadZip: prev.downloadZip || false, propertyName: prev.propertyName ?? '' }))
     .add<IAttachmentsEditorProps>(9, (prev) => ({ ...prev, propertyName: prev.propertyName ?? '', onChangeCustom: prev?.onFileChanged }))
     .add<IAttachmentsEditorProps>(10, (prev) => ({
       ...prev, desktop: { ...prev.desktop, downloadedFileStyles: { ...downloadedFileDefaultStyles() } },
       mobile: { ...prev.mobile, downloadedFileStyles: { ...downloadedFileDefaultStyles() } },
-      tablet: { ...prev.tablet, downloadedFileStyles: { ...downloadedFileDefaultStyles() } }
+      tablet: { ...prev.tablet, downloadedFileStyles: { ...downloadedFileDefaultStyles() } },
     }))
     .add<IAttachmentsEditorProps>(11, (prev: IAttachmentsEditorProps & LegacyStyleProps) => {
       // Handle components with root-level styling properties from legacy imports

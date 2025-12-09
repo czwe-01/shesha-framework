@@ -57,15 +57,15 @@ export const uploadFileErrorAction = createAction<IStoredFilesStateContext, ISto
 
 export const replaceFileRequestAction = createAction<IStoredFilesStateContext, string>(
   StoredFilesActionEnums.ReplaceFileRequest,
-  (fileId) => ({ fileId })
+  (fileId) => ({ fileId }),
 );
 export const replaceFileSuccessAction = createAction<IStoredFilesStateContext, { originalFileId: string; newFile: IStoredFile }>(
   StoredFilesActionEnums.ReplaceFileSuccess,
-  (payload: { originalFileId: string; newFile: IStoredFile }) => payload
+  (payload: { originalFileId: string; newFile: IStoredFile }) => payload,
 );
 export const replaceFileErrorAction = createAction<IStoredFilesStateContext, string>(
   StoredFilesActionEnums.ReplaceFileError,
-  (fileId) => ({ fileId })
+  (fileId) => ({ fileId }),
 );
 
 export const deleteFileRequestAction = createAction<IStoredFilesStateContext, string>(
