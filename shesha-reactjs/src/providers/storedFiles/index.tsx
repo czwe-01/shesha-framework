@@ -51,6 +51,9 @@ import DataContextBinder from '../dataContextProvider/dataContextBinder';
 import { fileListContextCode } from '@/publicJsApis';
 import ConditionalWrap from '@/components/conditionalWrapper';
 import { isValidGuid } from '@/components/formDesigner/components/utils';
+import { IEntityTypeIdentifier } from '../sheshaApplication/publicApi/entities/models';
+import { getEntityTypeIdentifierQueryParams, isEntityTypeIdentifier } from '../metadataDispatcher/entities/utils';
+import { extractAjaxResponse, isAjaxSuccessResponse } from '@/interfaces/ajaxResponse';
 
 export interface IStoredFilesProviderProps {
   name?: string;
@@ -230,7 +233,7 @@ const StoredFilesProvider: FC<PropsWithChildren<IStoredFilesProviderProps>> = ({
     dispatch(uploadFileRequestAction(newFile));
 
     uploadFileHttp(uploadFileEndpoint, formData)
-      .then((response) => {
+      .then((response: IAjaxResponse<IStoredFile>) => {
         const responseFile = extractAjaxResponse(response);
         responseFile.uid = newFile.uid;
         dispatch(uploadFileSuccessAction({ ...responseFile }));
@@ -316,8 +319,8 @@ const StoredFilesProvider: FC<PropsWithChildren<IStoredFilesProviderProps>> = ({
     dispatch(replaceFileRequestAction(fileId));
 
     replaceFileHttp(replaceFileEndpoint, formData)
-      .then((response) => {
-        const responseFile = response.result as IStoredFile;
+      .then((response: IAjaxResponse<IStoredFile>) => {
+        const responseFile = extractAjaxResponse(response);
         responseFile.uid = responseFile.id;
         dispatch(replaceFileSuccessAction({ originalFileId: fileId, newFile: { ...responseFile } }));
 
