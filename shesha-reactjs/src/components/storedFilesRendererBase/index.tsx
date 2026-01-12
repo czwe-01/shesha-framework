@@ -443,7 +443,9 @@ export const StoredFilesRendererBase: FC<IStoredFilesRendererBaseProps> = ({
           />
           {/* Custom Actions Button Group */}
           {customActions && customActions.length > 0 && (
-            <div onClick={(e) => e.stopPropagation()}>
+            <div onClick={(e) => {e.stopPropagation();
+              console.log("File context data  :: ", getFileContextData(file, fileId));
+            }}>
               <DataContextProvider
                 id={`file_ctx_${fileId}`}
                 name="fileContext"

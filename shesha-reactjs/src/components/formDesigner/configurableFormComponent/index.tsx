@@ -108,7 +108,7 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
   // and no margins (since wrapper handles margins as padding)
   const renderComponentModel = useMemo(() => {
     const deviceDimensions = getDeviceDimensions();
-    const stylingBoxWithoutMargins = removeMarginsFromStylingBox(componentModel.stylingBox);
+    const stylingBoxWithoutMargins = removeMarginsFromStylingBox(stylingBoxAsCSS);
 
     return {
       ...componentModel,

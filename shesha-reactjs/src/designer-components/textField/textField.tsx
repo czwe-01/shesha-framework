@@ -34,14 +34,11 @@ const TextFieldComponent: TextFieldComponentDefinition = {
       dataFormat === StringFormats.password),
   calculateModel: (model, allData) => ({ eventHandlers: getAllEventHandlers(model, allData) }),
   Factory: ({ model, calculatedModel }) => {
-    const shaForm = useShaFormInstance();
     const { styles } = useStyles({ fontFamily: model?.font?.type, fontWeight: model?.font?.weight, textAlign: model?.font?.align, color: model?.font?.color, fontSize: model?.font?.size });
     const InputComponentType = useMemo(() => model.textType === 'password' ? Input.Password : Input, [model.textType]);
 
     // In designer mode, use 100% dimensions; otherwise use calculated dimensions
-    const inputDimensionStyles = shaForm.formMode === 'designer'
-      ? { width: '100%', height: '100%' }
-      : model.allStyles.dimensionsStyles;
+    const inputDimensionStyles = { width: '100%', height: '100%' };
 
     const finalStyle = useMemo(() => !model.enableStyleOnReadonly && model.readOnly ? {
       ...model.allStyles.fontStyles,

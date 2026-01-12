@@ -95,13 +95,12 @@ export const createRootContainerStyle = (
  * Used in designer mode to prevent double-application of margins
  * since the wrapper already handles margins as padding.
  */
-export const removeMarginsFromStylingBox = (stylingBox: string | undefined): string => {
+export const removeMarginsFromStylingBox = (stylingBox: CSSProperties): string => {
   if (!stylingBox) return JSON.stringify({});
 
   try {
-    const parsed = JSON.parse(stylingBox);
     return JSON.stringify({
-      ...parsed,
+      ...stylingBox,
       marginTop: 0,
       marginBottom: 0,
       marginLeft: 0,
