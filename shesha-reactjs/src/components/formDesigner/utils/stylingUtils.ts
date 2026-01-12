@@ -35,7 +35,7 @@ export const DEFAULT_FORM_ITEM_MARGINS = {
 export const createRootContainerStyle = (
   dimensions: CSSProperties,
   margins: StyleConfig,
-  isInput: boolean
+  isInput: boolean,
 ): CSSProperties => {
   const defaultMargins = isInput
     ? DEFAULT_FORM_ITEM_MARGINS.input

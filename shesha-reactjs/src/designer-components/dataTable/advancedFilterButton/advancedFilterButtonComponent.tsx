@@ -9,7 +9,7 @@ import { AdvancedFilterButton } from './advancedFilterButton';
 import { getSettings } from './settingsForm';
 import { defaultStyles } from './utils';
 import { useDataTableStore } from '@/providers';
-import { Alert } from 'antd';
+import { useStyles } from '@/designer-components/dataTable/tableContext/styles';
 
 const AdvancedFilterButtonComponent: IToolboxComponent<IButtonComponentProps> = {
   type: 'datatable.filter',
@@ -18,27 +18,34 @@ const AdvancedFilterButtonComponent: IToolboxComponent<IButtonComponentProps> = 
   icon: <FilterOutlined />,
   Factory: ({ model }) => {
     const store = useDataTableStore(false);
+    const { styles } = useStyles();
 
     const finalStyle = {
       ...model.allStyles.dimensionsStyles,
       ...(['primary', 'default'].includes(model.buttonType) && model.allStyles.borderStyles),
       ...model.allStyles.fontStyles,
       ...(['dashed', 'default'].includes(model.buttonType) && model.allStyles.backgroundStyles),
-      ...(['primary', 'default'].includes(model.buttonType) && model.allStyles.shadowStyles),
+      ...(['primary', 'default', 'dashed'].includes(model.buttonType) && model.allStyles.shadowStyles),
       ...model.allStyles.stylingBoxAsCSS,
       ...model.allStyles.jsStyle,
     };
-    return store ? (
-      model.hidden ? null : (
-        <AdvancedFilterButton {...model} styles={finalStyle} />
-      )
-    ) : (
-      <Alert
-        className="sha-designer-warning"
-        message="Table filter must be used within a Data Table Context"
-        type="warning"
-      />
-    );
+
+    if (model.hidden) return null;
+
+    if (!store) {
+      return (
+        <div className={styles.hintContainer}>
+          <div className={styles.disabledComponentWrapper}>
+            <div className={styles.filterButtonMockup}>
+              <FilterOutlined style={{ color: '#8c8c8c', marginRight: '8px' }} />
+              Table Filter
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return <AdvancedFilterButton {...model} styles={finalStyle} />;
   },
   initModel: (model) => {
     return {
@@ -47,12 +54,16 @@ const AdvancedFilterButtonComponent: IToolboxComponent<IButtonComponentProps> = 
       label: '',
     };
   },
-  settingsFormMarkup: (data) => getSettings(data),
-  validateSettings: (model) => validateConfigurableComponentSettings(getSettings(model), model),
+  settingsFormMarkup: getSettings,
+  validateSettings: (model) => validateConfigurableComponentSettings(getSettings, model),
   migrator: (m) =>
     m
       .add<IButtonComponentProps>(3, (prev) => migrateReadOnly(prev, 'inherited'))
-      .add<IButtonComponentProps>(4, (prev) => ({ ...migratePrevStyles(prev, defaultStyles(prev)) })),
+      .add<IButtonComponentProps>(4, (prev) => ({ ...migratePrevStyles(prev, defaultStyles(prev)) }))
+      .add<IButtonComponentProps>(5, (prev, context) => ({
+        ...prev,
+        editMode: (context.isNew ? 'editable' : prev.editMode),
+      })),
 };
 
 export default AdvancedFilterButtonComponent;

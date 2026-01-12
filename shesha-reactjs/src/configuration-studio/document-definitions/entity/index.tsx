@@ -3,20 +3,29 @@ import { DocumentDefinition, ItemEditorProps, ProviderRendererProps, ITEM_TYPES 
 
 import { DocumentInstance } from "@/configuration-studio/cs/documentInstance";
 import { EntityToolbar } from "./toolbar";
-import { Form } from "antd";
+import { Form, Space } from "antd";
 import ModelConfiguratorRenderer from "@/components/modelConfigurator/renderer";
 import { ModelConfiguratorProvider, useModelConfigurator } from "@/providers";
+import { useConfigurationStudio } from "@/configuration-studio/cs/contexts";
 
 export const EntityDocumentDefinition: DocumentDefinition = {
   documentType: ITEM_TYPES.ENTITY,
   Editor: ({ doc }: ItemEditorProps): ReactNode => {
-    const { load } = useModelConfigurator();
+    const cs = useConfigurationStudio();
+    const { load, saveForm, isModified } = useModelConfigurator();
+
     useEffect(() => {
       doc.setLoader(() => {
         load();
         return Promise.resolve();
       });
-    }, [doc, load]);
+      doc.setSaver(async (): Promise<void> => {
+        await saveForm();
+      });
+    }, [cs, doc, load, saveForm]);
+    useEffect(() => {
+      cs.setDocumentModified(doc.itemId, isModified);
+    }, [cs, doc, isModified]);
     return (
       <div>
         <ModelConfiguratorRenderer />
@@ -33,7 +42,11 @@ export const EntityDocumentDefinition: DocumentDefinition = {
   },
   Toolbar: (_props: ItemEditorProps): ReactNode => {
     return (
-      <EntityToolbar />
+      <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Space direction="horizontal" size={5}>
+          <EntityToolbar />
+        </Space>
+      </div>
     );
   },
   documentInstanceFactory: (args) => {

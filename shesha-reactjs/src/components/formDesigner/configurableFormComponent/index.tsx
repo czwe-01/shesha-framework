@@ -21,7 +21,7 @@ import { isPropertySettings } from '@/designer-components/_settings/utils';
 import { Show } from '@/components/show';
 import { Tooltip } from 'antd';
 import { ShaForm, useIsDrawingForm } from '@/providers/form';
-import { useFormDesignerState, useFormDesignerStateSelector } from '@/providers/formDesigner';
+import { useFormDesigner, useFormDesignerReadOnly, useFormDesignerSelectedComponentId } from '@/providers/formDesigner';
 import { useStyles } from '../styles/styles';
 import { ComponentProperties } from '../componentPropertiesPanel/componentProperties';
 import { useFormDesignerComponentGetter } from '@/providers/form/hooks';
@@ -103,7 +103,7 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
   // Get component dimensions (handles special cases like DataTable context)
   const componentDimensions = useMemo(() =>
     getComponentDimensions(typeInfo, dimensionsStyles),
-    [typeInfo, dimensionsStyles]
+  [typeInfo, dimensionsStyles],
   );
 
   // Create the model for rendering - components receive 100% dimensions
@@ -128,7 +128,7 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
   // Create wrapper style - owns dimensions and margins
   const rootContainerStyle = useMemo(() =>
     createRootContainerStyle(componentDimensions, margins, component.isInput),
-    [componentDimensions, margins, component.isInput]
+  [componentDimensions, margins, component.isInput],
   );
 
   return (
@@ -195,7 +195,9 @@ const ConfigurableFormComponentDesignerMemo = memo(ConfigurableFormComponentDesi
 
 export const ConfigurableFormComponentDesigner: FC<IConfigurableFormComponentDesignerProps> = (props) => {
   const allData = useAvailableConstantsData({ topContextId: DataContextTopLevels.All });
-  const { selectedComponentId, readOnly, settingsPanelRef } = useFormDesignerState();
+  const { settingsPanelRef } = useFormDesigner();
+  const selectedComponentId = useFormDesignerSelectedComponentId();
+  const readOnly = useFormDesignerReadOnly();
   const hidden = getActualPropertyValue(props.componentModel, allData, 'hidden')?.hidden;
   const componentEditMode = getActualPropertyValue(props.componentModel, allData, 'editMode')?.editMode as EditMode;
 

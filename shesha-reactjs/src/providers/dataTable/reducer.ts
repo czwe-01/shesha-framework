@@ -8,6 +8,7 @@ import {
   IDataTableStateContext,
   ISelectionProps,
 } from './contexts';
+import { IModelValidation } from '@/utils/errors';
 import {
   DataTableActionEnums,
   IChangeFilterAction,
@@ -33,6 +34,7 @@ import {
 import { getTableDataColumn, prepareColumn } from './utils';
 import { Row } from 'react-table';
 import { ProperyDataType } from '@/interfaces/metadata';
+import { IEntityTypeIdentifier } from '../sheshaApplication/publicApi/entities/models';
 
 /** get dirty filter if exists and fallback to current filter state */
 const getDirtyFilter = (state: IDataTableStateContext): ITableFilter[] => {
@@ -111,7 +113,7 @@ const reducer = handleActions<IDataTableStateContext, any>(
 
     /** Table Context */
 
-    [DataTableActionEnums.SetModelType]: (state: IDataTableStateContext, action: ReduxActions.Action<string>) => {
+    [DataTableActionEnums.SetModelType]: (state: IDataTableStateContext, action: ReduxActions.Action<string | IEntityTypeIdentifier>) => {
       const { payload } = action;
 
       return {
@@ -572,6 +574,18 @@ const reducer = handleActions<IDataTableStateContext, any>(
       };
     },
 
+    [DataTableActionEnums.SetContextValidation]: (
+      state: IDataTableStateContext,
+      action: ReduxActions.Action<IModelValidation | undefined>,
+    ) => {
+      const { payload } = action;
+
+      return {
+        ...state,
+        contextValidation: payload,
+      };
+    },
+
     [DataTableActionEnums.FetchGroupingColumnsSuccess]: (
       state: IDataTableStateContext,
       action: ReduxActions.Action<IFetchGroupingColumnsSuccessPayload>,
@@ -597,7 +611,8 @@ const reducer = handleActions<IDataTableStateContext, any>(
 
           dataType: column.dataType as ProperyDataType,
           dataFormat: column.dataFormat,
-          entityReferenceTypeShortAlias: column.entityReferenceTypeShortAlias,
+          entityTypeName: column.entityTypeName,
+          entityTypeModule: column.entityTypeModule,
           referenceListName: column.referenceListName,
           referenceListModule: column.referenceListModule,
           allowInherited: column.allowInherited,

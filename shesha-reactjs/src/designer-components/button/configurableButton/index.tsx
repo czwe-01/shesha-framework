@@ -7,11 +7,13 @@ import { useConfigurableActionDispatcher } from '@/providers/configurableActions
 import { useAvailableConstantsData } from '@/providers/form/utils';
 import { DataContextTopLevels, isNavigationActionConfiguration, useShaRouting, useTheme } from '@/index';
 import { useAsyncMemo } from '@/hooks/useAsyncMemo';
+import { IFullAuditedEntity } from '@/publicJsApis/entities';
 import { useStyles } from './style';
+
 export interface IConfigurableButtonProps extends Omit<IButtonItem, 'style' | 'itemSubType'> {
   style?: CSSProperties;
   form: FormInstance<any>;
-  dynamicItem?: any;
+  dynamicItem?: IFullAuditedEntity;
 }
 
 export const ConfigurableButton: FC<IConfigurableButtonProps> = (props) => {
@@ -74,17 +76,21 @@ export const ConfigurableButton: FC<IConfigurableButtonProps> = (props) => {
       href={navigationUrl}
       title={props.tooltip}
       block={props.block}
+      disabled={buttonDisabled}
+      aria-disabled={buttonDisabled}
+      tabIndex={buttonDisabled ? -1 : undefined}
       loading={buttonLoading}
       onClick={onButtonClick}
       type={props.buttonType}
       danger={props.danger}
       icon={props.icon ? <ShaIcon iconName={props.icon as IconType} /> : undefined}
       iconPosition={props.iconPosition}
-      className={classNames('sha-toolbar-btn sha-toolbar-btn-configurable', styles.configurableButton, buttonDisabled && styles.disabled)}
+      className={classNames('sha-toolbar-btn sha-toolbar-btn-configurable', styles.configurableButton)}
       size={props?.size}
       style={{
         ...props?.style,
         ...(isSameUrl && { background: theme.application.primaryColor, color: theme.text.default }),
+        ...(buttonDisabled && { pointerEvents: "none" }),
       }}
     >
       {props.label}
