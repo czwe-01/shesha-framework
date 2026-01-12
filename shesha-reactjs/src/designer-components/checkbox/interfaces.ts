@@ -1,8 +1,10 @@
 import { IEventHandlers } from '@/components/formDesigner/components/utils';
 import { ComponentDefinition } from '@/interfaces';
-import { IConfigurableFormComponent } from '@/providers/form/models';
+import { IConfigurableFormComponent, IStyleType } from '@/providers/form/models';
 
-export type ICheckboxComponentProps = IConfigurableFormComponent;
+export type ICheckboxComponentProps = IConfigurableFormComponent & {
+  box?: IStyleType;
+};
 
 interface ICheckboxComponentCalulatedValues {
   eventHandlers?: IEventHandlers<any>;

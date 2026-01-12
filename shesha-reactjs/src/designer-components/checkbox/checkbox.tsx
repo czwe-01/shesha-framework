@@ -38,7 +38,7 @@ const CheckboxComponent: CheckboxComponentDefinition = {
   calculateModel: (model, allData) => ({ eventHandlers: getAllEventHandlers(model, allData) }),
   Factory: ({ model, calculatedModel }) => {
     // Get box dimensions if box styling is defined
-    const boxStyles = model.box ? useFormComponentStyles(model.checkbox) : null;
+    const boxStyles = model.box ? useFormComponentStyles(model.box) : null;
     const boxDimensions = boxStyles?.dimensionsStyles || {};
 
     const finalStyle = useMemo(() => !model.enableStyleOnReadonly && model.readOnly ? {
