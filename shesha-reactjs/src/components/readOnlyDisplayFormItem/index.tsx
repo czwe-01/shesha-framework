@@ -166,9 +166,9 @@ export const ReadOnlyDisplayFormItem: FC<IReadOnlyDisplayFormItemProps> = (props
   ]);
 
   return (
-    <span className={styles.readOnlyDisplayFormItem} style={style}>
+    <div className={styles.readOnlyDisplayFormItem} style={style}>
       {renderValue}
-    </span>
+    </div>
   );
 };
 

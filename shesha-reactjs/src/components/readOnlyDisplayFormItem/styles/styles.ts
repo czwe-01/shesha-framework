@@ -10,10 +10,6 @@ export const useStyles = createStyles(({ css, cx, prefixCls, token }, params: Us
 
   const readOnlyModeToggler = "read-only-mode-toggler";
   const readOnlyDisplayFormItem = cx("read-only-display-form-item", css`
-        width: 100%;
-        max-width: 100%;
-        overflow: hidden;
-        box-sizing: border-box;
 
         &.${prefixCls}-form-item {
             margin-bottom: unset;
@@ -58,8 +54,7 @@ export const useStyles = createStyles(({ css, cx, prefixCls, token }, params: Us
     margin-right: 8px;
     align-items: center;
     overflow: hidden;
-    text-overflow: ellipsis;
-    // white-space: nowrap;
+    
   `;
 
   const wrapper = css`
@@ -70,6 +65,15 @@ export const useStyles = createStyles(({ css, cx, prefixCls, token }, params: Us
     padding: 4px;
     box-sizing: border-box;
     justify-content: ${textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start'};
+    text-overflow: ellipsis;
+    overflow: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    ::-webkit-scrollbar { 
+      width: 0;
+      height: 0;
+    }
   `;
 
   return {

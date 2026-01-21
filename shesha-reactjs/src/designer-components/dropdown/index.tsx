@@ -40,7 +40,7 @@ const DropdownComponent: DropdownComponentDefinition = {
 
     const finalStyle = model.readOnly
       ? model.enableStyleOnReadonly
-        ? { ...model.allStyles.fontStyles, ...model.allStyles.dimensionsStyles }
+        ? { ...model.allStyles.fontStyles, ...model.allStyles.dimensionsStyles,  overflow: 'auto' }
         : { ...model.allStyles.fontStyles, ...model.allStyles.dimensionsStyles, ...model.allStyles.backgroundStyles, overflow: 'auto' }
       : { ...model.allStyles.fullStyle, overflow: 'auto' };
 

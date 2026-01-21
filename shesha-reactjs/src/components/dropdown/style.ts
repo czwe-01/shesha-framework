@@ -17,10 +17,12 @@ export const useStyles = createStyles(({ css, cx, token }, { style }: { style: C
             justify-content: ${style.textAlign};
         }
 
-        scrollbar-width: thin;
-        ::-webkit-scrollbar {
-            width: 8px;
-            background-color: transparent;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+
+        ::-webkit-scrollbar { 
+          width: 0;
+          height: 0;
         }
     }
 
