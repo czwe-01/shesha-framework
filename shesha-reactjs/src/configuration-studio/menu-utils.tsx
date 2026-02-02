@@ -52,10 +52,6 @@ const buildConfiguraitonItemActionsMenu = ({ configurationStudio, node }: BuildN
         await configurationStudio.showRevisionHistoryAsync(node);
       },
     },
-    {
-      label: "View Json Config",
-      key: "viewJsonConfig",
-    },
   ];
 };
 
@@ -119,11 +115,11 @@ const buildExposeAndImportExportMenu = ({ configurationStudio: cs, node }: Build
 const buildCreateNewItemsMenu = ({ node, configurationStudio }: BuildNodeMenuArgs): MenuItemType[] => {
   if (!node)
     return [];
-  const buildCreateCIMenuItem = (label: string, itemType: string): MenuItemType => {
+  const buildCreateCIMenuItem = (label: string, itemType: string, discriminator: string): MenuItemType => {
     return {
       label: label,
-      key: itemType,
-      icon: getIcon(TreeNodeType.ConfigurationItem, itemType),
+      key: discriminator,
+      icon: getIcon(configurationStudio.csEnvironment, TreeNodeType.ConfigurationItem, itemType),
       onClick: async (): Promise<void> => {
         await configurationStudio.createItemAsync({
           moduleId: node.moduleId,
@@ -136,6 +132,7 @@ const buildCreateNewItemsMenu = ({ node, configurationStudio }: BuildNodeMenuArg
             ? node.id
             : undefined,
           itemType: itemType,
+          discriminator: discriminator,
         });
       },
     };
@@ -145,7 +142,7 @@ const buildCreateNewItemsMenu = ({ node, configurationStudio }: BuildNodeMenuArg
     {
       label: "Folder",
       key: "folder",
-      icon: getIcon(TreeNodeType.Folder),
+      icon: getIcon(configurationStudio.csEnvironment, TreeNodeType.Folder),
       onClick: (): void => {
         configurationStudio.createFolderAsync({
           moduleId: node.moduleId,
@@ -161,7 +158,7 @@ const buildCreateNewItemsMenu = ({ node, configurationStudio }: BuildNodeMenuArg
 
   configurationStudio.itemTypes.forEach((it) => {
     if (it.createFormId)
-      result.push(buildCreateCIMenuItem(it.friendlyName, it.itemType));
+      result.push(buildCreateCIMenuItem(it.friendlyName, it.itemType, it.discriminator));
   });
 
   return result;
@@ -179,7 +176,7 @@ const buildConfigurationItemNodeContextMenu = (args: BuildNodeMenuArgs<ConfigIte
       label: "Open",
       key: "open",
       onClick: () => {
-        configurationStudio.activateDocumentById(node.id);
+        configurationStudio.selectTreeNode(node);
       },
     });
   result.push({

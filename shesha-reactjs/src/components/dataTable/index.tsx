@@ -3,7 +3,6 @@ import { ModalProps } from 'antd/lib/modal';
 import React, { CSSProperties, FC, Fragment, MutableRefObject, ReactElement, useEffect, useMemo } from 'react';
 import { Column, ColumnInstance, SortingRule, TableProps } from 'react-table';
 import { usePrevious } from 'react-use';
-import { ValidationErrors } from '..';
 import {
   IFlatComponentsStructure,
   ROOT_COMPONENT_KEY,
@@ -49,11 +48,11 @@ import { IShadowValue } from '@/designer-components/_settings/utils/shadow/inter
 import { isEqual } from 'lodash';
 import { Collapse, Typography } from 'antd';
 import { RowsReorderPayload } from '@/providers/dataTable/repository/interfaces';
-import { useStyles } from './styles/styles';
 import { adjustWidth } from './cell/utils';
 import { getCellStyleAccessor } from './utils';
 import { isPropertiesArray } from '@/interfaces/metadata';
 import { IBeforeRowReorderArguments, IAfterRowReorderArguments } from '@/designer-components/dataTable/tableContext/models';
+import { StandaloneTable } from '@/designer-components/dataTable/table/standaloneTable';
 
 export interface IIndexTableOptions {
   omitClick?: boolean;
@@ -110,6 +109,16 @@ export interface IIndexTableProps extends IShaDataTableProps, TableProps {
   rowPadding?: string;
   rowBorder?: string;
   rowBorderStyle?: IBorderValue;
+
+  // Body font styling
+  bodyFontFamily?: string;
+  bodyFontSize?: string;
+  bodyFontWeight?: number & {} | string;
+  bodyFontColor?: string;
+
+  // Action column icon styling
+  actionIconSize?: string | number;
+  actionIconColor?: string;
 
   // Cell styling
   cellTextColor?: string;
@@ -191,9 +200,16 @@ export const DataTable: FC<Partial<IIndexTableProps>> = ({
   rowBorderStyle,
   boxShadow,
   sortableIndicatorColor,
+  bodyFontFamily,
+  bodyFontSize,
+  bodyFontWeight,
+  bodyFontColor,
+  actionIconSize,
+  actionIconColor,
+  columnsMismatch,
   ...props
 }) => {
-  const store = useDataTableStore();
+  const store = useDataTableStore(false);
   const mode = selectionMode ?? (useMultiSelect ? 'multiple' : 'single');
   const multiSelect = mode === 'multiple';
   const appContext = useAvailableConstantsData();
@@ -213,6 +229,7 @@ export const DataTable: FC<Partial<IIndexTableProps>> = ({
     isFetchingTableData,
     totalPages,
     columns,
+    configurableColumns,
     groupingColumns,
     pageSizeOptions,
     currentPage,
@@ -349,15 +366,16 @@ export const DataTable: FC<Partial<IIndexTableProps>> = ({
       onRowsChanged(tableData);
     }
   }, [tableData]);
-  const { styles } = useStyles();
 
-  const metadata = useMetadata(false)?.metadata;
+  const entityMetadata = useMetadata(false);
+  const metadata = entityMetadata?.metadata;
 
   const handleRowDoubleClick = useMemo(() => {
     if (!onRowDoubleClick?.actionName) return undefined;
 
     return (row: any, rowIndex: number) => {
-      const evaluationContext = { ...appContext, data: row, rowIndex };
+      const currentSelectedRow = { index: rowIndex, row: row, id: row?.id };
+      const evaluationContext = { ...appContext, data: row, rowIndex, selectedRow: currentSelectedRow };
 
       try {
         executeAction({
@@ -460,7 +478,6 @@ export const DataTable: FC<Partial<IIndexTableProps>> = ({
         );
       }
     }
-    return false;
   };
 
   const crudOptions = useMemo(() => {
@@ -483,6 +500,11 @@ export const DataTable: FC<Partial<IIndexTableProps>> = ({
       enabled: result.canAdd || result.canDelete || result.canEdit,
     };
   }, [props.canDeleteInline, inlineEditMode, props.canEditInline, props.canAddInline, appContext.contexts.lastUpdate]);
+
+  // Check if there's a crud operations column - if so, disable row selection
+  const hasCrudOperationsColumn = useMemo(() => {
+    return columns.filter((c) => !!c.show).some((c) => c.columnType === 'crud-operations');
+  }, [columns]);
 
   const preparedColumns = useMemo<Column<any>[]>(() => {
     const localPreparedColumns = columns
@@ -914,14 +936,16 @@ export const DataTable: FC<Partial<IIndexTableProps>> = ({
     useMultiSelect: multiSelect,
     selectionMode: mode,
     freezeHeaders,
-    onSelectRow: onSelectRowLocal,
+    // Disable row selection when there's a crud operations column
+    onSelectRow: hasCrudOperationsColumn ? undefined : onSelectRowLocal,
     onRowDoubleClick: combinedDblClickHandler,
     onSelectedIdsChanged: mode === 'multiple' ? changeSelectedIds : undefined,
     onMultiRowSelect: mode === 'multiple' ? onMultiRowSelect : undefined,
     onSort, // Update it so that you can pass it as param. Quick fix for now
     columns: preparedColumns,
     // Only use selectedRowIndex in single mode; in multiple mode, row.isSelected controls highlighting
-    selectedRowIndex: mode === 'single' ? selectedRowIndex : undefined,
+    // Disable row selection highlighting when there's a crud operations column
+    selectedRowIndex: mode === 'single' && !hasCrudOperationsColumn ? selectedRowIndex : undefined,
     loading: isFetchingTableData,
     pageCount: totalPages,
     manualFilters: true, // informs React Table that you'll be handling sorting and pagination server-side
@@ -952,8 +976,8 @@ export const DataTable: FC<Partial<IIndexTableProps>> = ({
     inlineDisplayComponents,
     minHeight: props.minHeight,
     maxHeight: props.maxHeight,
-    noDataText,
-    noDataSecondaryText,
+    noDataText: noDataText,
+    noDataSecondaryText: noDataSecondaryText,
     noDataIcon,
     allowReordering: allowReordering && reorderingAvailable,
     onRowsReordered: handleRowsReordered,
@@ -999,15 +1023,32 @@ export const DataTable: FC<Partial<IIndexTableProps>> = ({
     headerShadow: props.headerShadow,
     rowShadow: props.rowShadow,
     rowDividers: props.rowDividers,
+    bodyFontFamily,
+    bodyFontSize,
+    bodyFontWeight,
+    bodyFontColor,
+    actionIconSize,
+    actionIconColor,
   };
+
+  // Always render ReactTable - it handles empty columns gracefully
+  // Only show StandaloneTable in designer mode when there are truly no configured columns
+  // Only show StandaloneTable when:
+  // 1. In designer mode
+  // 2. configurableColumns has been initialized (not undefined) AND is empty
+  // 3. columns (from store) is also empty
+  // This prevents showing StandaloneTable during initial load before columns are registered
+  const shouldShowStandaloneTable =
+    configurableColumns !== undefined && configurableColumns.length === 0 &&
+    (!columns || columns.length === 0);
 
   return (
     <Fragment>
-      <div className={styles.shaChildTableErrorContainer}>
-        {exportToExcelError && <ValidationErrors error="Error occurred while exporting to excel" />}
-      </div>
-
-      {tableProps.columns && tableProps.columns.length > 0 && <ReactTable {...tableProps} />}
+      {shouldShowStandaloneTable ? (
+        <StandaloneTable items={[]} type="" id="" />
+      ) : (
+        <ReactTable {...tableProps} />
+      )}
     </Fragment>
   );
 };

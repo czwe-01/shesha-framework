@@ -47,6 +47,7 @@ export const SPECIAL_NODES: { HOME: SpecialTreeNode; SETTINGS: SpecialTreeNode }
     title: "Home",
     icon: <HomeOutlined />,
     description: '',
+    itemType: 'home',
   },
   SETTINGS: {
     id: 'settings',
@@ -58,7 +59,13 @@ export const SPECIAL_NODES: { HOME: SpecialTreeNode; SETTINGS: SpecialTreeNode }
     title: "Settings",
     icon: <SettingOutlined />,
     description: '',
+    itemType: 'settings',
   },
+};
+
+type IndexedItem<T> = {
+  value: T;
+  originalIndex: number;
 };
 
 type DynamicProperties<K extends string | number | symbol, T> = {
@@ -106,7 +113,7 @@ interface ConfigurationStudioArguments {
 export class ConfigurationStudio implements IConfigurationStudio {
   forceRootUpdate: ForceUpdateTrigger;
 
-  private csEnvironment: IConfigurationStudioEnvironment;
+  csEnvironment: IConfigurationStudioEnvironment;
 
   private httpClient: HttpClientApi;
 
@@ -427,6 +434,7 @@ export class ConfigurationStudio implements IConfigurationStudio {
         return definition.documentInstanceFactory({
           // cs: this,
           itemId: d.itemId,
+          discriminator: node.discriminator,
           label: node.name,
           moduleId: node.moduleId,
           moduleName: node.moduleName,
@@ -441,6 +449,7 @@ export class ConfigurationStudio implements IConfigurationStudio {
 
         return definition.documentInstanceFactory({
           itemId: d.itemId,
+          discriminator: node.itemType,
           label: node.name,
           moduleId: node.moduleId,
           moduleName: "",
@@ -480,6 +489,7 @@ export class ConfigurationStudio implements IConfigurationStudio {
 
     const newDocument = definition.documentInstanceFactory({
       itemId: node.id,
+      discriminator: node.discriminator,
       label: node.name,
       moduleId: node.moduleId,
       moduleName: node.moduleName,
@@ -503,6 +513,7 @@ export class ConfigurationStudio implements IConfigurationStudio {
 
     const newDocument = definition.documentInstanceFactory({
       itemId: node.id,
+      discriminator: node.itemType,
       label: node.name,
       moduleId: node.moduleId,
       moduleName: "",
@@ -589,7 +600,7 @@ export class ConfigurationStudio implements IConfigurationStudio {
     this.notifySubscribers(['tabs', 'doc']);
 
     // if the document was active - activate next if available
-    if (activateNextTab && isActive) {
+    if (activateNextTab || isActive) {
       const indexToSwitch = this.docs.length - 1 >= index
         ? index
         : index - 1;
@@ -609,12 +620,16 @@ export class ConfigurationStudio implements IConfigurationStudio {
   closeMultipleDocumentsAsync = async (predicate: (doc: IDocumentInstance, index: number) => boolean, confirmUnsavedChanges: boolean): Promise<void> => {
     const activeDoc = this.activeDocument;
     // build list of reversed docs with active one on top of it
-    const allDocs = activeDoc
-      ? [...this.docs.filter((t) => t !== activeDoc), activeDoc]
-      : [...this.docs];
-    allDocs.reverse();
+    const indexedDocs = this.docs.map<IndexedItem<IDocumentInstance>>((d, idx) => ({ value: d, originalIndex: idx }));
+    if (activeDoc) {
+      const activeDocIndex = indexedDocs.findIndex((d) => d.value === activeDoc);
+      const [activeDocElement] = indexedDocs.splice(activeDocIndex, 1);
+      if (activeDocElement)
+        indexedDocs.push(activeDocElement);
+    }
+    indexedDocs.reverse();
 
-    const docsToClose = allDocs.filter(predicate);
+    const docsToClose = indexedDocs.filter((item) => predicate(item.value, item.originalIndex)).map((item) => item.value);
 
     const last = docsToClose.at(-1);
     for (const doc of docsToClose) {
@@ -693,20 +708,24 @@ export class ConfigurationStudio implements IConfigurationStudio {
     this._itemTypesMap.clear();
     this._itemTypes = [];
 
+    // const definition = this.csEnvironment.getDocumentDefinition(node.itemType);
     backEndItemTypes.forEach((it) => {
+      const frontEndDefinition = this.csEnvironment.getDocumentDefinition(it.itemType);
       const definition: ItemTypeDefinition = {
         itemType: it.itemType,
+        discriminator: it.discriminator,
         entityClassName: it.entityClassName,
         friendlyName: it.friendlyName,
         createFormId: it.createFormId,
         renameFormId: it.renameFormId,
         // front-end specific
         icon: getIcon(
+          this.csEnvironment,
           TreeNodeType.ConfigurationItem,
           it.itemType,
           false,
         ),
-        editor: this.csEnvironment.getDocumentDefinition(it.itemType),
+        editor: frontEndDefinition,
       };
       this._itemTypes.push(definition);
       this._itemTypesMap.set(it.itemType, definition);
@@ -723,7 +742,7 @@ export class ConfigurationStudio implements IConfigurationStudio {
 
       // First pass: create map and shallow copies
       flatTreeNodes.forEach((node) => {
-        treeNodeMap.set(node.id, flatNode2TreeNode(node));
+        treeNodeMap.set(node.id, flatNode2TreeNode(this.csEnvironment, node));
       });
 
       // Second pass: build hierarchy
@@ -790,6 +809,17 @@ export class ConfigurationStudio implements IConfigurationStudio {
   };
 
   deleteFolderAsync = async (node: FolderTreeNode): Promise<void> => {
+    if (node.children.length > 0) {
+      await this.modalApi.warning({
+        title: 'Delete Folder',
+        content: (
+          <div>
+            The folder &quot;{node.name}&quot; cannot be deleted while it contains items.
+          </div>
+        ),
+      });
+      return;
+    }
     if (!await this.modalApi.confirmYesNoAsync({ title: 'Confirm Deletion', content: `Are you sure you want to delete '${node.name}'?` }))
       return;
 
@@ -828,7 +858,7 @@ export class ConfigurationStudio implements IConfigurationStudio {
     await doc.reloadDocumentAsync();
   };
 
-  createItemAsync = async ({ moduleId, folderId, itemType, prevItemId }: CreateItemArgs): Promise<void> => {
+  createItemAsync = async ({ moduleId, folderId, itemType, discriminator, prevItemId }: CreateItemArgs): Promise<void> => {
     this.log(`create item of type '${itemType}'`, { moduleId, folderId });
 
     const definition = this.getItemTypeDefinition(itemType);
@@ -844,6 +874,7 @@ export class ConfigurationStudio implements IConfigurationStudio {
         folderId: folderId,
         prevItemId: prevItemId,
         itemType: itemType,
+        discriminator: discriminator,
       },
     });
     await this.loadTreeAsync();

@@ -604,57 +604,8 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                     components: [...fbf()
                       .addCollapsiblePanel({
                         id: nanoid(),
-                        propertyName: 'pnlRowDimensions',
-                        label: 'Row Dimensions',
-                        labelAlign: 'right',
-                        ghost: true,
-                        collapsible: 'header',
-                        content: {
-                          id: nanoid(),
-                          components: [...fbf()
-                            .addSettingsInputRow({
-                              id: nanoid(),
-                              inline: true,
-                              inputs: [
-                                {
-                                  type: 'textField',
-                                  id: nanoid(),
-                                  label: "Height",
-                                  width: 85,
-                                  propertyName: "rowDimensions.height",
-                                  icon: "heightIcon",
-                                  tooltip: "Row height. You can use any unit (%, px, em, etc). px by default if without unit",
-                                },
-                                {
-                                  type: 'textField',
-                                  id: nanoid(),
-                                  label: "Min Height",
-                                  width: 85,
-                                  hideLabel: true,
-                                  propertyName: "rowDimensions.minHeight",
-                                  icon: "minHeightIcon",
-                                  tooltip: "Minimum row height. Rows will not be smaller than this value",
-                                },
-                                {
-                                  type: 'textField',
-                                  id: nanoid(),
-                                  label: "Max Height",
-                                  width: 85,
-                                  hideLabel: true,
-                                  propertyName: "rowDimensions.maxHeight",
-                                  icon: "maxHeightIcon",
-                                  tooltip: "Maximum row height. Rows will not be taller than this value",
-                                },
-                              ],
-                            })
-                            .toJson(),
-                          ],
-                        },
-                      })
-                      .addCollapsiblePanel({
-                        id: nanoid(),
                         propertyName: 'rowPaddingPanel',
-                        label: 'Padding',
+                        label: 'Cell Padding',
                         labelAlign: 'right',
                         ghost: true,
                         collapsible: 'header',
@@ -706,6 +657,43 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                             .toJson(),
                           ],
                         },
+                      })
+                      .toJson(),
+                    ],
+                  },
+                })
+                .addCollapsiblePanel({
+                  id: nanoid(),
+                  propertyName: 'actionIconStyling',
+                  label: 'Action Column Icons',
+                  labelAlign: 'right',
+                  ghost: true,
+                  parentId: appearanceTabId,
+                  collapsible: 'header',
+                  className: 'ant-collapse-ghost',
+                  content: {
+                    id: nanoid(),
+                    components: [...fbf()
+                      .addSettingsInputRow({
+                        id: nanoid(),
+                        inputs: [
+                          {
+                            id: nanoid(),
+                            propertyName: 'actionIconSize',
+                            label: 'Icon Size',
+                            type: 'textField',
+                            tooltip: 'Size of action column icons (e.g., 16px, 1.2em). Inherits from table font size if not specified.',
+                            jsSetting: true,
+                          },
+                          {
+                            id: nanoid(),
+                            propertyName: 'actionIconColor',
+                            label: 'Icon Color',
+                            type: 'colorPicker',
+                            tooltip: 'Color of action column icons',
+                            jsSetting: true,
+                          },
+                        ],
                       })
                       .toJson(),
                     ],
@@ -875,6 +863,57 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                                   propertyName: "dimensions.maxHeight",
                                   icon: "maxHeightIcon",
                                   tooltip: "Maximum height. Default: auto",
+                                },
+                              ],
+                            })
+                            .toJson(),
+                          ],
+                        },
+                      })
+                      .addCollapsiblePanel({
+                        id: nanoid(),
+                        propertyName: 'pnlRowDimensions',
+                        label: 'Row Dimensions',
+                        labelAlign: 'right',
+                        ghost: true,
+                        parentId: styleRouterId,
+                        collapsible: 'header',
+                        content: {
+                          id: nanoid(),
+                          components: [...fbf()
+                            .addSettingsInputRow({
+                              id: nanoid(),
+                              parentId: styleRouterId,
+                              inline: true,
+                              inputs: [
+                                {
+                                  type: 'textField',
+                                  id: nanoid(),
+                                  label: "Height",
+                                  width: 85,
+                                  propertyName: "rowDimensions.height",
+                                  icon: "heightIcon",
+                                  tooltip: "Row height. You can use any unit (%, px, em, etc). px by default if without unit. Default: auto",
+                                },
+                                {
+                                  type: 'textField',
+                                  id: nanoid(),
+                                  label: "Min Height",
+                                  width: 85,
+                                  hideLabel: true,
+                                  propertyName: "rowDimensions.minHeight",
+                                  icon: "minHeightIcon",
+                                  tooltip: "Minimum row height. Rows will not be smaller than this value. Default: auto",
+                                },
+                                {
+                                  type: 'textField',
+                                  id: nanoid(),
+                                  label: "Max Height",
+                                  width: 85,
+                                  hideLabel: true,
+                                  propertyName: "rowDimensions.maxHeight",
+                                  icon: "maxHeightIcon",
+                                  tooltip: "Maximum row height. Rows will not be taller than this value. Default: auto",
                                 },
                               ],
                             })
@@ -1197,6 +1236,50 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                       })
                       .addCollapsiblePanel({
                         id: nanoid(),
+                        propertyName: 'cellStyling',
+                        label: 'Cell Styling',
+                        labelAlign: 'right',
+                        ghost: true,
+                        parentId: styleRouterId,
+                        collapsible: 'header',
+                        content: {
+                          id: nanoid(),
+                          components: [...fbf()
+                            .addSettingsInputRow({
+                              id: nanoid(),
+                              inputs: [
+                                {
+                                  id: nanoid(),
+                                  propertyName: 'cellBorderColor',
+                                  label: 'Cell Border Color',
+                                  type: 'colorPicker',
+                                  tooltip: 'Border color for table cells',
+                                  jsSetting: true,
+                                },
+                                {
+                                  id: nanoid(),
+                                  propertyName: 'cellBorders',
+                                  label: 'Show Cell Borders',
+                                  type: 'switch',
+                                  tooltip: 'Show borders around cells',
+                                  jsSetting: true,
+                                },
+                              ],
+                            })
+                            .addSettingsInput({
+                              id: nanoid(),
+                              propertyName: 'rowDividers',
+                              label: 'Row Dividers',
+                              inputType: 'switch',
+                              tooltip: 'Show horizontal dividing lines between rows',
+                              jsSetting: true,
+                            })
+                            .toJson(),
+                          ],
+                        },
+                      })
+                      .addCollapsiblePanel({
+                        id: nanoid(),
                         propertyName: 'customStyle',
                         label: 'Custom Styles',
                         labelAlign: 'right',
@@ -1231,71 +1314,6 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                                   description: 'The style that will be applied to the table',
                                 },
                               ],
-                            })
-                            .toJson(),
-                          ],
-                        },
-                      })
-                      .addCollapsiblePanel({
-                        id: nanoid(),
-                        propertyName: 'cellStyling',
-                        label: 'Cell Styling',
-                        labelAlign: 'right',
-                        ghost: true,
-                        parentId: styleRouterId,
-                        collapsible: 'header',
-                        content: {
-                          id: nanoid(),
-                          components: [...fbf()
-                            .addSettingsInputRow({
-                              id: nanoid(),
-                              inputs: [
-                                {
-                                  id: nanoid(),
-                                  propertyName: 'cellTextColor',
-                                  label: 'Cell Text Color',
-                                  type: 'colorPicker',
-                                  tooltip: 'Text color for table cells',
-                                  jsSetting: true,
-                                },
-                                {
-                                  id: nanoid(),
-                                  propertyName: 'cellBackgroundColor',
-                                  label: 'Cell Background',
-                                  type: 'colorPicker',
-                                  tooltip: 'Background color for table cells',
-                                  jsSetting: true,
-                                },
-                              ],
-                            })
-                            .addSettingsInputRow({
-                              id: nanoid(),
-                              inputs: [
-                                {
-                                  id: nanoid(),
-                                  propertyName: 'cellBorderColor',
-                                  label: 'Cell Border Color',
-                                  type: 'colorPicker',
-                                  tooltip: 'Border color for table cells',
-                                  jsSetting: true,
-                                },
-                                {
-                                  id: nanoid(),
-                                  propertyName: 'cellBorders',
-                                  label: 'Show Cell Borders',
-                                  type: 'switch',
-                                  tooltip: 'Show borders around cells',
-                                  jsSetting: true,
-                                },
-                              ],
-                            })
-                            .addSettingsInput({
-                              id: nanoid(),
-                              propertyName: 'rowDividers',
-                              label: 'Row Dividers',
-                              inputType: 'switch',
-                              tooltip: 'Show horizontal dividing lines between rows',
-                              jsSetting: true,
                             })
                             .toJson(),
                           ],

@@ -10,6 +10,7 @@ interface IModelInterface {
   downloadZip?: boolean;
   listType?: listType;
   fontStyles?: CSSProperties;
+  hasFiles?: boolean;
 };
 
 export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = {}, model = {}, containerStyles = {}, downloadedFileStyles }: { style: CSSProperties; model: IModelInterface; containerStyles: CSSProperties; downloadedFileStyles: CSSProperties }) => {
@@ -25,7 +26,7 @@ export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = 
     minWidth: containerMinWidth, marginTop, marginLeft, marginRight, marginBottom, paddingTop,
     paddingLeft, paddingRight, paddingBottom, ...restContainerStyles } = containerStyles;
 
-  const { gap, layout, isDragger } = model;
+  const { gap, layout, hasFiles } = model;
 
   const storedFilesRendererBtnContainer = "stored-files-renderer-btn-container";
   const storedFilesRendererNoFiles = "stored-files-renderer-no-files";
@@ -39,36 +40,34 @@ export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = 
   const colorBgTextHover = '#f0f0f0';
 
   const fileName = cx("item-file-name", css`
-    display: ${model.hideFileName ? 'none' : 'flex'};
-    color: ${color ?? token.colorPrimary} !important;
-    font-size: ${fontSize ?? '14px'} !important;
-    font-weight: ${fontWeight ?? '400'} !important;
-    font-family: ${fontFamily ?? 'Segoe UI'} !important;
-    text-align: ${textAlign ?? 'left'} !important;
-    justify-content: ${textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start'} !important;
-    margin: 2px 0px;
-    position: relative;
+    display: flex;
+    gap: 8px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex: 1;
-    cursor: pointer;
-    &:hover {
-      background-color: ${colorBgTextHover} !important;
-      opacity: 1 !important;
-      overflow: visible;
-      width: max-content;
-      min-width: 100%;
-      border-radius: 4px;
-      padding: 0 8px;
-      z-index: 999 !important;
+    justify-content: ${textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start'} !important;
+    flex: 1 !important;
+    .ant-typography {
+      display: ${model.hideFileName ? 'none' : 'block'};
+      color: ${color ?? token.colorPrimary} !important;
+      font-size: ${fontSize ?? '14px'} !important;
+      font-weight: ${fontWeight ?? '400'} !important;
+      font-family: ${fontFamily ?? 'Segoe UI'} !important;
+      text-align: ${textAlign ?? 'left'} !important;
+      margin: 2px 0px;
+      position: relative;
       white-space: nowrap;
-      justify-content: ${textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start'} !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      max-width: 100%;
+      min-width: 0;
     }
   `);
 
   const fileNameWrapper = cx("file-name-wrapper", css`
     display: ${model.hideFileName ? 'none' : 'flex'};
+    gap: 8px;
     cursor: pointer;
     &:hover {
       background-color: ${colorBgTextHover} !important;
@@ -98,11 +97,21 @@ export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = 
     }
 
     .item-file-name {
-      color: ${downloadedFileStyles?.color ?? color} !important;
-      font-size: ${downloadedFileStyles?.fontSize ?? fontSize} !important;
-      font-weight: ${downloadedFileStyles?.fontWeight ?? fontWeight} !important;
-      font-family: ${downloadedFileStyles?.fontFamily ?? fontFamily} !important;
-      text-align: ${downloadedFileStyles?.textAlign ?? textAlign} !important;
+      ${downloadedFileStyles?.textAlign === 'center' ? 'justify-content: center' : downloadedFileStyles?.textAlign === 'right' ? 'justify-content: flex-end' : 'justify-content: flex-start'} !important;
+      .ant-typography {
+        display: ${model.hideFileName ? 'none' : 'block'};
+        color: ${downloadedFileStyles?.color ?? color} !important;
+        font-size: ${downloadedFileStyles?.fontSize ?? fontSize} !important;
+        font-weight: ${downloadedFileStyles?.fontWeight ?? fontWeight} !important;
+        font-family: ${downloadedFileStyles?.fontFamily ?? fontFamily} !important;
+        text-align: ${downloadedFileStyles?.textAlign ?? textAlign} !important;
+        margin: 2px 0px;
+        position: relative;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+      }
     }
 
     .ant-upload-list-item-action {
@@ -138,7 +147,19 @@ export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = 
   const thumbnailHeight = layout ? (height ?? '54px') : '100%';
   const marginGap = gap ?? '8px';
 
-  const antUploadDragIcon = `${prefixCls}-upload-drag-icon`;
+  const antUploadDragIcon = cx(`${prefixCls}-upload-drag-icon`, css`
+     .${prefixCls}-upload-drag-icon {
+          width: 32px;
+        }
+    `);
+  const antUploadText = cx(`${prefixCls}-upload-text`, css`
+    font-size: 16px !important;
+    `);
+  const antUploadHint = cx(`${prefixCls}-upload-hint`, css`
+
+    `);
+
+
   const shaStoredFilesRenderer = cx("sha-stored-files-renderer", css`
     margin-top: ${marginTop};
     margin-left: ${marginLeft};
@@ -179,7 +200,7 @@ export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = 
       display: flex;
       padding: 0 !important;
       border: unset !important; 
-      width: 100%;
+      width: ${layout ? width : '100%'};
       :before {
         ${rest}
         display: none;
@@ -222,32 +243,46 @@ export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = 
     }
 
     .ant-upload-list-item-name {
-      ${layout ? 'display: none !important' : ''};
+      ${layout || model.hideFileName ? 'display: none !important' : ''};
     }
 
     .ant-upload-list-text {
-      > .downloaded-icon {
-      position: relative;
-      top: unset;
-      right: unset;
-     }
+      overflow: hidden;
+      ${!hasFiles ? 'display: none;' : ''}
+      >.ant-upload-list-item-container {
+        > div {
+          >.file-name-wrapper {
+            >.item-file-name {
+              width: 100%;
+              gap: 8px;
+            }
+          }
+          > .downloaded-icon {
+            position: relative;
+            top: unset;
+            right: unset;
+          }
+        }
+      }
     }
 
-    .ant-upload-drag:hover:not(.ant-upload-disabled) {
-      border-color: ${token.colorPrimary} !important;
-    }
-
-    .${prefixCls}-upload {
+    .${prefixCls}-upload-select {
       ${rest}
       border: unset;
-      ${(layout && !isDragger) && `width: ${thumbnailWidth} !important;`};
-      ${(layout && !isDragger) && `height: ${thumbnailHeight} !important;`};
-
+      width: ${layout ? thumbnailWidth : '100%'} !important;
+      height: ${layout ? thumbnailHeight : '100%'} !important;
       align-items: center;
 
+      .ant-upload {
+        width: ${layout ? thumbnailWidth : '100%'} !important;
+        height: ${layout ? thumbnailHeight : '100%'} !important;
+      }
+
       &.${prefixCls}-upload-btn {
+          padding: unset;
+
         .${prefixCls}-upload-drag-icon {
-          margin: unset;
+          margin: unset !important;
         }
 
         .${storedFilesRendererNoFiles} {
@@ -256,14 +291,30 @@ export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = 
 
         .ant-upload-select {
           align-content: center;
-          width: ${thumbnailWidth} !important;
+        }
+      }
+    }
+
+    .${prefixCls}-upload-drag {
+      ${hasFiles ? 'border: unset !important;' : ''}
+      .${prefixCls}-upload-btn {
+        padding: unset !important;
+        width: 100% !important;
+
+        .ant-upload-drag-icon {
+         margin: 0 !important;
+        }
+      }
+
+      .item-file-name {
+        width: max-content !important;
+        .ant-typography {
+          width: max-content !important;
         }
       }
     }
   
     .ant-btn {
-      color: ${token.colorPrimary} !important;
-      padding: 0;
       * {
         font-size: ${fontSize ?? '14px'} !important;
         font-weight: ${fontWeight ?? '400'} !important;
@@ -274,13 +325,13 @@ export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = 
       display: flex;
       margin-top: 4px;
       justify-content: flex-end;
-      width: ${containerWidth};
+      width: 100%;
       max-width: ${containerMaxWidth};
       min-width: ${containerMinWidth};
     }
   
     .${prefixCls}-upload-list {
-      ${layout ? `gap: ${marginGap}` : 'unset'};
+      ${layout ? `gap: ${marginGap} !important` : 'unset'};
       padding: 2px;
       overflow-y: auto;
       display: flex;
@@ -435,8 +486,9 @@ export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = 
   `);
 
   const uploadButton = cx("upload-button", css`
-    justify-content: ${textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start'};
-    ${model.listType === 'thumbnail' ? { ...style } : { ...model.fontStyles }}
+    width: 100%;
+    padding: 0px !important;
+    justify-content: ${textAlign === 'center' || model.listType === 'thumbnail' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start'};
   `);
 
   return {
@@ -449,6 +501,8 @@ export const useStyles = createStyles(({ token, css, cx, prefixCls }, { style = 
     downloadedFile,
     downloadedIcon,
     antUploadDragIcon,
+    antUploadText,
+    antUploadHint,
     thumbnailReadOnly,
     fileName,
     fileNameWrapper,

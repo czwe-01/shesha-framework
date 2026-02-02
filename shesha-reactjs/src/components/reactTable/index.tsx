@@ -116,8 +116,6 @@ export const ReactTable: FC<IReactTableProps> = ({
   boxShadow,
   sortableIndicatorColor,
   striped,
-  cellTextColor,
-  cellBackgroundColor,
   cellBorderColor,
   cellBorders,
   cellPadding,
@@ -126,6 +124,12 @@ export const ReactTable: FC<IReactTableProps> = ({
   headerShadow,
   rowShadow,
   rowDividers,
+  bodyFontFamily,
+  bodyFontSize,
+  bodyFontWeight,
+  bodyFontColor,
+  actionIconSize,
+  actionIconColor,
 }) => {
   const [componentState, setComponentState] = useState<IReactTableState>({
     allRows: data,
@@ -166,8 +170,6 @@ export const ReactTable: FC<IReactTableProps> = ({
     boxShadow,
     sortableIndicatorColor,
     striped,
-    cellTextColor,
-    cellBackgroundColor,
     cellBorderColor,
     cellBorders,
     cellPadding,
@@ -176,6 +178,13 @@ export const ReactTable: FC<IReactTableProps> = ({
     headerShadow,
     rowShadow,
     rowDividers,
+    bodyFontFamily,
+    bodyFontSize,
+    bodyFontWeight,
+    bodyFontColor,
+    freezeHeaders,
+    actionIconSize,
+    actionIconColor,
   });
 
   const { setDragState } = useDataTableStore();
@@ -481,7 +490,7 @@ export const ReactTable: FC<IReactTableProps> = ({
 
   const handleSelectRow = (rowIndex: number) => (row: Row<any>): void => {
     if (mode === 'none') return;
-    if (!omitClick && !(canEditInline || canDeleteInline)) {
+    if (!omitClick) {
       // In multiple selection mode, toggle the checkbox selection
       if (mode === 'multiple' && row.id) {
         const isCurrentlySelected = row.isSelected;
@@ -526,11 +535,12 @@ export const ReactTable: FC<IReactTableProps> = ({
         /* noop */
       };
 
-    return (data) => {
+    return (rowData, rowIndex, selectedRow?) => {
       const evaluationContext = {
         ...allData,
-        data,
-        selectedRow: data?.original,
+        row: rowData,
+        rowIndex,
+        selectedRow: selectedRow || rowData,
       };
 
       executeAction({
@@ -542,7 +552,8 @@ export const ReactTable: FC<IReactTableProps> = ({
 
   const handleDoubleClickRow = (row, index): void => {
     if (typeof onRowDoubleClick === 'object') {
-      performOnRowDoubleClick(row);
+      const currentSelectedRow = { index, row: row.original, id: row.original?.id };
+      performOnRowDoubleClick(row.original, index, currentSelectedRow);
     } else if (typeof onRowDoubleClick === 'function') {
       onRowDoubleClick(row?.original, index);
     }
@@ -567,12 +578,16 @@ export const ReactTable: FC<IReactTableProps> = ({
     if (maxHeight) result.maxHeight = `${maxHeight}px`;
 
     // to allow the table to overflow the container on y-axis
-    if (freezeHeaders && !result.maxHeight) {
-      result.maxHeight = '80vh';
+    if (freezeHeaders) {
+      if (!result.maxHeight) {
+        result.maxHeight = '80vh';
+      }
+      // Ensure overflow is set for sticky headers to work
+      result.overflow = 'auto';
     }
 
     return result;
-  }, [containerStyle, minHeight, maxHeight]);
+  }, [containerStyle, minHeight, maxHeight, freezeHeaders]);
 
   const renderExpandedContentView = (cellRef): JSX.Element => {
     const cellRect = cellRef?.current?.getBoundingClientRect();
@@ -690,7 +705,8 @@ export const ReactTable: FC<IReactTableProps> = ({
         }}
         onRowHover={() => {
           if (onRowHover) onRowHover(rowIndex, row.original);
-          dispatchRowEvent(onRowHoverAction, row.original, rowIndex);
+          const currentSelectedRow = { index: rowIndex, row: row.original, id: row.original?.id };
+          dispatchRowEvent(onRowHoverAction, row.original, rowIndex, currentSelectedRow);
         }}
         row={row}
         showExpandedView={showExpandedView}
@@ -821,7 +837,12 @@ export const ReactTable: FC<IReactTableProps> = ({
                           fontWeight: '600',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: effectiveHeaderTextAlign === 'center' ? 'center' : effectiveHeaderTextAlign === 'right' ? 'flex-end' : 'flex-start',
+                          // Map headerTextAlign to justify-content for flex container
+                          justifyContent:
+                            effectiveHeaderTextAlign === 'center' ? 'center'
+                              : effectiveHeaderTextAlign === 'right' ? 'flex-end'
+                                : effectiveHeaderTextAlign === 'justify' ? 'space-between'
+                                  : 'flex-start', // default for 'left' or undefined
                         }}
                       >
                         {column.render('Header')}
@@ -850,8 +871,8 @@ export const ReactTable: FC<IReactTableProps> = ({
           <div
             className={styles.tbody}
             style={{
-              height: scrollBodyHorizontally ? height || 250 : 'unset',
-              overflowY: scrollBodyHorizontally ? 'auto' : 'unset',
+              height: (scrollBodyHorizontally && !freezeHeaders) ? height || 250 : 'unset',
+              overflowY: (scrollBodyHorizontally && !freezeHeaders) ? 'auto' : 'unset',
               overflowX: 'unset',
             }}
             {...getTableBodyProps()}
