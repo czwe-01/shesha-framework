@@ -80,15 +80,18 @@ namespace Shesha.DynamicEntities.DbGenerator
                     .Where(x =>
                         x.EntityConfig.Id == entityConfig.Id
                         && x.InitStatus.HasFlag(EntityInitFlags.DbActionRequired)
-                        && x.ParentProperty == null
-                        && !x.IsFrameworkRelated)
+                        && x.ParentProperty == null)
                     .ToListAsync();
 
                 foreach (var property in props)
                 {
                     try
                     {
-                        await ProcessEntityPropertyAsync(property, force);
+                        if (property.IsFrameworkRelated)
+                            // Framework related properties should be created by UseSchemaAndTableAsync function executed above
+                            await UpdateSuccessAsync(property);
+                        else
+                            await ProcessEntityPropertyAsync(property, force);
                     }
                     catch (Exception e)
                     {
@@ -104,19 +107,15 @@ namespace Shesha.DynamicEntities.DbGenerator
             }
         }
 
-        public async Task ProcessEntityPropertyAsync(EntityProperty entityProperty)
-        {
-            await UseSchemaAndTableAsync(entityProperty.EntityConfig);
-            await ProcessEntityPropertyAsync(entityProperty, false);
-        }
-
-        private async Task ProcessEntityPropertyAsync(EntityProperty entityProperty, bool force)
+        public async Task ProcessEntityPropertyAsync(EntityProperty entityProperty, bool force = false)
         {
             if (entityProperty.InheritedFrom != null && !entityProperty.InheritedFrom.IsDeleted)
             {
                 await UpdateSuccessAsync(entityProperty);
                 return;
             }
+
+            await UseSchemaAndTableAsync(entityProperty.EntityConfig);
 
             var propertyDbType = GetDbColumnType(entityProperty);
             var columnName = entityProperty.ColumnName.NotNull($"Column name for property {entityProperty.Name} of {entityProperty.EntityConfig.FullClassName} should not be null");

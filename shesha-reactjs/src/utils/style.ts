@@ -1,3 +1,4 @@
+import React from 'react';
 import { isDefined } from "@/utils/nullables";
 
 export interface DimensionValue {
@@ -66,6 +67,25 @@ export const canAddToCalc = (dimensionValue: string | number | undefined): boole
   }
 
   return true;
+};
+
+/**
+ * Returns style overrides for ghost buttons.
+ * Ghost buttons display only foreground color (text/icon) with no background, border, or shadow.
+ * These overrides ensure ghost buttons maintain their transparent appearance.
+ *
+ * @returns Style object with transparent background, no border, and no shadow
+ * @example
+ * const ghostStyles = getGhostStyleOverrides();
+ * // Returns: { background: 'transparent', backgroundColor: 'transparent', border: 'none', boxShadow: 'none' }
+ */
+export const getGhostStyleOverrides = (): React.CSSProperties => {
+  return {
+    background: 'transparent',
+    backgroundColor: 'transparent',
+    border: 'none',
+    boxShadow: 'none',
+  };
 };
 
 export const hasNumber = (str: string | number): boolean => typeof str === 'number' ? true : /\d/.test(str);

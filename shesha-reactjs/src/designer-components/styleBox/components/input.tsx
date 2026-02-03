@@ -28,18 +28,13 @@ const BoxInput: FC<IProps> = ({ direction, onChange, readOnly, type, value }) =>
   const isEmpty = !currentValue || currentValue === '0';
 
   return (
-    <Tooltip
-      title={isEmpty ? "Leave empty or '0' for auto" : undefined}
-      placement="top"
-    >
-      <Input
-        className={getStyleClassName(type, direction)}
-        onChange={onModifyChange}
-        value={currentValue}
-        disabled={readOnly}
-        style={isEmpty ? { color: '#bfbfbf', fontStyle: 'italic' } : undefined}
-      />
-    </Tooltip>
+    <Input
+      className={getStyleClassName(type, direction)}
+      onChange={onModifyChange}
+      value={getStyleValue(type, direction, value)}
+      type="text"
+      disabled={readOnly}
+    />
   );
 };
 
