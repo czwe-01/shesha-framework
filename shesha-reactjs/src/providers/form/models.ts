@@ -26,7 +26,7 @@ export interface ISubmitActionArguments {
 
 export type FormMode = 'designer' | 'edit' | 'readonly';
 
-export type LabelAlign = 'left' | 'right';
+export type LabelAlign = 'left' | 'right' | 'top';
 
 export type PropertySettingMode = 'value' | 'code';
 
