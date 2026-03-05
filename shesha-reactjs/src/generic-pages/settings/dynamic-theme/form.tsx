@@ -21,9 +21,11 @@ const FormExample: FC<FormExampleProps> = ({ theme }) => {
     labelAlign: labelAlign !== 'top' ? labelAlign : null,
   };
 
-  const { fullStyle } = useFormComponentStyles({ ...inputSettings, jsStyle: '' });
-  const styles = { ...fullStyle, backgroundColor: theme?.componentBackground };
-
+  const { fullStyle  } = useFormComponentStyles({ ...inputSettings, jsStyle: '' });
+  const allStyles = { ...fullStyle, backgroundColor: theme?.componentBackground};
+  const { marginTop: marginTopAll, marginBottom: marginBottomAll, marginLeft: marginLeftAll, marginRight: marginRightAll, ...rest } = allStyles;
+  const marginStyle = { marginTop: marginTopAll, marginBottom: marginBottomAll, marginLeft: marginLeftAll, marginRight: marginRightAll };
+  const styles = { ...rest };
 
   return (
     <Form
@@ -33,35 +35,42 @@ const FormExample: FC<FormExampleProps> = ({ theme }) => {
       colon={inputSettings?.labelColon ?? true}
       style={{ width: '100%' }}
     >
-      <Space direction="vertical" style={{ width: '100%' }}>
+      <div style={marginStyle}>
         <Form.Item
           label="Text Input"
           validateStatus="success"
         >
           <Input placeholder="Enter text" defaultValue="Sample text" style={styles} />
         </Form.Item>
+      </div>
+      <div style={marginStyle}>
         <Form.Item
           label="Failed"
           validateStatus="error"
           help="This field has an error"
+          style={marginStyle}
         >
           <Input placeholder="Error input" style={styles} />
         </Form.Item>
-
+      </div>
+      <div style={marginStyle}> 
         <Form.Item
           label="Warning"
           validateStatus="warning"
+          style={marginStyle}
         >
           <Input placeholder="Warning input" prefix={<SmileOutlined />} style={styles} />
         </Form.Item>
-
+      </div>
+      <div style={marginStyle}> 
         <Form.Item
           label="Validating"
           validateStatus="validating"
+          style={marginStyle}
         >
           <Input placeholder="Warning input" prefix={<SmileOutlined />} style={styles} />
         </Form.Item>
-      </Space>
+      </div>
     </Form>
   );
 };

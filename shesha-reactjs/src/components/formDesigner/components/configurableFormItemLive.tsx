@@ -36,7 +36,7 @@ export const ConfigurableFormItemLive: FC<IConfigurableFormItemProps> = ({
   const formItemProps: FormItemProps = {
     className: classNames(className),
     label: hideLabel ? null : model.label,
-    labelAlign: model.labelAlign,
+    labelAlign: model.labelAlign === 'top' ? null : model.labelAlign,
     hidden: model.hidden,
     valuePropName: valuePropName,
     initialValue: initialValue,
