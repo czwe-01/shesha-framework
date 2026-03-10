@@ -5,8 +5,6 @@ import { getPropertySettingsFromData } from '@/designer-components/_settings/uti
 import { SettingsControl, useShaFormInstance } from '@/index';
 import { IConfigurableFormItemChildFunc, IConfigurableFormItemProps } from './model';
 import { ConfigurableFormItemLive } from './configurableFormItemLive';
-import { useStyles } from './styles';
-import classNames from 'classnames';
 
 export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
   children,
@@ -14,7 +12,6 @@ export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
   valuePropName,
 }) => {
   const { formData } = useShaFormInstance();
-  const { styles } = useStyles();
   if (model.hidden) return null;
 
   const { _mode: mode } = getPropertySettingsFromData(formData, model.propertyName);
@@ -53,7 +50,7 @@ export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
         validate: { required: model.validate?.required },
         hidden: model.hidden,
       }}
-      className={classNames(styles.settingsFormItem, "sha-js-label")}
+      className={"sha-js-label"}
       labelCol={{ span: 24 }}
       wrapperCol={{ span: 24 }}
     >
