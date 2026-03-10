@@ -8,9 +8,41 @@ import { CustomErrorBoundary } from '..';
 import ErrorIconPopover from '../componentErrors/errorIconPopover';
 import AttributeDecorator from '../attributeDecorator';
 import { IStyleType, isValidGuid, useActualContextData, useCalculatedModel } from '@/index';
-import { useFormComponentStyles } from '@/hooks/formComponentHooks';
+import { useFormComponentStyles, UseFormComponentStylesOptions } from '@/hooks/formComponentHooks';
 import { useStyles } from './styles/styles';
 import { FormComponentValidationProvider, useValidationErrorsActionsOrDefault, useValidationErrorsStateOrDefault } from '@/providers/validationErrors';
+
+/**
+ * Determines the component category for theme styling based on component type and properties.
+ */
+const getComponentCategory = (componentType: string, isInput?: boolean): UseFormComponentStylesOptions['componentCategory'] => {
+  // Input components: isInput = true
+  if (isInput) {
+    return 'inputComponents';
+  }
+
+  // Layout components: container-like components
+  const layoutComponentTypes = [
+    'container', 'card', 'tabs', 'collapsiblePanel', 'panel',
+    'columns', 'sizableColumns', 'dataList', 'dataTable',
+    'drawer', 'wizard', 'sectionSeparator', 'divider'
+  ];
+  if (layoutComponentTypes.includes(componentType)) {
+    return 'layoutComponents';
+  }
+
+  // Inline components: inline elements
+  const inlineComponentTypes = [
+    'button', 'link', 'text', 'icon', 'iconPicker',
+    'refListStatus', 'tag', 'badge'
+  ];
+  if (inlineComponentTypes.includes(componentType)) {
+    return 'inlineComponents';
+  }
+
+  // Standard components: everything else (display components)
+  return 'standardComponents';
+};
 
 export interface IFormComponentProps {
   componentModel: IConfigurableFormComponent;
@@ -59,7 +91,10 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel }) => {
   if (!toolboxComponent?.isInput && !toolboxComponent?.isOutput)
     actualModel.propertyName = undefined;
 
-  actualModel.allStyles = useFormComponentStyles(actualModel);
+  // Determine component category for theme styling
+  const componentCategory = getComponentCategory(componentModel.type, toolboxComponent?.isInput);
+  
+  actualModel.allStyles = useFormComponentStyles(actualModel, { componentCategory });
 
   const calculatedModel = useCalculatedModel(actualModel, toolboxComponent?.useCalculateModel, toolboxComponent?.calculateModel);
 

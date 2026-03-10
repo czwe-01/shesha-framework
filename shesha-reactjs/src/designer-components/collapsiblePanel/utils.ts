@@ -1,14 +1,16 @@
 import { IStyleType } from "@/index";
 import { ICollapsiblePanelComponentProps } from "./interfaces";
+import { IConfigurableTheme, getLayoutComponentThemeDefaults } from "@/providers/theme";
 
-export const defaultStyles = (prev: ICollapsiblePanelComponentProps): IStyleType => {
+export const defaultStyles = (prev: ICollapsiblePanelComponentProps, theme?: IConfigurableTheme): IStyleType => {
+  const themeDefaults = getLayoutComponentThemeDefaults(theme);
   const bodyColor = prev.bodyColor || '#fff';
   const { ghost, borderRadius } = prev;
 
   return {
-    background: { type: 'color', color: bodyColor },
+    background: themeDefaults.background ?? { type: 'color', color: bodyColor },
     dimensions: { width: 'auto', height: 'auto', minHeight: '0px', maxHeight: 'auto', minWidth: '0px', maxWidth: 'auto' },
-    border: {
+    border: themeDefaults.border ?? {
       radiusType: 'all', borderType: 'custom',
       border: {
         ...ghost ? { all: { width: '1px', color: '#d9d9d9', style: 'solid' } }
@@ -22,8 +24,8 @@ export const defaultStyles = (prev: ICollapsiblePanelComponentProps): IStyleType
       },
       radius: { all: borderRadius || 8 },
     },
-    shadow: { blurRadius: 0, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 0, spreadRadius: 0 },
-    stylingBox: '{"marginBottom":"5","paddingLeft":"8","paddingBottom":"8","paddingTop":"8","paddingRight":"8"}',
+    shadow: themeDefaults.shadow ?? { blurRadius: 0, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 0, spreadRadius: 0 },
+    stylingBox: themeDefaults.stylingBox ?? '{"marginBottom":"5","paddingLeft":"8","paddingBottom":"8","paddingTop":"8","paddingRight":"8"}',
   };
 };
 

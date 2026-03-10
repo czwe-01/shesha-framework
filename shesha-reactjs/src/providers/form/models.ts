@@ -197,6 +197,17 @@ export interface IFormComponentStyles {
   appearanceStyle: CSSProperties;
   /** Styles assempled from {...appearanceStyle, ...jsStyle} */
   fullStyle: CSSProperties;
+  /** Additional theme configuration properties */
+  themeConfig?: {
+    // Layout component theme properties
+    gridGapHorizontal?: string | number;
+    gridGapVertical?: string | number;
+    // Input component theme properties
+    labelAlign?: 'left' | 'right' | 'top';
+    labelColon?: boolean;
+    labelSpan?: number;
+    contentSpan?: number;
+  };
 }
 
 /**

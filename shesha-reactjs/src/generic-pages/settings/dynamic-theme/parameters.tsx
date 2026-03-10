@@ -145,7 +145,7 @@ const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, rea
       {/* Layout Component Settings Section */}
       <CollapsiblePanel
         {...commonPanelProps}
-        header={<HeaderContent title="Layout Component Settings" subtitle="Configure layout component styling" />}
+        header={<HeaderContent title="Layout Component Settings" subtitle="Configure the styling of layout componens such as:  Panels, Cards, Tabs, etc." />}
       >
         <Space size="middle" direction="vertical" className={styles.space}>
           {/* Margin & Padding */}
@@ -436,10 +436,10 @@ const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, rea
         </Space>
       </CollapsiblePanel>
 
-      {/* Form Layout Section */}
+      {/* Input Component Section */}
       <CollapsiblePanel
         {...commonPanelProps}
-        header={<HeaderContent title="Form Layout" subtitle="Configure form layout settings" />}
+        header={<HeaderContent title="Input Component settings" subtitle="Configure the styling of layout componens such as:  TextField, NumberField, TextArea, etc." />}
       >
         <Space direction="vertical" size="large">
           {/* Label Align */}
@@ -509,7 +509,7 @@ const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, rea
       {/* Standard Component Settings Section */}
       <CollapsiblePanel
         {...commonPanelProps}
-        header={<HeaderContent title="Standard Component Settings" subtitle="Configure standard component styling" />}
+        header={<HeaderContent title="Standard Component Settings" subtitle="Configure the styling of layout componens such as:  Statistic, Charts, KeyInformationBar, etc." />}
       >
         <Box
           value={standardSettings?.stylingBox}
@@ -524,7 +524,7 @@ const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, rea
         header={(
           <HeaderContent
             title="Inline Component Settings"
-            subtitle="Customize inline component appearance and behavior"
+            subtitle="Configure the styling of layout componens such as:  Text, Icon, Button, etc."
           />
         )}
       >

@@ -15,8 +15,10 @@ import {
   useCanvas,
   useDeepCompareMemo,
   useSheshaApplication,
+  useTheme,
   wrapConstantsData,
 } from "..";
+import { getThemeBaseStyles } from "@/providers/theme/styleUtils";
 import { TouchableProxy, makeTouchableProxy } from "@/providers/form/touchableProxy";
 import { useParent } from "@/providers/parentProvider";
 import { isEqual } from "lodash";
@@ -196,51 +198,81 @@ export function useActualContextExecutionExecutor<T = unknown, TAdditionalData e
   return actualDataRef.current;
 };
 
+export interface UseFormComponentStylesOptions {
+  /**
+   * The component category for applying theme defaults.
+   * - 'inputComponents': Form input fields (isInput: true)
+   * - 'layoutComponents': Container components (panel, card, wizard, tabs, etc.)
+   * - 'standardComponents': Display components (statistic, charts, etc.) - only margin/padding from theme
+   * - 'inlineComponents': Inline elements (icon, text, link, button) - only margin/padding from theme
+   */
+  componentCategory?: 'inputComponents' | 'layoutComponents' | 'standardComponents' | 'inlineComponents';
+}
+
 export const useFormComponentStyles = <TModel>(
   model: TModel & IStyleType & Omit<IConfigurableFormComponent, 'id' | 'type'>,
+  options?: UseFormComponentStylesOptions,
 ): IFormComponentStyles => {
   const app = useSheshaApplication();
+  const { theme } = useTheme();
+  
   const jsStyle = useActualContextExecution(model.style, undefined, {}); // use default style if empty or error
   const { designerWidth } = useCanvas();
 
+  // Get theme base styles for the component category
+  const themeBaseStyles = useMemo(() => {
+    if (!options?.componentCategory) return {} as IStyleType;
+    return getThemeBaseStyles(theme, options.componentCategory);
+  }, [theme, options?.componentCategory]);
+
+  // Merge theme base styles with model styles, with model styles taking precedence
+  // For standardComponents and inlineComponents, only stylingBox is applied from theme
   const { dimensions, border, font, shadow, background, stylingBox, overflow } = model;
+  
+  // Apply theme stylingBox as base if component doesn't have one
+  const effectiveStylingBox = stylingBox ?? themeBaseStyles?.stylingBox;
+  
+  // For layoutComponents, also apply theme background, border, shadow as base
+  const effectiveBackground = background ?? (options?.componentCategory === 'layoutComponents' ? themeBaseStyles?.background : undefined);
+  const effectiveBorder = border ?? (options?.componentCategory === 'layoutComponents' ? themeBaseStyles?.border : undefined);
+  const effectiveShadow = shadow ?? (options?.componentCategory === 'layoutComponents' ? themeBaseStyles?.shadow : undefined);
 
   const [backgroundStyles, setBackgroundStyles] = useState(
-    background && background.storedFile?.id && background.type === 'storedFile'
+    effectiveBackground && effectiveBackground.storedFile?.id && effectiveBackground.type === 'storedFile'
       ? {
-        backgroundImage: `url(${app.backendUrl}/api/StoredFile/Download?id=${background.storedFile.id})`,
-        backgroundSize: background.size,
-        backgroundPosition: background.position,
-        backgroundRepeat: background.repeat,
+        backgroundImage: `url(${app.backendUrl}/api/StoredFile/Download?id=${effectiveBackground.storedFile.id})`,
+        backgroundSize: effectiveBackground.size,
+        backgroundPosition: effectiveBackground.position,
+        backgroundRepeat: effectiveBackground.repeat,
       }
-      : getBackgroundStyle(background, jsStyle),
+      : getBackgroundStyle(effectiveBackground, jsStyle),
   );
 
-  const stylingBoxParsed = useMemo(() => jsonSafeParse<StyleBoxValue>(stylingBox || '{}') ?? {}, [stylingBox]);
+  const stylingBoxParsed = useMemo(() => jsonSafeParse<StyleBoxValue>(effectiveStylingBox || '{}') ?? {}, [effectiveStylingBox]);
 
   const dimensionsStyles = useMemo(() => getDimensionsStyle(dimensions, stylingBoxParsed, designerWidth), [dimensions, stylingBoxParsed, designerWidth]);
-  const borderStyles = useMemo(() => getBorderStyle(border, jsStyle), [border, jsStyle]);
+  const borderStyles = useMemo(() => getBorderStyle(effectiveBorder, jsStyle), [effectiveBorder, jsStyle]);
   const fontStyles = useMemo(() => getFontStyle(font), [font]);
-  const shadowStyles = useMemo(() => getShadowStyle(shadow), [shadow]);
+  const shadowStyles = useMemo(() => getShadowStyle(effectiveShadow), [effectiveShadow]);
   const stylingBoxAsCSS = useMemo(() => pickStyleFromModel(stylingBoxParsed), [stylingBoxParsed]);
   const overflowStyles = useMemo(() => overflow ? getOverflowStyle(overflow, false) : {}, [overflow]);
 
   useDeepCompareEffect(() => {
-    if (background && background.storedFile?.id && background.type === 'storedFile') {
-      fetch(`${app.backendUrl}/api/StoredFile/Download?id=${background.storedFile.id}`,
+    if (effectiveBackground && effectiveBackground.storedFile?.id && effectiveBackground.type === 'storedFile') {
+      fetch(`${app.backendUrl}/api/StoredFile/Download?id=${effectiveBackground.storedFile.id}`,
         { headers: { ...app.httpHeaders, "Content-Type": "application/octet-stream" } })
         .then((response) => {
           return response.blob();
         })
         .then((blob) => {
           const url = URL.createObjectURL(blob);
-          const style = getBackgroundStyle(background, jsStyle, url);
+          const style = getBackgroundStyle(effectiveBackground, jsStyle, url);
           setBackgroundStyles(style);
         });
     } else {
-      setBackgroundStyles(getBackgroundStyle(background, jsStyle));
+      setBackgroundStyles(getBackgroundStyle(effectiveBackground, jsStyle));
     }
-  }, [background, jsStyle, app.backendUrl, app.httpHeaders]);
+  }, [effectiveBackground, jsStyle, app.backendUrl, app.httpHeaders]);
 
   const appearanceStyle = useMemo(() => removeUndefinedProps(
     {
@@ -256,6 +288,30 @@ export const useFormComponentStyles = <TModel>(
 
   const fullStyle = useDeepCompareMemo(() => ({ ...appearanceStyle, ...jsStyle }), [appearanceStyle, jsStyle]);
 
+  // Build theme config from theme base styles
+  const themeConfig = useMemo(() => {
+    if (!options?.componentCategory || !themeBaseStyles) return undefined;
+    
+    const config: IFormComponentStyles['themeConfig'] = {};
+    
+    // Add layout-specific properties
+    if (options.componentCategory === 'layoutComponents') {
+      config.gridGapHorizontal = themeBaseStyles.gridGapHorizontal;
+      config.gridGapVertical = themeBaseStyles.gridGapVertical;
+    }
+    
+    // Add input-specific properties
+    if (options.componentCategory === 'inputComponents') {
+      config.labelAlign = themeBaseStyles.labelAlign;
+      config.labelColon = themeBaseStyles.labelColon;
+      config.labelSpan = themeBaseStyles.labelSpan;
+      config.contentSpan = themeBaseStyles.contentSpan;
+    }
+    
+    // Only return if we have properties
+    return Object.keys(config).length > 0 ? config : undefined;
+  }, [themeBaseStyles, options?.componentCategory]);
+
   const allStyles: IFormComponentStyles = useMemo(() => ({
     stylingBoxAsCSS,
     dimensionsStyles,
@@ -267,7 +323,8 @@ export const useFormComponentStyles = <TModel>(
     jsStyle,
     appearanceStyle,
     fullStyle,
-  }), [stylingBoxAsCSS, dimensionsStyles, borderStyles, fontStyles, backgroundStyles, shadowStyles, overflowStyles, jsStyle, appearanceStyle, fullStyle]);
+    themeConfig,
+  }), [stylingBoxAsCSS, dimensionsStyles, borderStyles, fontStyles, backgroundStyles, shadowStyles, overflowStyles, jsStyle, appearanceStyle, fullStyle, themeConfig]);
 
   return allStyles;
 };
