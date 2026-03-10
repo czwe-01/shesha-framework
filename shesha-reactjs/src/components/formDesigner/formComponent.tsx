@@ -9,7 +9,7 @@ import ErrorIconPopover from '../componentErrors/errorIconPopover';
 import AttributeDecorator from '../attributeDecorator';
 import { IStyleType, isValidGuid, useActualContextData, useCalculatedModel } from '@/index';
 import { useFormComponentStyles } from '@/hooks/formComponentHooks';
-import { stylingUtils } from '@/components/formDesigner/utils/stylingUtils';
+import { stylingUtils, getDeviceSpecificStyles, DeviceType } from '@/components/formDesigner/utils/stylingUtils';
 import { useStyles } from './styles/styles';
 import { FormComponentValidationProvider, useValidationErrorsActionsOrDefault, useValidationErrorsStateOrDefault } from '@/providers/validationErrors';
 
@@ -41,9 +41,17 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel }) => {
   // In preview/live mode: use original device-specific stylingBox (with margins) and dimensions
   const isDesignerMode = shaForm.formMode === 'designer';
   const extendedModel = componentModel as IConfigurableFormComponent & IStyleType;
+  
+  // Get device-specific styles with fallback chain: mobile → tablet → desktop → base
+  const deviceSpecificStyles = getDeviceSpecificStyles(
+    componentModel,
+    { mobile: componentModel?.mobile, tablet: componentModel?.tablet, desktop: componentModel?.desktop },
+    effectiveDevice as DeviceType,
+  );
+  
   const deviceModel = {
     ...componentModel,
-    ...componentModel?.[effectiveDevice],
+    ...deviceSpecificStyles,
     // In designer: preserve padding-only stylingBox and stripped style (no margins) from wrapper
     // In preview: use original stylingBox with margins from device settings
     ...(isDesignerMode
@@ -52,7 +60,7 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel }) => {
         dimensions: extendedModel.dimensions,
         style: extendedModel.style, // Keep stripped style (no margins)
       }
-      : { stylingBox: componentModel?.[effectiveDevice]?.stylingBox }
+      : { stylingBox: deviceSpecificStyles.stylingBox }
     ),
   };
 
@@ -75,7 +83,7 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel }) => {
   if (!toolboxComponent?.isInput && !toolboxComponent?.isOutput)
     actualModel.propertyName = undefined;
 
-  const allStyles = useFormComponentStyles(actualModel);
+  const allStyles = useFormComponentStyles(actualModel, { activeDevice: effectiveDevice });
 
   // For input components: Strip margins from fullStyle and jsStyle
   // Margins are handled by the FormItem wrapper (via allStyles.margins), not the inner component

@@ -199,6 +199,8 @@ export function useActualContextExecutionExecutor<T = unknown, TAdditionalData e
 export interface IUseFormComponentStylesOptions {
   /** Use wrapperStyle instead of style for jsStyle calculation (for container components) */
   useWrapperStyle?: boolean;
+  /** The active device for responsive styles - include to force recalculation when device changes */
+  activeDevice?: string;
 }
 
 export const useFormComponentStyles = <TModel>(
@@ -206,7 +208,7 @@ export const useFormComponentStyles = <TModel>(
   options?: IUseFormComponentStylesOptions,
 ): IFormComponentStyles => {
   const app = useSheshaApplication();
-  const { useWrapperStyle } = options || {};
+  const { useWrapperStyle, activeDevice } = options || {};
   // For container components, use wrapperStyle instead of style
   const styleSource = useWrapperStyle && model.wrapperStyle ? (model).wrapperStyle : model.style;
   const jsStyle = useActualContextExecution(styleSource, undefined, {}); // use default style if empty or error
@@ -225,14 +227,14 @@ export const useFormComponentStyles = <TModel>(
       : getBackgroundStyle(background, jsStyle),
   );
 
-  const stylingBoxParsed = useMemo(() => jsonSafeParse<StyleBoxValue>(stylingBox || '{}') ?? {}, [stylingBox]);
+  const stylingBoxParsed = useMemo(() => jsonSafeParse<StyleBoxValue>(stylingBox || '{}') ?? {}, [stylingBox, activeDevice]);
 
-  const borderStyles = useMemo(() => getBorderStyle(border, jsStyle), [border, jsStyle]);
-  const fontStyles = useMemo(() => getFontStyle(font), [font]);
-  const shadowStyles = useMemo(() => getShadowStyle(shadow), [shadow]);
-  const stylingBoxAsCSS = useMemo(() => pickStyleFromModel(stylingBoxParsed), [stylingBoxParsed]);
-  const dimensionsStyles = useMemo(() => getDimensionsStyle(dimensions, designerWidth, undefined), [dimensions, designerWidth]);
-  const overflowStyles = useMemo(() => overflow ? getOverflowStyle(overflow, false) : {}, [overflow]);
+  const borderStyles = useMemo(() => getBorderStyle(border, jsStyle), [border, jsStyle, activeDevice]);
+  const fontStyles = useMemo(() => getFontStyle(font), [font, activeDevice]);
+  const shadowStyles = useMemo(() => getShadowStyle(shadow), [shadow, activeDevice]);
+  const stylingBoxAsCSS = useMemo(() => pickStyleFromModel(stylingBoxParsed), [stylingBoxParsed, activeDevice]);
+  const dimensionsStyles = useMemo(() => getDimensionsStyle(dimensions, designerWidth, undefined), [dimensions, designerWidth, activeDevice]);
+  const overflowStyles = useMemo(() => overflow ? getOverflowStyle(overflow, false) : {}, [overflow, activeDevice]);
 
   useDeepCompareEffect(() => {
     if (background && background.storedFile?.id && background.type === 'storedFile') {
@@ -261,9 +263,9 @@ export const useFormComponentStyles = <TModel>(
       ...shadowStyles,
       ...overflowStyles,
       fontWeight: fontStyles.fontWeight || 400,
-    }), [stylingBoxAsCSS, dimensionsStyles, borderStyles, fontStyles, backgroundStyles, shadowStyles, overflowStyles]);
+    }), [stylingBoxAsCSS, dimensionsStyles, borderStyles, fontStyles, backgroundStyles, shadowStyles, overflowStyles, activeDevice]);
 
-  const fullStyle = useDeepCompareMemo(() => ({ ...appearanceStyle, ...jsStyle }), [appearanceStyle, jsStyle]);
+  const fullStyle = useDeepCompareMemo(() => ({ ...appearanceStyle, ...jsStyle }), [appearanceStyle, jsStyle, activeDevice]);
 
   // Extract margin styles for wrapper use
   const margins = useMemo(() => ({
@@ -271,7 +273,7 @@ export const useFormComponentStyles = <TModel>(
     marginBottom: fullStyle.marginBottom,
     marginLeft: fullStyle.marginLeft,
     marginRight: fullStyle.marginRight,
-  }), [fullStyle.marginTop, fullStyle.marginBottom, fullStyle.marginLeft, fullStyle.marginRight]);
+  }), [fullStyle.marginTop, fullStyle.marginBottom, fullStyle.marginLeft, fullStyle.marginRight, activeDevice]);
 
   const allStyles: IFormComponentStyles = useMemo(() => ({
     stylingBoxAsCSS,
@@ -285,7 +287,7 @@ export const useFormComponentStyles = <TModel>(
     appearanceStyle,
     fullStyle,
     margins,
-  }), [stylingBoxAsCSS, dimensionsStyles, borderStyles, fontStyles, backgroundStyles, shadowStyles, overflowStyles, jsStyle, appearanceStyle, fullStyle, margins]);
+  }), [stylingBoxAsCSS, dimensionsStyles, borderStyles, fontStyles, backgroundStyles, shadowStyles, overflowStyles, jsStyle, appearanceStyle, fullStyle, margins, activeDevice]);
 
   return allStyles;
 };

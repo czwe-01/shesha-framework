@@ -2,6 +2,63 @@ import { CSSProperties } from 'react';
 import { addPx } from '@/utils/style';
 import { DEFAULT_MARGINS } from './designerConstants';
 import { getCalculatedDimension } from '@/designer-components/_settings/utils/index';
+import { isDefined } from '@/utils/nullables';
+
+/** Device types for responsive styling */
+export type DeviceType = 'mobile' | 'tablet' | 'desktop';
+
+/**
+ * Gets the device fallback chain for a target device.
+ * Mobile falls back to tablet, then desktop.
+ * Tablet falls back to desktop.
+ * Desktop has no fallback (just uses base).
+ */
+const getDeviceFallbackChain = (targetDevice: DeviceType): DeviceType[] => {
+  switch (targetDevice) {
+    case 'mobile':
+      return ['mobile', 'tablet', 'desktop'];
+    case 'tablet':
+      return ['tablet', 'desktop'];
+    case 'desktop':
+      return ['desktop'];
+    default:
+      return ['desktop'];
+  }
+};
+
+/**
+ * Merges device-specific styles with fallback chain support.
+ * Properties from the target device take precedence, then fall back through the chain.
+ * 
+ * @param baseStyles - The base component styles (non-device specific)
+ * @param deviceStyles - Object containing device-specific styles { mobile, tablet, desktop }
+ * @param targetDevice - The target device to get styles for
+ * @returns Merged styles with proper fallback chain applied
+ */
+export const getDeviceSpecificStyles = <T extends object>(
+  baseStyles: T | undefined,
+  deviceStyles: { mobile?: T; tablet?: T; desktop?: T } | undefined,
+  targetDevice: DeviceType,
+): T => {
+  const fallbackChain = getDeviceFallbackChain(targetDevice);
+  
+  // Start with base styles
+  let merged = { ...(baseStyles || {} as T) };
+  
+  // Apply styles from each device in the fallback chain (in reverse order so target device wins)
+  // Order: desktop → tablet → mobile (for mobile target)
+  // Order: desktop → tablet (for tablet target)
+  // Order: desktop (for desktop target)
+  for (let i = fallbackChain.length - 1; i >= 0; i--) {
+    const device = fallbackChain[i];
+    const deviceSpecificStyles = deviceStyles?.[device];
+    if (isDefined(deviceSpecificStyles)) {
+      merged = { ...merged, ...deviceSpecificStyles };
+    }
+  }
+  
+  return merged;
+};
 
 /** Margin values extracted from various style sources */
 export interface MarginValues {

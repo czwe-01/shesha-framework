@@ -29,7 +29,7 @@ import { ComponentProperties } from '../componentPropertiesPanel/componentProper
 import { useFormDesignerComponentGetter } from '@/providers/form/hooks';
 import { useFormComponentStyles } from '@/hooks/formComponentHooks';
 import { dimensionUtils } from '../utils/dimensionUtils';
-import { stylingUtils } from '../utils/stylingUtils';
+import { stylingUtils, getDeviceSpecificStyles, DeviceType } from '../utils/stylingUtils';
 import { designerConstants } from '../utils/designerConstants';
 import { jsonSafeParse } from '@/utils/object';
 
@@ -63,30 +63,48 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
    * Merges component model with device-specific settings.
    * Handles the complexity of components with separate container configurations
    * (e.g., attachmentsEditor with thumbnail dimensions at root and container dimensions in container property).
+   * 
+   * Uses fallback chain: mobile → tablet → desktop → base
    */
   const fullComponentModel = useMemo(() => {
-    const deviceModel = componentModel?.[activeDevice];
+    // Get device-specific styles with fallback chain support
+    const deviceSpecificStyles = getDeviceSpecificStyles(
+      componentModel,
+      { mobile: componentModel?.mobile, tablet: componentModel?.tablet, desktop: componentModel?.desktop },
+      activeDevice as DeviceType,
+    );
 
     // Determine if component has separate container-level styling
     // This is true when both root-level and container-level dimensions exist
-    const hasRootDimensions = !!(deviceModel?.dimensions || componentModel?.dimensions);
-    const hasContainerDimensions = !!(deviceModel?.container?.dimensions || componentModel?.container?.dimensions);
+    const hasRootDimensions = !!(deviceSpecificStyles?.dimensions || componentModel?.dimensions);
+    const hasContainerDimensions = !!(deviceSpecificStyles?.container?.dimensions || componentModel?.container?.dimensions);
     const hasSeparateContainerStyles = hasRootDimensions && hasContainerDimensions;
+
+    // Get device-specific container styles with fallback chain support
+    const deviceContainerStyles = getDeviceSpecificStyles(
+      componentModel?.container,
+      { 
+        mobile: componentModel?.mobile?.container, 
+        tablet: componentModel?.tablet?.container, 
+        desktop: componentModel?.desktop?.container 
+      },
+      activeDevice as DeviceType,
+    );
 
     // For backward compatibility: spread container props to root UNLESS component has explicit separate styles
     const containerPropsToSpread = hasSeparateContainerStyles
       ? {}
-      : { ...componentModel?.container, ...deviceModel?.container };
+      : deviceContainerStyles;
 
     // Always merge container objects to preserve container-level configuration
     const mergedContainer = {
       ...componentModel?.container,
-      ...deviceModel?.container,
+      ...deviceContainerStyles,
     };
 
     return {
       ...componentModel,
-      ...deviceModel,
+      ...deviceSpecificStyles,
       ...containerPropsToSpread,
       container: mergedContainer,
     };
@@ -102,7 +120,7 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
       ? { ...fullComponentModel, ...fullComponentModel.container }
       : fullComponentModel;
   }, [fullComponentModel]);
-  const { dimensionsStyles, stylingBoxAsCSS, jsStyle } = useFormComponentStyles(styleModelForWrapper);
+  const { dimensionsStyles, stylingBoxAsCSS, jsStyle } = useFormComponentStyles(styleModelForWrapper, { activeDevice });
 
   // Extract margins from ORIGINAL component styling (before stripping) for the wrapper
   // Custom style margins take precedence over stylingBox margins

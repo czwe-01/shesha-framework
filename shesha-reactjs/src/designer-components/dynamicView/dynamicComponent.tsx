@@ -8,6 +8,7 @@ import { IModelValidation } from '@/utils/errors';
 import ErrorIconPopover from '@/components/componentErrors/errorIconPopover';
 import AttributeDecorator from '@/components/attributeDecorator';
 import { useShaFormDataUpdate } from '@/providers/form/providers/shaFormProvider';
+import { getDeviceSpecificStyles, DeviceType } from '@/components/formDesigner/utils/stylingUtils';
 
 export interface IConfigurableFormComponentProps {
   model: IConfigurableFormComponent;
@@ -25,8 +26,16 @@ const DynamicComponent: FC<IConfigurableFormComponentProps> = ({ model: componen
 
   const toolboxComponent = getToolboxComponent(componentModel.type);
 
+  // Get device-specific styles with fallback chain: mobile → tablet → desktop → base
   const deviceModel = Boolean(activeDevice) && typeof activeDevice === 'string'
-    ? { ...componentModel, ...componentModel?.[activeDevice] }
+    ? {
+        ...componentModel,
+        ...getDeviceSpecificStyles(
+          componentModel,
+          { mobile: componentModel?.mobile, tablet: componentModel?.tablet, desktop: componentModel?.desktop },
+          activeDevice as DeviceType,
+        ),
+      }
     : componentModel;
 
   const actualModel = useActualContextData(
