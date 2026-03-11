@@ -50,7 +50,7 @@ export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
         validate: { required: model.validate?.required },
         hidden: model.hidden,
       }}
-      className={"sha-js-label"}
+      className="sha-js-label"
       labelCol={{ span: 24 }}
       wrapperCol={{ span: 24 }}
     >

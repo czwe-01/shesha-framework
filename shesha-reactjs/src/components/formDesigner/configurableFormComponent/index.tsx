@@ -63,7 +63,7 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
    * Merges component model with device-specific settings.
    * Handles the complexity of components with separate container configurations
    * (e.g., attachmentsEditor with thumbnail dimensions at root and container dimensions in container property).
-   * 
+   *
    * Uses fallback chain: mobile → tablet → desktop → base
    */
   const fullComponentModel = useMemo(() => {
@@ -83,10 +83,10 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
     // Get device-specific container styles with fallback chain support
     const deviceContainerStyles = getDeviceSpecificStyles(
       componentModel?.container,
-      { 
-        mobile: componentModel?.mobile?.container, 
-        tablet: componentModel?.tablet?.container, 
-        desktop: componentModel?.desktop?.container 
+      {
+        mobile: componentModel?.mobile?.container,
+        tablet: componentModel?.tablet?.container,
+        desktop: componentModel?.desktop?.container,
       },
       activeDevice as DeviceType,
     );

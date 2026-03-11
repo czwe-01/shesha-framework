@@ -29,7 +29,7 @@ const getDeviceFallbackChain = (targetDevice: DeviceType): DeviceType[] => {
 /**
  * Merges device-specific styles with fallback chain support.
  * Properties from the target device take precedence, then fall back through the chain.
- * 
+ *
  * @param baseStyles - The base component styles (non-device specific)
  * @param deviceStyles - Object containing device-specific styles { mobile, tablet, desktop }
  * @param targetDevice - The target device to get styles for
@@ -41,10 +41,10 @@ export const getDeviceSpecificStyles = <T extends object>(
   targetDevice: DeviceType,
 ): T => {
   const fallbackChain = getDeviceFallbackChain(targetDevice);
-  
+
   // Start with base styles
   let merged = { ...(baseStyles || {} as T) };
-  
+
   // Apply styles from each device in the fallback chain (in reverse order so target device wins)
   // Order: desktop → tablet → mobile (for mobile target)
   // Order: desktop → tablet (for tablet target)
@@ -56,7 +56,7 @@ export const getDeviceSpecificStyles = <T extends object>(
       merged = { ...merged, ...deviceSpecificStyles };
     }
   }
-  
+
   return merged;
 };
 

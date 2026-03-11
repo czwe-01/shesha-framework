@@ -41,14 +41,14 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel }) => {
   // In preview/live mode: use original device-specific stylingBox (with margins) and dimensions
   const isDesignerMode = shaForm.formMode === 'designer';
   const extendedModel = componentModel as IConfigurableFormComponent & IStyleType;
-  
+
   // Get device-specific styles with fallback chain: mobile → tablet → desktop → base
   const deviceSpecificStyles = getDeviceSpecificStyles(
     componentModel,
     { mobile: componentModel?.mobile, tablet: componentModel?.tablet, desktop: componentModel?.desktop },
     effectiveDevice as DeviceType,
   );
-  
+
   const deviceModel = {
     ...componentModel,
     ...deviceSpecificStyles,

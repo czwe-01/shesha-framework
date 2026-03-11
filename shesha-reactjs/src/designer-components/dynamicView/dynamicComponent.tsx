@@ -29,13 +29,13 @@ const DynamicComponent: FC<IConfigurableFormComponentProps> = ({ model: componen
   // Get device-specific styles with fallback chain: mobile → tablet → desktop → base
   const deviceModel = Boolean(activeDevice) && typeof activeDevice === 'string'
     ? {
-        ...componentModel,
-        ...getDeviceSpecificStyles(
-          componentModel,
-          { mobile: componentModel?.mobile, tablet: componentModel?.tablet, desktop: componentModel?.desktop },
-          activeDevice as DeviceType,
-        ),
-      }
+      ...componentModel,
+      ...getDeviceSpecificStyles(
+        componentModel,
+        { mobile: componentModel?.mobile, tablet: componentModel?.tablet, desktop: componentModel?.desktop },
+        activeDevice as DeviceType,
+      ),
+    }
     : componentModel;
 
   const actualModel = useActualContextData(
