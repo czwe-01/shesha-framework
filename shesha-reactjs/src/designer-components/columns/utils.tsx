@@ -3,16 +3,16 @@ import { IConfigurableTheme, getLayoutComponentThemeDefaults } from "@/providers
 
 export const defaultStyles = (theme?: IConfigurableTheme): IColumnsInputProps => {
   const themeDefaults = getLayoutComponentThemeDefaults(theme);
-  
+
   // Apply theme grid gap settings to gutterX and gutterY
   // Convert string/number to number (theme stores as px value)
-  const themeGutterX = themeDefaults.gridGapHorizontal !== undefined 
-    ? Number(themeDefaults.gridGapHorizontal) 
+  const themeGutterX = themeDefaults.gridGapHorizontal !== undefined
+    ? Number(themeDefaults.gridGapHorizontal)
     : undefined;
-  const themeGutterY = themeDefaults.gridGapVertical !== undefined 
-    ? Number(themeDefaults.gridGapVertical) 
+  const themeGutterY = themeDefaults.gridGapVertical !== undefined
+    ? Number(themeDefaults.gridGapVertical)
     : undefined;
-  
+
   return {
     background: themeDefaults.background ?? { type: 'color', color: '' },
     dimensions: { width: '100%', height: 'auto', minHeight: '0px', maxHeight: 'auto', minWidth: '0px', maxWidth: '100%' },

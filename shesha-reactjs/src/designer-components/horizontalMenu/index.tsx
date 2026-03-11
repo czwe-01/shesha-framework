@@ -7,6 +7,7 @@ import {
   getShadowStyle,
   getStyle,
   IConfigurableFormComponent,
+  IShadowValue,
   ISidebarMenuItem,
   IToolboxComponent,
   migratePrevStyles,
@@ -33,13 +34,7 @@ interface IMenuListProps extends IConfigurableFormComponent, ILayoutColor {
   styleOnSelected?: string;
   styleOnSubMenu?: string;
   width?: string;
-  menuItemShadow?: {
-    color: string;
-    offsetX?: number;
-    offsetY?: number;
-    blurRadius?: number;
-    spreadRadius?: number;
-  };
+  menuItemShadow?: IShadowValue;
 }
 
 type MenuOverflowValue = "dropdown" | "menu" | "scroll";

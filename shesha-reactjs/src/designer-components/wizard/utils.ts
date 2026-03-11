@@ -123,7 +123,7 @@ export const onAddNewItem = (items: IWizardStepProps[]): IWizardStepProps => {
 
 export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getLayoutComponentThemeDefaults(theme);
-  
+
   return {
     background: themeDefaults.background ?? { type: 'color', color: '' },
     font: { weight: '400', size: 16, color: '#000', type: 'Segoe UI' },

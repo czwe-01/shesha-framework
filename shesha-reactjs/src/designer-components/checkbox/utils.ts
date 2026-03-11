@@ -4,7 +4,7 @@ import { ICheckboxComponentProps } from './interfaces';
 
 export const defaultStyles = (prev: ICheckboxComponentProps & IInputStyles, theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getInputComponentThemeDefaults(theme);
-  
+
   return {
     border: {
       radiusType: 'all',

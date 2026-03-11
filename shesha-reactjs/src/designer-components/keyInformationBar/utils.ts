@@ -3,7 +3,7 @@ import { IConfigurableTheme, getStandardComponentThemeDefaults } from "@/provide
 
 export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getStandardComponentThemeDefaults(theme);
-  
+
   return {
     background: { type: 'color', color: '#fff' },
     border: {

@@ -91,7 +91,7 @@ export const getContent = (content: string, { dataType = 'string', dateFormat, n
 
 export const defaultStyles = (textType: string, theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getInlineComponentThemeDefaults(theme);
-  
+
   return {
     font: {
       color: '#000',

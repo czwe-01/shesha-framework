@@ -7,7 +7,7 @@ const initialBorder: IStyleType['border']['border']['all'] = { width: '1px', col
 
 export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getLayoutComponentThemeDefaults(theme);
-  
+
   return {
     font: {
       size: 14,

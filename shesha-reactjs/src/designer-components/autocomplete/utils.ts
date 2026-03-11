@@ -3,7 +3,7 @@ import { IConfigurableTheme, getInputComponentThemeDefaults } from "@/providers/
 
 export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getInputComponentThemeDefaults(theme);
-  
+
   return {
     background: themeDefaults?.background ?? { type: 'color', color: '#fff' },
     font: { weight: '400', size: 14, color: '#000', type: 'Segoe UI' },

@@ -31,7 +31,7 @@ export const buttonTypes = [
 
 export const defaultStyles = (prev: IButtonComponentProps, theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getInlineComponentThemeDefaults(theme);
-  
+
   return {
     background: { type: 'color' },
     font: { weight: '400', size: 14, type: 'Segoe UI', align: 'center' },

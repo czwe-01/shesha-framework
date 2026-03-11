@@ -156,7 +156,7 @@ export const ALIGN_SELF = [
 
 export const defaultStyles = (prev?: IContainerComponentProps, theme?: IConfigurableTheme): IStyleType & ICommonContainerProps => {
   const themeDefaults = getLayoutComponentThemeDefaults(theme);
-  
+
   const {
     width = 'auto',
     height = 'auto',
@@ -176,7 +176,7 @@ export const defaultStyles = (prev?: IContainerComponentProps, theme?: IConfigur
 
   // Use theme border if available, otherwise use defaults
   const themeBorder = themeDefaults.border;
-  
+
   // Use theme grid gap as default if available
   // Theme gridGapHorizontal/Vertical can be applied to gap property
   const themeGap = themeDefaults.gridGapHorizontal || themeDefaults.gridGapVertical;

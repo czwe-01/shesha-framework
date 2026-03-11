@@ -11,7 +11,7 @@ type DefaultStyles = Omit<IStyleType, 'style'> & {
 
 export const defaultStyles = (theme?: IConfigurableTheme): DefaultStyles => {
   const themeDefaults = getStandardComponentThemeDefaults(theme);
-  
+
   return {
     background: { type: 'color', color: '#fff' },
     titleFont: { weight: '300', size: 20, color: '#000', type: 'Segoe UI', align: 'center' },

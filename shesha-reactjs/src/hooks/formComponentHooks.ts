@@ -15,10 +15,8 @@ import {
   useCanvas,
   useDeepCompareMemo,
   useSheshaApplication,
-  useTheme,
   wrapConstantsData,
 } from "..";
-import { getThemeBaseStyles } from "@/providers/theme/styleUtils";
 import { TouchableProxy, makeTouchableProxy } from "@/providers/form/touchableProxy";
 import { useParent } from "@/providers/parentProvider";
 import { isEqual } from "lodash";
@@ -214,60 +212,44 @@ export const useFormComponentStyles = <TModel>(
   const jsStyle = useActualContextExecution(styleSource, undefined, {}); // use default style if empty or error
   const { designerWidth } = useCanvas();
 
-  // Get theme base styles for the component category
-  const themeBaseStyles = useMemo(() => {
-    if (!options?.componentCategory) return {} as IStyleType;
-    return getThemeBaseStyles(theme, options.componentCategory);
-  }, [theme, options?.componentCategory]);
-
-  // Merge theme base styles with model styles, with model styles taking precedence
-  // For standardComponents and inlineComponents, only stylingBox is applied from theme
   const { dimensions, border, font, shadow, background, stylingBox, overflow } = model;
-  
-  // Apply theme stylingBox as base if component doesn't have one
-  const effectiveStylingBox = stylingBox ?? themeBaseStyles?.stylingBox;
-  
-  // For layoutComponents, also apply theme background, border, shadow as base
-  const effectiveBackground = background ?? (options?.componentCategory === 'layoutComponents' ? themeBaseStyles?.background : undefined);
-  const effectiveBorder = border ?? (options?.componentCategory === 'layoutComponents' ? themeBaseStyles?.border : undefined);
-  const effectiveShadow = shadow ?? (options?.componentCategory === 'layoutComponents' ? themeBaseStyles?.shadow : undefined);
 
   const [backgroundStyles, setBackgroundStyles] = useState(
-    effectiveBackground && effectiveBackground.storedFile?.id && effectiveBackground.type === 'storedFile'
+    background && background.storedFile?.id && background.type === 'storedFile'
       ? {
-        backgroundImage: `url(${app.backendUrl}/api/StoredFile/Download?id=${effectiveBackground.storedFile.id})`,
-        backgroundSize: effectiveBackground.size,
-        backgroundPosition: effectiveBackground.position,
-        backgroundRepeat: effectiveBackground.repeat,
+        backgroundImage: `url(${app.backendUrl}/api/StoredFile/Download?id=${background.storedFile.id})`,
+        backgroundSize: background.size,
+        backgroundPosition: background.position,
+        backgroundRepeat: background.repeat,
       }
-      : getBackgroundStyle(effectiveBackground, jsStyle),
+      : getBackgroundStyle(background, jsStyle),
   );
 
-  const stylingBoxParsed = useMemo(() => jsonSafeParse<StyleBoxValue>(effectiveStylingBox || '{}') ?? {}, [effectiveStylingBox]);
+  const stylingBoxParsed = useMemo(() => jsonSafeParse<StyleBoxValue>(stylingBox || '{}') ?? {}, [stylingBox]);
 
   const borderStyles = useMemo(() => getBorderStyle(border, jsStyle), [border, jsStyle]);
   const fontStyles = useMemo(() => getFontStyle(font), [font]);
-  const shadowStyles = useMemo(() => getShadowStyle(effectiveShadow), [effectiveShadow]);
+  const shadowStyles = useMemo(() => getShadowStyle(shadow), [shadow]);
   const stylingBoxAsCSS = useMemo(() => pickStyleFromModel(stylingBoxParsed), [stylingBoxParsed]);
   const dimensionsStyles = useMemo(() => getDimensionsStyle(dimensions, designerWidth, undefined), [dimensions, designerWidth]);
   const overflowStyles = useMemo(() => overflow ? getOverflowStyle(overflow, false) : {}, [overflow]);
 
   useDeepCompareEffect(() => {
-    if (effectiveBackground && effectiveBackground.storedFile?.id && effectiveBackground.type === 'storedFile') {
-      fetch(`${app.backendUrl}/api/StoredFile/Download?id=${effectiveBackground.storedFile.id}`,
+    if (background && background.storedFile?.id && background.type === 'storedFile') {
+      fetch(`${app.backendUrl}/api/StoredFile/Download?id=${background.storedFile.id}`,
         { headers: { ...app.httpHeaders, "Content-Type": "application/octet-stream" } })
         .then((response) => {
           return response.blob();
         })
         .then((blob) => {
           const url = URL.createObjectURL(blob);
-          const style = getBackgroundStyle(effectiveBackground, jsStyle, url);
+          const style = getBackgroundStyle(background, jsStyle, url);
           setBackgroundStyles(style);
         });
     } else {
-      setBackgroundStyles(getBackgroundStyle(effectiveBackground, jsStyle));
+      setBackgroundStyles(getBackgroundStyle(background, jsStyle));
     }
-  }, [effectiveBackground, jsStyle, app.backendUrl, app.httpHeaders]);
+  }, [background, jsStyle, app.backendUrl, app.httpHeaders]);
 
   const appearanceStyle = useMemo(() => removeUndefinedProps(
     {

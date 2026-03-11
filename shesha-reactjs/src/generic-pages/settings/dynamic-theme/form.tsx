@@ -1,5 +1,5 @@
 import { SmileOutlined } from '@ant-design/icons';
-import { Form, Input, Space } from 'antd';
+import { Form, Input } from 'antd';
 import React, { FC } from 'react';
 import { IConfigurableTheme } from '@/providers/theme/contexts';
 import { useFormComponentStyles } from '@/index';
@@ -21,8 +21,8 @@ const FormExample: FC<FormExampleProps> = ({ theme }) => {
     labelAlign: labelAlign !== 'top' ? labelAlign : null,
   };
 
-  const { fullStyle  } = useFormComponentStyles({ ...inputSettings, jsStyle: '' });
-  const allStyles = { ...fullStyle, backgroundColor: theme?.componentBackground};
+  const { fullStyle } = useFormComponentStyles({ ...inputSettings, jsStyle: '' });
+  const allStyles = { ...fullStyle, backgroundColor: theme?.componentBackground };
   const { marginTop: marginTopAll, marginBottom: marginBottomAll, marginLeft: marginLeftAll, marginRight: marginRightAll, ...rest } = allStyles;
   const marginStyle = { marginTop: marginTopAll, marginBottom: marginBottomAll, marginLeft: marginLeftAll, marginRight: marginRightAll };
   const styles = { ...rest };
@@ -53,7 +53,7 @@ const FormExample: FC<FormExampleProps> = ({ theme }) => {
           <Input placeholder="Error input" style={styles} />
         </Form.Item>
       </div>
-      <div style={marginStyle}> 
+      <div style={marginStyle}>
         <Form.Item
           label="Warning"
           validateStatus="warning"
@@ -62,7 +62,7 @@ const FormExample: FC<FormExampleProps> = ({ theme }) => {
           <Input placeholder="Warning input" prefix={<SmileOutlined />} style={styles} />
         </Form.Item>
       </div>
-      <div style={marginStyle}> 
+      <div style={marginStyle}>
         <Form.Item
           label="Validating"
           validateStatus="validating"

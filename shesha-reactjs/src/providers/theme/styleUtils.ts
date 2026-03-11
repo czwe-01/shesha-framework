@@ -1,5 +1,5 @@
 import { IStyleType, StyleBoxValue } from '@/interfaces';
-import { 
+import {
   IConfigurableTheme,
 } from './contexts';
 import { jsonSafeParse } from '@/utils/object';
@@ -12,7 +12,7 @@ export interface IThemeStyleType extends IStyleType {
   // Layout component properties
   gridGapHorizontal?: string | number;
   gridGapVertical?: string | number;
-  
+
   // Input component properties
   labelAlign?: 'left' | 'right' | 'top';
   labelColon?: boolean;
@@ -25,7 +25,7 @@ export interface IThemeStyleType extends IStyleType {
  */
 export const getThemeStylingBox = (
   theme: IConfigurableTheme | undefined,
-  category: 'inputComponents' | 'layoutComponents' | 'standardComponents' | 'inlineComponents'
+  category: 'inputComponents' | 'layoutComponents' | 'standardComponents' | 'inlineComponents',
 ): string | undefined => {
   if (!theme) return undefined;
   return theme[category]?.stylingBox;
@@ -54,19 +54,17 @@ export const parseThemeStylingBox = (stylingBox: string | undefined): React.CSSP
  * Returns the theme values that should be used as defaults for input components
  */
 export const getInputComponentThemeDefaults = (
-  theme: IConfigurableTheme | undefined
+  theme: IConfigurableTheme | undefined,
 ): Partial<IThemeStyleType> => {
   if (!theme?.inputComponents) return {};
 
   const settings = theme.inputComponents;
 
-  console.log("Form itme theme : ", theme);
-  
   return {
     stylingBox: settings.stylingBox,
     background: {
       type: 'color',
-      color: theme.componentBackground
+      color: theme.componentBackground,
     },
     // Include label settings that might be used by form items
     labelAlign: settings.labelAlign,
@@ -81,7 +79,7 @@ export const getInputComponentThemeDefaults = (
  * Returns the theme values that should be used as defaults for layout components
  */
 export const getLayoutComponentThemeDefaults = (
-  theme: IConfigurableTheme | undefined
+  theme: IConfigurableTheme | undefined,
 ): Partial<IThemeStyleType> => {
   if (!theme?.layoutComponents) return {};
 
@@ -121,7 +119,7 @@ export const getLayoutComponentThemeDefaults = (
  * Gets standard component theme defaults - only stylingBox (margin/padding)
  */
 export const getStandardComponentThemeDefaults = (
-  theme: IConfigurableTheme | undefined
+  theme: IConfigurableTheme | undefined,
 ): Partial<IThemeStyleType> => {
   if (!theme?.standardComponents) return {};
 
@@ -134,7 +132,7 @@ export const getStandardComponentThemeDefaults = (
  * Gets inline component theme defaults - only stylingBox (margin/padding)
  */
 export const getInlineComponentThemeDefaults = (
-  theme: IConfigurableTheme | undefined
+  theme: IConfigurableTheme | undefined,
 ): Partial<IThemeStyleType> => {
   if (!theme?.inlineComponents) return {};
 
@@ -149,7 +147,7 @@ export const getInlineComponentThemeDefaults = (
  */
 export const mergeThemeDefaultsWithComponentDefaults = (
   themeDefaults: Partial<IThemeStyleType>,
-  componentDefaults: IThemeStyleType
+  componentDefaults: IThemeStyleType,
 ): IThemeStyleType => {
   return {
     // Start with component defaults
@@ -177,7 +175,7 @@ export const mergeThemeDefaultsWithComponentDefaults = (
  */
 export const getThemeBaseStyles = (
   theme: IConfigurableTheme | undefined,
-  category: 'inputComponents' | 'layoutComponents' | 'standardComponents' | 'inlineComponents'
+  category: 'inputComponents' | 'layoutComponents' | 'standardComponents' | 'inlineComponents',
 ): Partial<IThemeStyleType> => {
   switch (category) {
     case 'inputComponents':
