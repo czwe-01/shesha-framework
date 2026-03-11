@@ -6,6 +6,7 @@ import { QuestionCircleOutlined } from '@ant-design/icons';
 import { addPx } from '@/utils/style';
 import { titleDefaultStyles } from './utils';
 import { useAvailableConstantsData } from '@/providers/form/utils';
+import { LabelAlign } from '@/index';
 
 export interface ISectionSeparatorProps {
   id?: string;
@@ -20,7 +21,7 @@ export interface ISectionSeparatorProps {
   lineHeight?: string;
   titleMargin?: number;
   marginBottom?: string | number;
-  labelAlign?: 'left' | 'center' | 'right';
+  labelAlign?: LabelAlign | 'center';
   orientation?: 'horizontal' | 'vertical';
   fontSize?: string | number;
   lineType?: string;

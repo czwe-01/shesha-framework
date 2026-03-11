@@ -4,6 +4,7 @@ import { IExpressionExecuterArguments, executeScriptSync } from '@/providers/for
 import { IConfigurableFormComponent, IStyleType } from "@/index";
 import { IModelMetadata, IPropertyMetadata, isPropertiesArray, isPropertiesLoader } from '@/interfaces/metadata';
 import { camelcaseDotNotation, toCamelCase, humanizeString } from '@/utils/string';
+import { IConfigurableTheme, getInputComponentThemeDefaults } from '@/providers/theme';
 
 const NEW_KEY = ['{{NEW_KEY}}', '{{GEN_KEY}}'];
 const MAX_NUMBER_OF_DEFAULT_COLS = 20;
@@ -96,9 +97,11 @@ export const filterVisibility =
       return true;
     };
 
-export const defaultStyles = (): IStyleType => {
+export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
+  const themeDefaults = getInputComponentThemeDefaults(theme);
+
   return {
-    background: { type: 'color', color: '#fff' },
+    background: { type: 'color', color: themeDefaults.background.color || '#fff' },
     font: { weight: '400', size: 14, color: '#000', type: 'Segoe UI', align: 'left' },
     border: {
       border: {
@@ -120,6 +123,7 @@ export const defaultStyles = (): IStyleType => {
       spreadRadius: 0,
       color: 'rgba(0, 0, 0, 0.1)',
     },
+    stylingBox: themeDefaults.stylingBox,
   };
 };
 

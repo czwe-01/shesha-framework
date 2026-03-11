@@ -14,6 +14,7 @@ import { Migrator, MigratorFluent } from '@/utils/fluentMigrator/migrator';
 import { IModelMetadata, IPropertyMetadata } from './metadata';
 import { IAjaxResponseBase, IApplicationContext, IDimensionsValue, IErrorInfo } from '..';
 import { ISheshaApplicationInstance } from '@/providers/sheshaApplication/application';
+import { IConfigurableTheme } from '@/providers/theme';
 import { AxiosResponse } from 'axios';
 import { FormBuilderFactory } from '@/form-factory/interfaces';
 
@@ -231,6 +232,7 @@ export interface SettingsMigrationContext {
   flatStructure: IFlatComponentsStructure;
   componentId: string;
   isNew?: boolean;
+  theme?: IConfigurableTheme;
 }
 
 /**

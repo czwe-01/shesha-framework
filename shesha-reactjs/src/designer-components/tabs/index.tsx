@@ -145,7 +145,7 @@ const TabsComponent: TabsComponentDefinition = {
     .add<ITabsComponentProps>(2, (prev) => ({ ...migrateFormApi.properties(prev) }))
     .add<ITabsComponentProps>(3, (prev) => removeComponents(prev))
     .add<ITabsComponentProps>(4, (prev) => {
-      const newModel = migratePrevStyles(prev, defaultStyles);
+      const newModel = migratePrevStyles(prev, defaultStyles());
       const initialCardStyle = { ...defaultCardStyles, font: { ...defaultCardStyles.font, color: '#000000' } };
       return {
         ...newModel,
