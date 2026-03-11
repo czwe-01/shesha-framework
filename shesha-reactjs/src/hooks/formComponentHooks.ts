@@ -198,25 +198,20 @@ export function useActualContextExecutionExecutor<T = unknown, TAdditionalData e
   return actualDataRef.current;
 };
 
-export interface UseFormComponentStylesOptions {
-  /**
-   * The component category for applying theme defaults.
-   * - 'inputComponents': Form input fields (isInput: true)
-   * - 'layoutComponents': Container components (panel, card, wizard, tabs, etc.)
-   * - 'standardComponents': Display components (statistic, charts, etc.) - only margin/padding from theme
-   * - 'inlineComponents': Inline elements (icon, text, link, button) - only margin/padding from theme
-   */
-  componentCategory?: 'inputComponents' | 'layoutComponents' | 'standardComponents' | 'inlineComponents';
+export interface IUseFormComponentStylesOptions {
+  /** Use wrapperStyle instead of style for jsStyle calculation (for container components) */
+  useWrapperStyle?: boolean;
 }
 
 export const useFormComponentStyles = <TModel>(
   model: TModel & IStyleType & Omit<IConfigurableFormComponent, 'id' | 'type'>,
-  options?: UseFormComponentStylesOptions,
+  options?: IUseFormComponentStylesOptions,
 ): IFormComponentStyles => {
   const app = useSheshaApplication();
-  const { theme } = useTheme();
-  
-  const jsStyle = useActualContextExecution(model.style, undefined, {}); // use default style if empty or error
+  const { useWrapperStyle } = options || {};
+  // For container components, use wrapperStyle instead of style
+  const styleSource = useWrapperStyle && model.wrapperStyle ? (model).wrapperStyle : model.style;
+  const jsStyle = useActualContextExecution(styleSource, undefined, {}); // use default style if empty or error
   const { designerWidth } = useCanvas();
 
   // Get theme base styles for the component category
@@ -250,11 +245,11 @@ export const useFormComponentStyles = <TModel>(
 
   const stylingBoxParsed = useMemo(() => jsonSafeParse<StyleBoxValue>(effectiveStylingBox || '{}') ?? {}, [effectiveStylingBox]);
 
-  const dimensionsStyles = useMemo(() => getDimensionsStyle(dimensions, stylingBoxParsed, designerWidth), [dimensions, stylingBoxParsed, designerWidth]);
-  const borderStyles = useMemo(() => getBorderStyle(effectiveBorder, jsStyle), [effectiveBorder, jsStyle]);
+  const borderStyles = useMemo(() => getBorderStyle(border, jsStyle), [border, jsStyle]);
   const fontStyles = useMemo(() => getFontStyle(font), [font]);
   const shadowStyles = useMemo(() => getShadowStyle(effectiveShadow), [effectiveShadow]);
   const stylingBoxAsCSS = useMemo(() => pickStyleFromModel(stylingBoxParsed), [stylingBoxParsed]);
+  const dimensionsStyles = useMemo(() => getDimensionsStyle(dimensions, designerWidth, undefined), [dimensions, designerWidth]);
   const overflowStyles = useMemo(() => overflow ? getOverflowStyle(overflow, false) : {}, [overflow]);
 
   useDeepCompareEffect(() => {
@@ -288,29 +283,13 @@ export const useFormComponentStyles = <TModel>(
 
   const fullStyle = useDeepCompareMemo(() => ({ ...appearanceStyle, ...jsStyle }), [appearanceStyle, jsStyle]);
 
-  // Build theme config from theme base styles
-  const themeConfig = useMemo(() => {
-    if (!options?.componentCategory || !themeBaseStyles) return undefined;
-    
-    const config: IFormComponentStyles['themeConfig'] = {};
-    
-    // Add layout-specific properties
-    if (options.componentCategory === 'layoutComponents') {
-      config.gridGapHorizontal = themeBaseStyles.gridGapHorizontal;
-      config.gridGapVertical = themeBaseStyles.gridGapVertical;
-    }
-    
-    // Add input-specific properties
-    if (options.componentCategory === 'inputComponents') {
-      config.labelAlign = themeBaseStyles.labelAlign;
-      config.labelColon = themeBaseStyles.labelColon;
-      config.labelSpan = themeBaseStyles.labelSpan;
-      config.contentSpan = themeBaseStyles.contentSpan;
-    }
-    
-    // Only return if we have properties
-    return Object.keys(config).length > 0 ? config : undefined;
-  }, [themeBaseStyles, options?.componentCategory]);
+  // Extract margin styles for wrapper use
+  const margins = useMemo(() => ({
+    marginTop: fullStyle.marginTop,
+    marginBottom: fullStyle.marginBottom,
+    marginLeft: fullStyle.marginLeft,
+    marginRight: fullStyle.marginRight,
+  }), [fullStyle.marginTop, fullStyle.marginBottom, fullStyle.marginLeft, fullStyle.marginRight]);
 
   const allStyles: IFormComponentStyles = useMemo(() => ({
     stylingBoxAsCSS,
@@ -323,8 +302,8 @@ export const useFormComponentStyles = <TModel>(
     jsStyle,
     appearanceStyle,
     fullStyle,
-    themeConfig,
-  }), [stylingBoxAsCSS, dimensionsStyles, borderStyles, fontStyles, backgroundStyles, shadowStyles, overflowStyles, jsStyle, appearanceStyle, fullStyle, themeConfig]);
+    margins,
+  }), [stylingBoxAsCSS, dimensionsStyles, borderStyles, fontStyles, backgroundStyles, shadowStyles, overflowStyles, jsStyle, appearanceStyle, fullStyle, margins]);
 
   return allStyles;
 };

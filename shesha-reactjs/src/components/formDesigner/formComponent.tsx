@@ -8,41 +8,10 @@ import { CustomErrorBoundary } from '..';
 import ErrorIconPopover from '../componentErrors/errorIconPopover';
 import AttributeDecorator from '../attributeDecorator';
 import { IStyleType, isValidGuid, useActualContextData, useCalculatedModel } from '@/index';
-import { useFormComponentStyles, UseFormComponentStylesOptions } from '@/hooks/formComponentHooks';
+import { useFormComponentStyles } from '@/hooks/formComponentHooks';
+import { stylingUtils } from '@/components/formDesigner/utils/stylingUtils';
 import { useStyles } from './styles/styles';
 import { FormComponentValidationProvider, useValidationErrorsActionsOrDefault, useValidationErrorsStateOrDefault } from '@/providers/validationErrors';
-
-/**
- * Determines the component category for theme styling based on component type and properties.
- */
-const getComponentCategory = (componentType: string, isInput?: boolean): UseFormComponentStylesOptions['componentCategory'] => {
-  // Input components: isInput = true
-  if (isInput) {
-    return 'inputComponents';
-  }
-
-  // Layout components: container-like components
-  const layoutComponentTypes = [
-    'container', 'card', 'tabs', 'collapsiblePanel', 'panel',
-    'columns', 'sizableColumns', 'dataList', 'dataTable',
-    'drawer', 'wizard', 'sectionSeparator', 'divider'
-  ];
-  if (layoutComponentTypes.includes(componentType)) {
-    return 'layoutComponents';
-  }
-
-  // Inline components: inline elements
-  const inlineComponentTypes = [
-    'button', 'link', 'text', 'icon', 'iconPicker',
-    'refListStatus', 'tag', 'badge'
-  ];
-  if (inlineComponentTypes.includes(componentType)) {
-    return 'inlineComponents';
-  }
-
-  // Standard components: everything else (display components)
-  return 'standardComponents';
-};
 
 export interface IFormComponentProps {
   componentModel: IConfigurableFormComponent;
@@ -68,9 +37,24 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel }) => {
   // Default to 'desktop' when there's no canvas context (e.g., in datatables)
   const effectiveDevice = activeDevice || 'desktop';
 
-  const deviceModel = Boolean(effectiveDevice) && typeof effectiveDevice === 'string'
-    ? { ...componentModel, ...componentModel?.[effectiveDevice] }
-    : componentModel;
+  // In designer mode: preserve the padding-only stylingBox, dimensions, and style (margins stripped) from wrapper
+  // In preview/live mode: use original device-specific stylingBox (with margins) and dimensions
+  const isDesignerMode = shaForm.formMode === 'designer';
+  const extendedModel = componentModel as IConfigurableFormComponent & IStyleType;
+  const deviceModel = {
+    ...componentModel,
+    ...componentModel?.[effectiveDevice],
+    // In designer: preserve padding-only stylingBox and stripped style (no margins) from wrapper
+    // In preview: use original stylingBox with margins from device settings
+    ...(isDesignerMode
+      ? {
+        stylingBox: extendedModel.stylingBox,
+        dimensions: extendedModel.dimensions,
+        style: extendedModel.style, // Keep stripped style (no margins)
+      }
+      : { stylingBox: componentModel?.[effectiveDevice]?.stylingBox }
+    ),
+  };
 
   const toolboxComponent = getToolboxComponent(componentModel.type);
 
@@ -91,10 +75,21 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel }) => {
   if (!toolboxComponent?.isInput && !toolboxComponent?.isOutput)
     actualModel.propertyName = undefined;
 
-  // Determine component category for theme styling
-  const componentCategory = getComponentCategory(componentModel.type, toolboxComponent?.isInput);
-  
-  actualModel.allStyles = useFormComponentStyles(actualModel, { componentCategory });
+  const allStyles = useFormComponentStyles(actualModel);
+
+  // For input components: Strip margins from fullStyle and jsStyle
+  // Margins are handled by the FormItem wrapper (via allStyles.margins), not the inner component
+  // This prevents double margins (wrapper + component) in both designer and live modes
+  if (toolboxComponent?.isInput) {
+    actualModel.allStyles = {
+      ...allStyles,
+      fullStyle: stylingUtils.stripMargins(allStyles.fullStyle),
+      jsStyle: stylingUtils.stripMargins(allStyles.jsStyle),
+      // margins are preserved for FormItem wrapper use
+    };
+  } else {
+    actualModel.allStyles = allStyles;
+  }
 
   const calculatedModel = useCalculatedModel(actualModel, toolboxComponent?.useCalculateModel, toolboxComponent?.calculateModel);
 

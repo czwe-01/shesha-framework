@@ -14,6 +14,7 @@ export const defaultStyles = (prev: IImageProps, theme?: IConfigurableTheme): IS
       },
       radius: { all: borderRadius },
     },
+    dimensions: { width: '100%', height: 'auto', minHeight: '0px', maxHeight: 'auto', minWidth: '0px', maxWidth: 'auto' },
     // Apply theme stylingBox as default if available
     stylingBox: themeDefaults.stylingBox,
   };
