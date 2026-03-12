@@ -120,7 +120,7 @@ export const defaultStyles = (textType: string, theme?: IConfigurableTheme): ISt
       maxWidth: 'auto',
     },
     // Apply theme stylingBox as default if available
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };
 

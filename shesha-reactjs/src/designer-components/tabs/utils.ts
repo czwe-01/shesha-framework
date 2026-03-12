@@ -15,9 +15,9 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
       type: 'Segoe UI',
       color: '',
     },
-    background: themeDefaults.background ?? { type: 'color', color: '#FFFFFF' },
+    background: themeDefaults?.background ?? { type: 'color', color: '#FFFFFF' },
     dimensions: { width: 'auto', height: 'auto', minHeight: '0px', maxHeight: 'auto', minWidth: '0px', maxWidth: 'auto' },
-    border: themeDefaults.border ?? {
+    border: themeDefaults?.border ?? {
       border: {
         all: initialBorder, top: initialBorder, right: initialBorder,
         bottom: initialBorder, left: initialBorder,
@@ -26,8 +26,8 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
       radiusType: 'all',
       borderType: 'all',
     },
-    shadow: themeDefaults.shadow ?? { blurRadius: 0, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 0, spreadRadius: 0 },
-    stylingBox: themeDefaults.stylingBox ?? "{\"marginBottom\":\"5\",\"paddingLeft\":\"16\",\"paddingBottom\":\"16\",\"paddingTop\":\"16\",\"paddingRight\":\"16\"}",
+    shadow: themeDefaults?.shadow ?? { blurRadius: 0, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 0, spreadRadius: 0 },
+    stylingBox: themeDefaults?.stylingBox ?? "{\"marginBottom\":\"5\",\"paddingLeft\":\"16\",\"paddingBottom\":\"16\",\"paddingTop\":\"16\",\"paddingRight\":\"16\"}",
   };
 };
 

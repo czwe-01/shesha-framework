@@ -56,7 +56,7 @@ export const defaultStyles = (prev: IButtonComponentProps, theme?: IConfigurable
       maxWidth: 'auto',
     },
     // Apply theme stylingBox as default if available
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };
 

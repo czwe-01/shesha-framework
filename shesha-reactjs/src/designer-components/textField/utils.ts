@@ -5,7 +5,7 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getInputComponentThemeDefaults(theme);
 
   return {
-    background: { type: 'color', color: themeDefaults.background.color || '#fff' },
+    background: { type: 'color', color: themeDefaults?.background?.color || '#fff' },
     font: { weight: '400', size: 14, color: '#000', type: 'Segoe UI' },
     border: {
       border: {
@@ -21,6 +21,6 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
     },
     dimensions: { width: '100%', height: '32px', minHeight: '0px', maxHeight: 'auto', minWidth: '0px', maxWidth: 'auto' },
     // Apply theme stylingBox as default if available
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };

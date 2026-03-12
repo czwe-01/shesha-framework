@@ -34,6 +34,6 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
     },
     overflow: true,
     // Apply theme stylingBox as default if available
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };

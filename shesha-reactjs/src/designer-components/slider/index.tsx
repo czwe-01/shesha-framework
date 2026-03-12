@@ -9,6 +9,8 @@ import { getSettings } from './settingsForm';
 import { useStyles } from './styles';
 import { DataTypes } from '@/interfaces';
 import { NumberFormats } from '@/interfaces/dataTypes';
+import { migratePrevStyles } from '../_common-migrations';
+import { defaultStyles } from './utils';
 
 const SliderComponent: SliderComponentDefinition = {
   type: 'slider',
@@ -17,6 +19,7 @@ const SliderComponent: SliderComponentDefinition = {
   isInput: true,
   isOutput: true,
   canBeJsSetting: true,
+  componentCatergory: 'inlineComponents',
   preserveDimensionsInDesigner: true,
   dataTypeSupported: ({ dataType, dataFormat }) => dataType === DataTypes.number && [NumberFormats.int64, NumberFormats.int32].includes(dataFormat),
   Factory: ({ model }) => {

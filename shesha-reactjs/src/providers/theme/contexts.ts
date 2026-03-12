@@ -19,6 +19,7 @@ export interface IInputComponentSettings {
   labelHeight?: string | number;
   contentSpan?: number;
   stylingBox?: string;
+  background?: IBackgroundValue;
 }
 
 export interface ILayoutComponentSettings {

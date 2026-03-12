@@ -7,9 +7,9 @@ export const defaultStyles = (prev: ICardComponentProps, theme?: IConfigurableTh
   const { size } = prev;
 
   return {
-    border: themeDefaults.border ?? { hideBorder: false, radiusType: 'all', borderType: 'all', border: { all: { width: '1px', style: 'solid', color: '#d9d9d9' } }, radius: { all: 8 } },
+    border: themeDefaults?.border ?? { hideBorder: false, radiusType: 'all', borderType: 'all', border: { all: { width: '1px', style: 'solid', color: '#d9d9d9' } }, radius: { all: 8 } },
     dimensions: { width: '100%', height: size === 'small' ? '22px' : size === 'large' ? '38px' : '30px', minHeight: '0px', maxHeight: 'auto', minWidth: '0px', maxWidth: 'auto' },
-    background: themeDefaults.background ?? {
+    background: themeDefaults?.background ?? {
       type: 'color',
       color: '#fff',
       repeat: 'no-repeat',
@@ -27,13 +27,13 @@ export const defaultStyles = (prev: ICardComponentProps, theme?: IConfigurableTh
       size: 14,
       weight: '400',
     },
-    shadow: themeDefaults.shadow ?? {
+    shadow: themeDefaults?.shadow ?? {
       offsetX: 0,
       offsetY: 0,
       color: '#000',
       blurRadius: 0,
       spreadRadius: 0,
     },
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };

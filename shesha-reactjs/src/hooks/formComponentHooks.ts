@@ -15,8 +15,10 @@ import {
   useCanvas,
   useDeepCompareMemo,
   useSheshaApplication,
+  useTheme,
   wrapConstantsData,
 } from "..";
+import { getThemeBaseStyles, IThemeStyleType } from "@/providers/theme/styleUtils";
 import { TouchableProxy, makeTouchableProxy } from "@/providers/form/touchableProxy";
 import { useParent } from "@/providers/parentProvider";
 import { isEqual } from "lodash";
@@ -29,6 +31,48 @@ import { jsonSafeParse, removeUndefinedProps } from "@/utils/object";
 import { getDimensionsStyle } from "@/designer-components/_settings/utils/dimensions/utils";
 import { getOverflowStyle } from "@/designer-components/_settings/utils/overflow/util";
 import { isNullOrWhiteSpace } from "@/utils/nullables";
+import { IBackgroundValue } from "@/designer-components/_settings/utils/background/interfaces";
+import { IBorderValue } from "@/designer-components/_settings/utils/border/interfaces";
+import { IShadowValue } from "@/designer-components/_settings/utils/shadow/interfaces";
+
+/**
+ * Deep merges theme defaults with model values, where model values take precedence.
+ * Only falls back to theme for keys that are undefined/null in the model.
+ */
+const mergeWithThemeDefaults = <T extends object>(
+  modelValue: T | undefined,
+  themeDefault: T | undefined,
+): T | undefined => {
+  if (!themeDefault) return modelValue;
+  if (!modelValue) return themeDefault;
+
+  const result = { ...modelValue } as Record<string, unknown>;
+
+  for (const key of Object.keys(themeDefault)) {
+    const modelVal = result[key];
+    const themeVal = (themeDefault as Record<string, unknown>)[key];
+
+    if (modelVal === undefined || modelVal === null) {
+      // If model doesn't have this key, use theme default
+      result[key] = themeVal;
+    } else if (
+      typeof modelVal === "object" &&
+      !Array.isArray(modelVal) &&
+      typeof themeVal === "object" &&
+      themeVal !== null
+    ) {
+      // Deep merge nested objects
+      result[key] = mergeWithThemeDefaults(
+        modelVal as Record<string, unknown>,
+        themeVal as Record<string, unknown>,
+      );
+    }
+    // Otherwise keep model value (it takes precedence)
+  }
+
+  return result as T;
+};
+
 
 type MayHaveEditMode<T> = T & {
   editMode?: unknown | undefined;
@@ -199,6 +243,8 @@ export function useActualContextExecutionExecutor<T = unknown, TAdditionalData e
 export interface IUseFormComponentStylesOptions {
   /** Use wrapperStyle instead of style for jsStyle calculation (for container components) */
   useWrapperStyle?: boolean;
+  /** Component category for applying theme defaults */
+  componentCategory?: 'inputComponents' | 'layoutComponents' | 'standardComponents' | 'inlineComponents';
 }
 
 export const useFormComponentStyles = <TModel>(
@@ -206,13 +252,47 @@ export const useFormComponentStyles = <TModel>(
   options?: IUseFormComponentStylesOptions,
 ): IFormComponentStyles => {
   const app = useSheshaApplication();
-  const { useWrapperStyle } = options || {};
+  const { useWrapperStyle, componentCategory } = options || {};
+  const themeContext = useTheme();
+  const theme = themeContext?.theme;
+
+  // Get theme defaults based on component category
+  const themeDefaults = useMemo(() => {
+    if (!componentCategory || !theme) return {} as IThemeStyleType;
+    return getThemeBaseStyles(theme, componentCategory);
+  }, [theme, componentCategory]);
+
   // For container components, use wrapperStyle instead of style
   const styleSource = useWrapperStyle && model.wrapperStyle ? (model).wrapperStyle : model.style;
   const jsStyle = useActualContextExecution(styleSource, undefined, {}); // use default style if empty or error
   const { designerWidth } = useCanvas();
 
-  const { dimensions, border, font, shadow, background, stylingBox, overflow } = model;
+  // Use model values with theme defaults as fallback (per-key merge)
+  const {
+    dimensions,
+    border: modelBorder,
+    font: modelFont,
+    shadow: modelShadow,
+    background: modelBackground,
+    stylingBox: modelStylingBox,
+    overflow: modelOverflow,
+  } = model;
+
+  // Apply theme defaults per-key, so if a key is missing in model, theme value is used
+  const background = mergeWithThemeDefaults<IBackgroundValue>(
+    modelBackground,
+    themeDefaults.background,
+  );
+  const border = mergeWithThemeDefaults<IBorderValue>(
+    modelBorder,
+    themeDefaults.border as IBorderValue,
+  );
+  const shadow = mergeWithThemeDefaults<IShadowValue>(
+    modelShadow,
+    themeDefaults.shadow as IShadowValue,
+  );
+  const stylingBox = modelStylingBox ?? themeDefaults.stylingBox;
+  const overflow = modelOverflow;
 
   const [backgroundStyles, setBackgroundStyles] = useState(
     background && background.storedFile?.id && background.type === 'storedFile'
@@ -228,6 +308,7 @@ export const useFormComponentStyles = <TModel>(
   const stylingBoxParsed = useMemo(() => jsonSafeParse<StyleBoxValue>(stylingBox || '{}') ?? {}, [stylingBox]);
 
   const borderStyles = useMemo(() => getBorderStyle(border, jsStyle), [border, jsStyle]);
+  const font = modelFont;
   const fontStyles = useMemo(() => getFontStyle(font), [font]);
   const shadowStyles = useMemo(() => getShadowStyle(shadow), [shadow]);
   const stylingBoxAsCSS = useMemo(() => pickStyleFromModel(stylingBoxParsed), [stylingBoxParsed]);

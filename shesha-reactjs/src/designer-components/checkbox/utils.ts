@@ -44,6 +44,6 @@ export const defaultStyles = (prev: ICheckboxComponentProps & IInputStyles, them
       spreadRadius: 0,
     },
     // Apply theme stylingBox as default if available
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };

@@ -32,7 +32,7 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
       minWidth: '0px',
       maxWidth: 'auto',
     },
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };
 

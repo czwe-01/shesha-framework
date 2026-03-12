@@ -46,6 +46,6 @@ export const defaultStyles = (theme?: IConfigurableTheme): DefaultStyles => {
       spreadRadius: -10,
     },
     // Apply theme stylingBox as default if available
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };

@@ -35,7 +35,7 @@ export const defaultStyles = (prev: IEntityPickerComponentProps, theme?: IConfig
       spreadRadius: 0,
     },
     // Apply theme stylingBox as default if available
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };
 

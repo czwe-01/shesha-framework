@@ -175,14 +175,14 @@ export const defaultStyles = (prev?: IContainerComponentProps, theme?: IConfigur
   const isAbove = shadowStyle === 'above';
 
   // Use theme border if available, otherwise use defaults
-  const themeBorder = themeDefaults.border;
+  const themeBorder = themeDefaults?.border;
 
   // Use theme grid gap as default if available
   // Theme gridGapHorizontal/Vertical can be applied to gap property
-  const themeGap = themeDefaults.gridGapHorizontal || themeDefaults.gridGapVertical;
+  const themeGap = themeDefaults?.gridGapHorizontal || themeDefaults?.gridGapVertical;
 
   return {
-    background: themeDefaults.background ?? {
+    background: themeDefaults?.background ?? {
       type: 'color',
       color: '',
     },
@@ -202,14 +202,14 @@ export const defaultStyles = (prev?: IContainerComponentProps, theme?: IConfigur
       },
       radius: { all: borderRadius },
     },
-    shadow: themeDefaults.shadow ?? {
+    shadow: themeDefaults?.shadow ?? {
       blurRadius: isBelow || isAbove ? 4 : 0,
       color: '#000000',
       offsetX: 0,
       offsetY: isAbove ? -2 : isBelow ? 2 : 0,
       spreadRadius: 0,
     },
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
     display: prev?.className === 'sha-index-table-control' || prev?.className === 'index-table-controls-right' ? 'flex' : prev?.display ?? null,
     direction: prev?.direction ?? "horizontal",
     flexWrap: prev?.className === 'sha-index-table-control' || prev?.className === 'index-table-controls-right' ? 'nowrap' : prev?.flexWrap ?? 'nowrap',

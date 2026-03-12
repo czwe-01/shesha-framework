@@ -1,5 +1,25 @@
 import { IStyleType } from "@/index";
 import { IConfigurableTheme, getInputComponentThemeDefaults } from "@/providers/theme";
+import { nanoid } from '@/utils/uuid';
+import { ReferenceListItemDto } from '@/apis/referenceList';
+import { DataSourceType, ILabelValue } from '@/designer-components/dropdown/model';
+
+export const getDataSourceList = (
+  dataSource: DataSourceType,
+  values: ILabelValue[],
+  refList: ReferenceListItemDto[],
+  urlList: ILabelValue<any>[] = [],
+): ILabelValue[] => {
+  switch (dataSource) {
+    case 'values':
+      return values;
+
+    case 'referenceList':
+      return (refList || [])?.map(({ id, item, itemValue }) => ({ id, value: itemValue, label: item }));
+    case 'url':
+      return urlList?.map((props) => (props?.id ? props : { ...props, id: nanoid() }));
+  }
+};
 
 export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getInputComponentThemeDefaults(theme);
@@ -33,6 +53,6 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
       maxWidth: 'auto',
     },
     // Apply theme stylingBox as default if available
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };

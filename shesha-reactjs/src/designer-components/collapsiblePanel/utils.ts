@@ -8,9 +8,9 @@ export const defaultStyles = (prev: ICollapsiblePanelComponentProps, theme?: ICo
   const { ghost, borderRadius } = prev;
 
   return {
-    background: themeDefaults.background ?? { type: 'color', color: bodyColor },
+    background: themeDefaults?.background ?? { type: 'color', color: bodyColor },
     dimensions: { width: 'auto', height: 'auto', minHeight: '0px', maxHeight: 'auto', minWidth: '0px', maxWidth: 'auto' },
-    border: themeDefaults.border ?? {
+    border: themeDefaults?.border ?? {
       radiusType: 'all', borderType: 'custom',
       border: {
         ...ghost ? { all: { width: '1px', color: '#d9d9d9', style: 'solid' } }
@@ -24,8 +24,8 @@ export const defaultStyles = (prev: ICollapsiblePanelComponentProps, theme?: ICo
       },
       radius: { all: borderRadius || 8 },
     },
-    shadow: themeDefaults.shadow ?? { blurRadius: 0, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 0, spreadRadius: 0 },
-    stylingBox: themeDefaults.stylingBox ?? '{"marginBottom":"5","paddingLeft":"8","paddingBottom":"8","paddingTop":"8","paddingRight":"8"}',
+    shadow: themeDefaults?.shadow ?? { blurRadius: 0, color: 'rgba(0, 0, 0, 0.15)', offsetX: 0, offsetY: 0, spreadRadius: 0 },
+    stylingBox: themeDefaults?.stylingBox ?? '{"marginBottom":"5","paddingLeft":"8","paddingBottom":"8","paddingTop":"8","paddingRight":"8"}',
   };
 };
 

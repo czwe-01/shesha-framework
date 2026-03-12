@@ -125,10 +125,10 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getLayoutComponentThemeDefaults(theme);
 
   return {
-    background: themeDefaults.background ?? { type: 'color', color: '' },
+    background: themeDefaults?.background ?? { type: 'color', color: '' },
     font: { weight: '400', size: 16, color: '#000', type: 'Segoe UI' },
     dimensions: { width: 'auto', height: 'auto', minHeight: '0px', maxHeight: 'auto', minWidth: '0px', maxWidth: 'auto' },
-    border: themeDefaults.border ?? {
+    border: themeDefaults?.border ?? {
       radiusType: 'all',
       borderType: 'all',
       border: {
@@ -140,7 +140,7 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
       },
       radius: { all: 8 },
     },
-    shadow: themeDefaults.shadow,
-    stylingBox: themeDefaults.stylingBox ?? "{\"marginBottom\":\"5\",\"paddingBottom\":\"16\",\"paddingTop\":\"16\",\"paddingLeft\":\"16\",\"paddingRight\":\"16\"}",
+    shadow: themeDefaults?.shadow,
+    stylingBox: themeDefaults?.stylingBox ?? "{\"marginBottom\":\"5\",\"paddingBottom\":\"16\",\"paddingTop\":\"16\",\"paddingLeft\":\"16\",\"paddingRight\":\"16\"}",
   };
 };

@@ -7,6 +7,6 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
   return {
     font: { weight: '400', size: 14, type: 'Segoe UI' },
     // Apply theme stylingBox as default if available
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };

@@ -27,6 +27,7 @@ const FormExample: FC<FormExampleProps> = ({ theme }) => {
   const marginStyle = { marginTop: marginTopAll, marginBottom: marginBottomAll, marginLeft: marginLeftAll, marginRight: marginRightAll };
   const styles = { ...rest };
 
+  console.log("Margins :: ", marginStyle)
   return (
     <Form
       layout={formLayout?.layout === 'horizontal' || inputSettings?.labelAlign !== 'top' ? 'horizontal' : 'vertical'}

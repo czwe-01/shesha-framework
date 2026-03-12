@@ -125,11 +125,6 @@ export const createColorConfigs = (
       label: 'Page',
       onChange: (color: any) => onChange({ ...theme, pageBackground: color.toString() }),
     },
-    {
-      name: 'componentBackground',
-      label: 'Component',
-      onChange: (color: any) => onChange({ ...theme, componentBackground: color.toString() }),
-    },
   ];
   return { colorConfigs, textConfigs, backgroundConfigs };
 };

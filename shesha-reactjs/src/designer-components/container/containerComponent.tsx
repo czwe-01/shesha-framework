@@ -4,7 +4,7 @@ import { ICommonContainerProps, IContainerComponentProps } from '@/interfaces';
 import { getStyle, getLayoutStyle, validateConfigurableComponentSettings, useAvailableConstantsData } from '@/providers/form/utils';
 import { getSettings } from './settingsForm';
 import { migrateCustomFunctions, migratePropertyName } from '@/designer-components/_common-migrations/migrateSettings';
-import { useFormData, useGlobalState } from '@/providers';
+import { useFormData, useGlobalState, useTheme } from '@/providers';
 import { ComponentsContainer } from '@/components';
 import { migrateVisibility } from '@/designer-components/_common-migrations/migrateVisibility';
 import ParentProvider from '@/providers/parentProvider/index';
@@ -30,6 +30,7 @@ const ContainerComponent: ContainerComponentDefinition = {
     const { globalState } = useGlobalState();
     const allData = useAvailableConstantsData();
     const { styles, cx } = useStyles();
+    const { theme } = useTheme();
 
     // For containers, use wrapperStyle instead of style for margins/dimensions
     const containerStyles = useFormComponentStyles(model, { useWrapperStyle: true });
@@ -63,7 +64,7 @@ const ContainerComponent: ContainerComponentDefinition = {
       noDefaultStyling: model.noDefaultStyling,
       gridColumnsCount: model.gridColumnsCount,
       flexWrap: model.flexWrap,
-      gap: addPx(model.gap, allData),
+      gap: model.gap ? addPx(model.gap, allData) : `${addPx( theme?.layoutComponents?.gridGapVertical, allData)} ${addPx( theme?.layoutComponents?.gridGapHorizontal, allData)}`,
     }), [
       model.display,
       model.flexDirection,

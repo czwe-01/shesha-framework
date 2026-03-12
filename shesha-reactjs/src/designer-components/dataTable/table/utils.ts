@@ -101,7 +101,7 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getInputComponentThemeDefaults(theme);
 
   return {
-    background: { type: 'color', color: themeDefaults.background.color || '#fff' },
+    background: { type: 'color', color: themeDefaults?.background.color || '#fff' },
     font: { weight: '400', size: 14, color: '#000', type: 'Segoe UI', align: 'left' },
     border: {
       border: {
@@ -123,7 +123,7 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
       spreadRadius: 0,
       color: 'rgba(0, 0, 0, 0.1)',
     },
-    stylingBox: themeDefaults.stylingBox,
+    stylingBox: themeDefaults?.stylingBox,
   };
 };
 
