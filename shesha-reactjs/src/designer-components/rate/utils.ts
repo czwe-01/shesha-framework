@@ -8,7 +8,7 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
     background: { type: 'color', color: '' },
     font: {
       weight: '400',
-      size: 14,
+      size: 24,
       color: '#000',
       type: 'Segoe UI',
     },
@@ -25,7 +25,7 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
       radiusType: 'all',
     },
     dimensions: {
-      width: '100%',
+      width: 'auto',
       height: 'auto',
       minHeight: '0px',
       maxHeight: 'auto',

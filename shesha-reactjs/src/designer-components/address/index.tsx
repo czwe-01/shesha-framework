@@ -17,6 +17,7 @@ const AddressCompoment: IToolboxComponent<IAddressCompomentProps> = {
   type: 'address',
   name: 'Address',
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   icon: <HomeOutlined />,
   preserveDimensionsInDesigner: true,

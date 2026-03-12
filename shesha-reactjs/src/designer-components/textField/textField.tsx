@@ -24,6 +24,7 @@ const TextFieldComponent: TextFieldComponentDefinition = {
   isOutput: true,
   canBeJsSetting: true,
   name: 'Text field',
+  componentCatergory: 'inputComponents',
   icon: <CodeOutlined />,
   preserveDimensionsInDesigner: true,
   dataTypeSupported: ({ dataType, dataFormat }) =>

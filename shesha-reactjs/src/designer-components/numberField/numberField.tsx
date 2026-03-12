@@ -25,6 +25,7 @@ const suffixStyle = { color: 'rgba(0,0,0,.45)' };
 const NumberFieldComponent: NumberFieldComponentDefinition = {
   type: 'numberField',
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   canBeJsSetting: true,
   name: 'Number field',

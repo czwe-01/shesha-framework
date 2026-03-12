@@ -9,12 +9,15 @@ import { validateConfigurableComponentSettings } from '@/providers/form/utils';
 import { ColorPicker } from '@/components';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
 import { getAllEventHandlers } from '@/components/formDesigner/components/utils';
+import { migratePrevStyles } from '../_common-migrations/migrateStyles';
+import { defaultStyles } from './utils';
 
 const ColorPickerComponent: ColorPickerComponentDefinition = {
   type: 'colorPicker',
   name: 'Color Picker',
   canBeJsSetting: true,
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   icon: <FormatPainterOutlined />,
   preserveDimensionsInDesigner: true,
@@ -41,7 +44,8 @@ const ColorPickerComponent: ColorPickerComponentDefinition = {
     .add<IColorPickerComponentProps>(0, (prev) => migratePropertyName(migrateCustomFunctions(prev)))
     .add<IColorPickerComponentProps>(1, (prev) => migrateVisibility(prev))
     .add<IColorPickerComponentProps>(2, (prev) => ({ ...prev, allowClear: false, showText: false }))
-    .add<IColorPickerComponentProps>(3, (prev) => ({ ...migrateFormApi.properties(prev) })),
+    .add<IColorPickerComponentProps>(3, (prev) => ({ ...migrateFormApi.properties(prev) }))
+    .add<IColorPickerComponentProps>(4, (prev) => ({ ...migratePrevStyles(prev, defaultStyles()) })),
   validateSettings: (model) => validateConfigurableComponentSettings(getSettings, model),
 };
 

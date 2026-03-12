@@ -30,6 +30,7 @@ import { isDefined } from '@/utils/nullables';
 const AutocompleteComponent: AutocompleteComponentDefinition = {
   type: 'autocomplete',
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   canBeJsSetting: true,
   name: 'Autocomplete',

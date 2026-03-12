@@ -16,6 +16,8 @@ import {
   ShaIcon,
 } from '@/components';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
+import { migratePrevStyles } from '../_common-migrations/migrateStyles';
+import { defaultStyles } from './utils';
 
 export interface IRateProps extends IConfigurableFormComponent {
   value?: number;
@@ -33,6 +35,7 @@ const RateComponent: IToolboxComponent<IRateProps> = {
   name: 'Rate',
   icon: <LikeOutlined />,
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   preserveDimensionsInDesigner: true,
   calculateModel: (model, allData) => ({
@@ -84,7 +87,8 @@ const RateComponent: IToolboxComponent<IRateProps> = {
       prev.hideLabel = true;
       if (!prev.icon) prev.icon = 'StarFilled';
       return prev;
-    }),
+    })
+    .add<IRateProps>(5, (prev) => ({ ...migratePrevStyles(prev, defaultStyles()) })),
 };
 
 export default RateComponent;

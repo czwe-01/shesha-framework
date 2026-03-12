@@ -17,6 +17,7 @@ const IconPickerComponent: IconPickerComponentDefinition = {
   name: 'Icon',
   icon: <HeartOutlined />,
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   canBeJsSetting: true,
   preserveDimensionsInDesigner: true,

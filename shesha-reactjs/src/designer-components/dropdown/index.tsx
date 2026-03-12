@@ -22,6 +22,7 @@ const DropdownComponent: DropdownComponentDefinition = {
   isOutput: true,
   canBeJsSetting: true,
   isHidden: false,
+  componentCatergory: 'inputComponents',
   name: 'Dropdown',
   icon: <DownSquareOutlined />,
   preserveDimensionsInDesigner: true,

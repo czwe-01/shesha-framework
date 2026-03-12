@@ -17,6 +17,7 @@ import { defaultStyles } from './utils';
 const DrawerComponent: IToolboxComponent<IDrawerProps> = {
   type: 'drawer',
   isInput: false,
+  componentCatergory: 'layoutComponents',
   name: 'Drawer',
   icon: <SwapOutlined />,
   Factory: ({ model }) => {

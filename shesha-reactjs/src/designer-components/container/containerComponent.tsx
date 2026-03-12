@@ -20,6 +20,7 @@ import { useFormComponentStyles } from '@/hooks/formComponentHooks';
 const ContainerComponent: ContainerComponentDefinition = {
   type: 'container',
   isInput: false,
+  componentCatergory: 'layoutComponents',
   name: 'Container',
   icon: <GroupOutlined />,
   // Static empty array to prevent unnecessary re-renders when isDynamic is false

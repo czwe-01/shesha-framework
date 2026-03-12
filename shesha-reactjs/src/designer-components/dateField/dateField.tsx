@@ -22,6 +22,7 @@ const DateField: DateFieldDefinition = {
   type: 'dateField',
   name: 'Date field',
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   canBeJsSetting: true,
   icon: <CalendarOutlined />,

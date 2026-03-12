@@ -20,6 +20,7 @@ const StatusTagComponent: IToolboxComponent<IStatusTagProps> = {
   type: 'statusTag',
   name: 'Status Tag',
   isInput: false,
+  componentCatergory: 'inlineComponents',
   isOutput: true,
   icon: <ArrowsAltOutlined />,
   Factory: ({ model }) => {

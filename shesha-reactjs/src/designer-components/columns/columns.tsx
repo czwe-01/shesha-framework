@@ -41,6 +41,7 @@ const validateColumns = (columns: IColumnProps[]): IColumnProps[] => {
 const ColumnsComponent: ColumnsComponentDefinition = {
   type: 'columns',
   isInput: false,
+  componentCatergory: 'layoutComponents',
   name: 'Columns',
   icon: <SplitCellsOutlined />,
   Factory: ({ model }) => {

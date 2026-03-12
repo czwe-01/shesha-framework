@@ -29,6 +29,7 @@ const SubFormComponent: IToolboxComponent<ISubFormComponentProps> = {
   icon: <FormOutlined />,
   isInput: true,
   isOutput: true,
+  componentCatergory: 'layoutComponents',
   Factory: ({ model }) => {
     const { formMode } = useForm();
     const { data: formData } = useFormData();

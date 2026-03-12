@@ -14,6 +14,7 @@ import { IPagerComponentProps, PagerComponentDefinition } from './interfaces';
 const PagerComponent: PagerComponentDefinition = {
   type: 'datatable.pager',
   isInput: false,
+  componentCatergory: 'inlineComponents',
   name: 'Table Pager',
   icon: <ControlOutlined />,
   Factory: ({ model }) => {

@@ -15,6 +15,7 @@ import { defaultStyles } from './utils';
 const LinkComponent: LinkComponentDefinition = {
   type: 'link',
   isInput: false,
+  componentCatergory: 'inlineComponents',
   name: 'link',
   icon: <LinkOutlined />,
   calculateModel: (model, allData) => ({

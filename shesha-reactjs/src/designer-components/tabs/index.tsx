@@ -24,6 +24,7 @@ type TabItem = TabsProps['items'][number];
 const TabsComponent: TabsComponentDefinition = {
   type: 'tabs',
   isInput: false,
+  componentCatergory: 'layoutComponents',
   name: 'Tabs',
   icon: <FolderOutlined />,
   Factory: ({ model }) => {

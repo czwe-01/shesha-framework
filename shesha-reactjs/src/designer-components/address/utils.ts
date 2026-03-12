@@ -124,7 +124,11 @@ export const loadGooglePlaces = (googleMapsApiKey: string, callback: Function): 
 };
 
 
-export const defaultStyles = (): IStyleType => {
+import { IConfigurableTheme, getInputComponentThemeDefaults } from "@/providers/theme";
+
+export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
+  const themeDefaults = getInputComponentThemeDefaults(theme);
+  
   return {
     background: { type: 'color', color: '#fff' },
     font: { weight: '400', size: 14, color: '#000', type: 'Segoe UI' },
@@ -141,5 +145,7 @@ export const defaultStyles = (): IStyleType => {
       radiusType: 'all',
     },
     dimensions: { width: '100%', height: '32px', minHeight: '0px', maxHeight: 'auto', minWidth: '0px', maxWidth: 'auto' },
+    // Apply theme stylingBox as default if available
+    stylingBox: themeDefaults.stylingBox,
   };
 };

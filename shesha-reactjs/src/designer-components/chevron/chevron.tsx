@@ -12,7 +12,8 @@ import { migratePrevStyles } from '../_common-migrations/migrateStyles';
 
 const ChevronComponent: IToolboxComponent<IChevronProps> = {
   type: 'chevron',
-  isInput: true,
+  isInput: false,
+  componentCatergory: 'standardComponents',
   name: 'Chevron',
   preserveDimensionsInDesigner: true,
   icon: <FolderOpenOutlined />,

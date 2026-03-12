@@ -16,6 +16,8 @@ import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
 import { getSettings } from './settingsForm';
 import { getAllEventHandlers } from '@/components/formDesigner/components/utils';
 import { IEnhancedRadioProps, RadioComponentDefinition } from './interfaces';
+import { migratePrevStyles } from '../_common-migrations/migrateStyles';
+import { defaultStyles } from './utils';
 
 const RadioComponent: RadioComponentDefinition = {
   type: 'radio',
@@ -82,7 +84,8 @@ const RadioComponent: RadioComponentDefinition = {
         };
 
         return { ...prev, desktop: { ...styles }, tablet: { ...styles }, mobile: { ...styles } };
-      }),
+      })
+      .add<IEnhancedRadioProps>(7, (prev) => ({ ...migratePrevStyles(prev, defaultStyles()) })),
   linkToModelMetadata: (model, metadata): IEnhancedRadioProps => {
     const isRefList = metadata.dataType === DataTypes.referenceListItem;
 

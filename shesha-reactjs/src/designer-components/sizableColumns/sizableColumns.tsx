@@ -24,6 +24,7 @@ import { getSettings } from './settingsForm';
 const SizableColumnsComponent: IToolboxComponent<ISizableColumnComponentProps> = {
   type: 'sizableColumns',
   isInput: false,
+  componentCatergory: 'layoutComponents',
   name: 'SizableColumns',
   icon: <BorderHorizontalOutlined />,
   Factory: ({ model }) => {

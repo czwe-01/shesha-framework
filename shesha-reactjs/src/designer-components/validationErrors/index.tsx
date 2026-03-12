@@ -26,6 +26,7 @@ export interface IValidationErrorsComponentProps extends IConfigurableFormCompon
 const ValidationErrorsComponent: IToolboxComponent<IValidationErrorsComponentProps> = {
   type: 'validationErrors',
   isInput: false,
+  componentCatergory: 'standardComponents',
   name: 'Validation Errors',
   icon: <WarningOutlined />,
   Factory: ({ model }) => {

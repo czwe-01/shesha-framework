@@ -5,7 +5,7 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getInputComponentThemeDefaults(theme);
 
   return {
-    background: { type: 'color', color: '' },
+    background: { type: 'color', color: '#fff' },
     font: {
       weight: '400',
       size: 14,
@@ -15,18 +15,18 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
     border: {
       border: {
         all: {
-          width: 0,
+          width: '1px',
           style: 'solid',
-          color: 'transparent',
+          color: '#d9d9d9',
         },
       },
-      radius: { all: 0 },
+      radius: { all: 8 },
       borderType: 'all',
       radiusType: 'all',
     },
     dimensions: {
       width: '100%',
-      height: 'auto',
+      height: '32px',
       minHeight: '0px',
       maxHeight: 'auto',
       minWidth: '0px',

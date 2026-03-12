@@ -13,6 +13,48 @@ import { stylingUtils } from '@/components/formDesigner/utils/stylingUtils';
 import { useStyles } from './styles/styles';
 import { FormComponentValidationProvider, useValidationErrorsActionsOrDefault, useValidationErrorsStateOrDefault } from '@/providers/validationErrors';
 
+/**
+ * Determines the component category for theme styling based on component type and properties.
+ * Priority: 1) Explicit componentCategory from toolbox, 2) isInput flag, 3) Component type matching
+ */
+const getComponentCategory = (
+  componentType: string, 
+  isInput?: boolean,
+  toolboxComponentCategory?: UseFormComponentStylesOptions['componentCategory']
+): UseFormComponentStylesOptions['componentCategory'] => {
+  // Priority 1: Use explicit componentCategory from toolbox component if available
+  if (toolboxComponentCategory) {
+    return toolboxComponentCategory;
+  }
+
+  // Priority 2: Input components: isInput = true
+  if (isInput) {
+    return 'inputComponents';
+  }
+
+  // Priority 3: Layout components: container-like components
+  const layoutComponentTypes = [
+    'container', 'card', 'tabs', 'collapsiblePanel', 'panel',
+    'columns', 'sizableColumns', 'dataList', 'dataTable',
+    'drawer', 'wizard', 'sectionSeparator', 'divider'
+  ];
+  if (layoutComponentTypes.includes(componentType)) {
+    return 'layoutComponents';
+  }
+
+  // Priority 4: Inline components: inline elements
+  const inlineComponentTypes = [
+    'button', 'link', 'text', 'icon', 'iconPicker',
+    'refListStatus', 'tag', 'badge'
+  ];
+  if (inlineComponentTypes.includes(componentType)) {
+    return 'inlineComponents';
+  }
+
+  // Standard components: everything else (display components)
+  return 'standardComponents';
+};
+
 export interface IFormComponentProps {
   componentModel: IConfigurableFormComponent;
 }
@@ -75,21 +117,10 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel }) => {
   if (!toolboxComponent?.isInput && !toolboxComponent?.isOutput)
     actualModel.propertyName = undefined;
 
-  const allStyles = useFormComponentStyles(actualModel);
-
-  // For input components: Strip margins from fullStyle and jsStyle
-  // Margins are handled by the FormItem wrapper (via allStyles.margins), not the inner component
-  // This prevents double margins (wrapper + component) in both designer and live modes
-  if (toolboxComponent?.isInput) {
-    actualModel.allStyles = {
-      ...allStyles,
-      fullStyle: stylingUtils.stripMargins(allStyles.fullStyle),
-      jsStyle: stylingUtils.stripMargins(allStyles.jsStyle),
-      // margins are preserved for FormItem wrapper use
-    };
-  } else {
-    actualModel.allStyles = allStyles;
-  }
+  // Determine component category for theme styling
+  const componentCategory = getComponentCategory(componentModel.type, toolboxComponent?.isInput, toolboxComponent?.componentCatergory);
+  
+  actualModel.allStyles = useFormComponentStyles(actualModel, { componentCategory });
 
   const calculatedModel = useCalculatedModel(actualModel, toolboxComponent?.useCalculateModel, toolboxComponent?.calculateModel);
 

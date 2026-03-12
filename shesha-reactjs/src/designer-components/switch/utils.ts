@@ -25,7 +25,7 @@ export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
       radiusType: 'all',
     },
     dimensions: {
-      width: '100%',
+      width: 'auto',
       height: 'auto',
       minHeight: '0px',
       maxHeight: 'auto',

@@ -1,6 +1,9 @@
 import { IStyleType } from '@/index';
+import { IConfigurableTheme, getInputComponentThemeDefaults } from "@/providers/theme";
 
-export const defaultStyles = (): IStyleType => {
+export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
+  const themeDefaults = getInputComponentThemeDefaults(theme);
+
   return {
     background: { type: 'color', color: '#fff' },
     font: {
@@ -28,7 +31,8 @@ export const defaultStyles = (): IStyleType => {
       maxHeight: 'auto',
       minWidth: '0px',
       maxWidth: 'auto',
-
     },
+    // Apply theme stylingBox as default if available
+    stylingBox: themeDefaults.stylingBox,
   };
 };

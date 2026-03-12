@@ -17,6 +17,8 @@ import { migrateVisibility } from '@/designer-components/_common-migrations/migr
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
 import { getSettings } from './settingsForm';
 import { IEventHandlers, getAllEventHandlers } from '@/components/formDesigner/components/utils';
+import { migratePrevStyles } from '../_common-migrations/migrateStyles';
+import { defaultStyles } from './utils';
 
 interface IEnhancedICheckboxGoupProps extends Omit<ICheckboxGroupProps, 'style'>, IConfigurableFormComponent {
 }
@@ -96,7 +98,8 @@ const CheckboxGroupComponent: IToolboxComponent<IEnhancedICheckboxGoupProps, ICh
       .add<IEnhancedICheckboxGoupProps>(2, (prev) => migratePropertyName(migrateCustomFunctions(prev)))
       .add<IEnhancedICheckboxGoupProps>(3, (prev) => migrateVisibility(prev))
       .add<IEnhancedICheckboxGoupProps>(4, (prev) => migrateReadOnly(prev))
-      .add<IEnhancedICheckboxGoupProps>(5, (prev) => ({ ...migrateFormApi.eventsAndProperties(prev) })),
+      .add<IEnhancedICheckboxGoupProps>(5, (prev) => ({ ...migrateFormApi.eventsAndProperties(prev) }))
+      .add<IEnhancedICheckboxGoupProps>(6, (prev) => ({ ...migratePrevStyles(prev, defaultStyles()) })),
   linkToModelMetadata: (model, metadata): IEnhancedICheckboxGoupProps => {
     const refListId: IReferenceListIdentifier = metadata.referenceListName
       ? { module: metadata.referenceListModule, name: metadata.referenceListName }

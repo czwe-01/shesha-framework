@@ -57,7 +57,8 @@ const SliderComponent: SliderComponentDefinition = {
         ...prev,
         min: prev?.min && prev.min !== '' ? parseInt(prev.min, 10) : undefined,
         max: prev?.max && prev.max !== '' ? parseInt(prev.max, 10) : undefined,
-      })),
+      }))
+      .add<ISliderComponentProps>(2, (prev) => ({ ...migratePrevStyles(prev, defaultStyles()) })),
 };
 
 export default SliderComponent;

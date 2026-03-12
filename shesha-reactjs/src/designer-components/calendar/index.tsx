@@ -12,7 +12,8 @@ import { ICalendarProps } from './interfaces';
 
 const CalendarComponent: IToolboxComponent<ICalendarProps> = {
   type: 'calendar',
-  isInput: true,
+  isInput: false,
+  componentCatergory: 'standardComponents',
   name: 'Calendar',
   preserveDimensionsInDesigner: true,
   icon: <FolderOpenOutlined />,
