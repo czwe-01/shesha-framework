@@ -1,8 +1,10 @@
 import { IStyleType } from "@/index";
 import { IEntityPickerComponentProps } from ".";
+import { IConfigurableTheme, getInputComponentThemeDefaults } from "@/providers/theme";
 
-export const defaultStyles = (prev: IEntityPickerComponentProps): IStyleType => {
+export const defaultStyles = (prev: IEntityPickerComponentProps, theme?: IConfigurableTheme): IStyleType => {
   const { size } = prev;
+  const themeDefaults = getInputComponentThemeDefaults(theme);
 
   return {
     border: { hideBorder: false, radiusType: 'all', borderType: 'all', border: { all: { width: '1px', style: 'solid', color: '#d9d9d9' } }, radius: { all: 8 } },
@@ -32,6 +34,8 @@ export const defaultStyles = (prev: IEntityPickerComponentProps): IStyleType => 
       blurRadius: 0,
       spreadRadius: 0,
     },
+    // Apply theme stylingBox as default if available
+    stylingBox: themeDefaults.stylingBox,
   };
 };
 

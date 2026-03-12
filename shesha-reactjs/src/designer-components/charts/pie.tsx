@@ -21,6 +21,7 @@ const PieChartComponent: IToolboxComponent<IChartProps> = {
   type: 'pieChart',
   name: 'Pie Chart',
   isInput: false,
+  componentCatergory: 'standardComponents',
   isOutput: true,
   icon: <PieChartOutlined />,
   Factory: ({ model }) => {

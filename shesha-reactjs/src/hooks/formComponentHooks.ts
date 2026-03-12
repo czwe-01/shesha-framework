@@ -15,7 +15,6 @@ import {
   useCanvas,
   useDeepCompareMemo,
   useSheshaApplication,
-  useTheme,
   wrapConstantsData,
 } from "..";
 import { getThemeBaseStyles } from "@/providers/theme/styleUtils";

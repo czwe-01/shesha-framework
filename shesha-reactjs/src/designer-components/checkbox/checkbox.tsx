@@ -29,6 +29,7 @@ interface ExtendedCheckboxProps extends CheckboxProps {
 const CheckboxComponent: CheckboxComponentDefinition = {
   type: 'checkbox',
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   canBeJsSetting: true,
   name: 'Checkbox',

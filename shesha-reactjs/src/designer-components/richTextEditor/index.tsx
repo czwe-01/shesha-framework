@@ -30,6 +30,7 @@ const RichTextEditorComponent: IToolboxComponent<IRichTextEditorProps> = {
   name: 'Rich Text Editor',
   icon: <EditOutlined />,
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   Factory: ({ model }) => {
     const { data: formData } = useFormData();

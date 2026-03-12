@@ -25,6 +25,7 @@ import { migratePrevStyles } from '../_common-migrations/migrateStyles';
 const CardComponent: IToolboxComponent<ICardComponentProps> = {
   type: 'card',
   isInput: false,
+  componentCatergory: 'layoutComponents',
   name: 'Card',
   icon: <CodeSandboxSquareFilled />,
   Factory: ({ model }) => {

@@ -21,6 +21,7 @@ const PolarAreaChartComponent: IToolboxComponent<IChartProps> = {
   type: 'polarAreaChart',
   name: 'Polar Area Chart',
   isInput: false,
+  componentCatergory: 'standardComponents',
   isOutput: true,
   icon: <RadarChartOutlined />,
   Factory: ({ model }) => {

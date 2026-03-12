@@ -20,6 +20,7 @@ import { useFormComponentStyles } from '@/hooks/formComponentHooks';
 const CollapsiblePanelComponent: CollapsiblePanelComponentDefinition = {
   type: 'collapsiblePanel',
   isInput: false,
+  componentCatergory: 'layoutComponents',
   name: 'Panel',
   icon: <GroupOutlined />,
   Factory: ({ model }) => {

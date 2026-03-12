@@ -21,6 +21,7 @@ const BarChartComponent: IToolboxComponent<IChartProps> = {
   type: 'barChart',
   name: 'Bar Chart',
   isInput: false,
+  componentCatergory: 'standardComponents',
   isOutput: true,
   icon: <BarChartOutlined />,
   Factory: ({ model }) => {

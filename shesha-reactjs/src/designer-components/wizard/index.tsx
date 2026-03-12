@@ -22,6 +22,7 @@ import { defaultStyles } from './utils';
 const TabsComponent: IToolboxComponent<Omit<IWizardComponentProps, 'size'>> = {
   type: 'wizard',
   isInput: false,
+  componentCatergory: 'layoutComponents',
   name: 'Wizard',
   icon: <DoubleRightOutlined />,
   Factory: ({ model, form }) => {

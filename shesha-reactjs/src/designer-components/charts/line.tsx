@@ -21,6 +21,7 @@ const LineChartComponent: IToolboxComponent<IChartProps> = {
   type: 'lineChart',
   name: 'Line Chart',
   isInput: false,
+  componentCatergory: 'standardComponents',
   isOutput: true,
   icon: <LineChartOutlined />,
   Factory: ({ model }) => {

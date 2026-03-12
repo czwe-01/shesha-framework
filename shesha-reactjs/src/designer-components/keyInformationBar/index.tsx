@@ -15,6 +15,7 @@ import { defaultStyles } from './utils';
 const KeyInformationBarComponent: KeyInformationBarComponentDefinition = {
   type: 'KeyInformationBar',
   isInput: false,
+  componentCatergory: 'layoutComponents',
   name: 'Key Information Bar',
   icon: <BorderLeftOutlined />,
   Factory: ({ model }) => {

@@ -21,6 +21,7 @@ export const TimeFieldComponent: TimeFieldComponentDefinition = {
   type: 'timePicker',
   name: 'Time Picker',
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   canBeJsSetting: true,
   icon: <ClockCircleOutlined />,

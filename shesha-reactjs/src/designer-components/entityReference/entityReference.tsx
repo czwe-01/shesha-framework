@@ -86,8 +86,9 @@ const EntityReferenceWrapper: React.FC<{
 const EntityReferenceComponent: IToolboxComponent<IEntityReferenceControlProps> = {
   type: 'entityReference',
   name: 'Entity Reference',
-  isInput: true,
+  isInput: false,
   isOutput: true,
+  componentCatergory: 'inlineComponents',
   icon: <LinkExternalOutlined />,
   Factory: ({ model: passedModel }) => {
     const { allStyles, hidden, readOnly, ...model } = passedModel;

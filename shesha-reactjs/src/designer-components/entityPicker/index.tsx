@@ -55,6 +55,7 @@ export interface IEntityPickerComponentProps extends IConfigurableFormComponent,
 const EntityPickerComponent: IToolboxComponent<IEntityPickerComponentProps> = {
   type: 'entityPicker',
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   name: 'Entity Picker',
   icon: <EllipsisOutlined />,

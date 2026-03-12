@@ -40,6 +40,7 @@ const TextAreaComponent: TextAreaComponentDefinition = {
   type: 'textArea',
   name: 'Text Area',
   isInput: true,
+  componentCatergory: 'inputComponents',
   isOutput: true,
   canBeJsSetting: true,
   icon: <FontColorsOutlined />,

@@ -19,6 +19,7 @@ import { ContainerComponentDefinition } from './interfaces';
 const ContainerComponent: ContainerComponentDefinition = {
   type: 'container',
   isInput: false,
+  componentCatergory: 'layoutComponents',
   name: 'Container',
   icon: <GroupOutlined />,
   Factory: ({ model }) => {

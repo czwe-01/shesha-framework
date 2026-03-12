@@ -11,6 +11,8 @@ import React, { useMemo } from 'react';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
 import { ISwitchComponentProps, SwitchComponentDefinition } from './interfaces';
 import { getSettings } from './settingsForm';
+import { migratePrevStyles } from '../_common-migrations/migrateStyles';
+import { defaultStyles } from './utils';
 
 const SwitchComponent: SwitchComponentDefinition = {
   type: 'switch',

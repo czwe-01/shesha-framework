@@ -14,14 +14,24 @@ import { FormComponentValidationProvider, useValidationErrorsActionsOrDefault, u
 
 /**
  * Determines the component category for theme styling based on component type and properties.
+ * Priority: 1) Explicit componentCategory from toolbox, 2) isInput flag, 3) Component type matching
  */
-const getComponentCategory = (componentType: string, isInput?: boolean): UseFormComponentStylesOptions['componentCategory'] => {
-  // Input components: isInput = true
+const getComponentCategory = (
+  componentType: string, 
+  isInput?: boolean,
+  toolboxComponentCategory?: UseFormComponentStylesOptions['componentCategory']
+): UseFormComponentStylesOptions['componentCategory'] => {
+  // Priority 1: Use explicit componentCategory from toolbox component if available
+  if (toolboxComponentCategory) {
+    return toolboxComponentCategory;
+  }
+
+  // Priority 2: Input components: isInput = true
   if (isInput) {
     return 'inputComponents';
   }
 
-  // Layout components: container-like components
+  // Priority 3: Layout components: container-like components
   const layoutComponentTypes = [
     'container', 'card', 'tabs', 'collapsiblePanel', 'panel',
     'columns', 'sizableColumns', 'dataList', 'dataTable',
@@ -31,7 +41,7 @@ const getComponentCategory = (componentType: string, isInput?: boolean): UseForm
     return 'layoutComponents';
   }
 
-  // Inline components: inline elements
+  // Priority 4: Inline components: inline elements
   const inlineComponentTypes = [
     'button', 'link', 'text', 'icon', 'iconPicker',
     'refListStatus', 'tag', 'badge'
@@ -92,7 +102,7 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel }) => {
     actualModel.propertyName = undefined;
 
   // Determine component category for theme styling
-  const componentCategory = getComponentCategory(componentModel.type, toolboxComponent?.isInput);
+  const componentCategory = getComponentCategory(componentModel.type, toolboxComponent?.isInput, toolboxComponent?.componentCatergory);
   
   actualModel.allStyles = useFormComponentStyles(actualModel, { componentCategory });
 

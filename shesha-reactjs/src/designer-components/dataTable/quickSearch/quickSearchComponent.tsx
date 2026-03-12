@@ -21,6 +21,7 @@ const outsideContextValidationError = validationError('Quick Search');
 const QuickSearchComponent: QuickSearchComponentDefinition = {
   type: 'datatable.quickSearch',
   isInput: false,
+  componentCatergory: 'inlineComponents',
   name: 'Quick Search',
   icon: <SearchOutlined />,
   Factory: ({ model }) => {

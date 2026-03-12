@@ -98,6 +98,8 @@ export type IToolboxComponent<TModel extends IConfigurableFormComponent = IConfi
    */
   canBeJsSetting?: boolean;
 
+  componentCatergory: 'inputComponents' | 'layoutcomponents' | 'inlineComponents' | 'standardComponents';
+
   /**
    * Component name. This name is displayed on the components toolbox
    */
