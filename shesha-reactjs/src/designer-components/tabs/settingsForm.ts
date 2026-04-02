@@ -93,6 +93,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                       listItemSettingsMarkup: getItemSettings(fbf),
                       onAddNewItem: onAddNewItem,
                       hidden: false,
+                      jsSetting: true,
                       modalSettings: {
                         title: 'Configure Tab Panes',
                         header: 'Here you can configure the tab panes by adjusting their settings and ordering.',

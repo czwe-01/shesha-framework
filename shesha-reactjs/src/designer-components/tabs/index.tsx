@@ -6,6 +6,7 @@ import { useAvailableConstantsData } from '@/providers/form/utils';
 import { IFormComponentContainer } from '@/providers/form/models';
 import { ITabsComponentProps, TabsComponentDefinition } from './models';
 import { migrateCustomFunctions, migratePropertyName, migrateReadOnly } from '@/designer-components/_common-migrations/migrateSettings';
+import { getValueFromPropertySettings } from '@/designer-components/_settings/utils';
 import { nanoid } from '@/utils/uuid';
 import { Tabs, TabsProps } from 'antd';
 import { useDeepCompareMemo } from '@/hooks';
@@ -88,12 +89,12 @@ const TabsComponent: TabsComponentDefinition = {
           disabled: selectMode === 'readOnly' || (selectMode === 'inherited' && readOnly),
           children: (
             <ParentProvider
-              name={`Tab-${key}`}
-              model={item}
+              name={`tab-${key}`}
+              model={model}
             >
               <ComponentsContainer
                 containerId={id}
-                dynamicComponents={model?.isDynamic ? components : []}
+                dynamicComponents={components || []}
               />
             </ParentProvider>
           ),
