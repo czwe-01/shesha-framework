@@ -27,7 +27,7 @@ export const DesignerMainArea: FC<{ viewType?: IViewType }> = ({ viewType = 'con
   const shaForm = useShaFormInstance();
   const { antdForm: form } = shaForm;
   const { styles } = useStyles();
-  const { deleteComponent } = useFormDesigner();
+  const { deleteComponent, settingsPanelRef } = useFormDesigner();
   const component = useFormDesignerSelectedComponent();
 
   const showMarkup = false;
@@ -62,11 +62,16 @@ export const DesignerMainArea: FC<{ viewType?: IViewType }> = ({ viewType = 'con
 
     if (isEditing) return;
 
+    // Ignore if focus is inside the properties/settings panel
+    if (settingsPanelRef?.current && settingsPanelRef.current.contains(target)) {
+      return;
+    }
+
     if (selectedComponentId) {
       event.preventDefault();
       deleteComponent({ componentId: selectedComponentId });
     }
-  }, [readOnly, formMode, selectedComponentId, deleteComponent]);
+  }, [readOnly, formMode, selectedComponentId, deleteComponent, settingsPanelRef]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);

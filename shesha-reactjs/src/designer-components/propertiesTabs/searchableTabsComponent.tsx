@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, Input, Empty } from 'antd';
 import ParentProvider from '@/providers/parentProvider';
-import ComponentsContainer from '@/components/formDesigner/containers/componentsContainer';
+import { ComponentsContainer } from '@/components';
 import { useStyles } from './style';
 import { SearchOutlined } from '@ant-design/icons';
 import { filterDynamicComponents } from './utils';
 import { IPropertiesTabsComponentProps } from './models';
-import { useFormStateOrUndefined, useFormActionsOrUndefined } from '@/providers/form';
+import { useFormState, useFormActions } from '@/providers/form';
 import { useShaFormDataUpdate } from '@/providers/form/providers/shaFormProvider';
 
 interface SearchableTabsProps {
@@ -17,11 +17,10 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
   const { tabs } = model;
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTabKey, setActiveTabKey] = useState('1');
-  const searchRefs = useRef(new Map());
   const { styles } = useStyles();
 
-  const formState = useFormStateOrUndefined();
-  const formActions = useFormActionsOrUndefined();
+  const formState = useFormState();
+  const formActions = useFormActions();
 
   useShaFormDataUpdate();
 
@@ -35,7 +34,7 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
     style?: React.CSSProperties;
     autoFocus?: boolean;
     wrapperStyle?: React.CSSProperties;
-  }): React.JSX.Element => {
+  }): JSX.Element => {
     const input = (
       <Input
         type="search"
@@ -59,33 +58,9 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
     ) : input;
   };
 
-  const focusActiveTabSearch = useCallback(() => {
-    const activeSearchInput = searchRefs.current.get(activeTabKey);
-    if (activeSearchInput) {
-      // Small delay to ensure the tab is rendered
-      setTimeout(() => {
-        activeSearchInput.focus();
-      }, 50);
-    }
-  }, [activeTabKey]);
-
-  const handleTabChange = useCallback((newActiveKey: string): void => {
+  const handleTabChange = (newActiveKey: string): void => {
     setActiveTabKey(newActiveKey);
-    // Only focus search when user manually changes tabs, not on programmatic tab switches
-    const activeSearchInput = searchRefs.current.get(newActiveKey);
-    if (activeSearchInput) {
-      setTimeout(() => {
-        activeSearchInput.focus();
-      }, 50);
-    }
-  }, [setActiveTabKey]);
-
-  // Focus search input when search query changes and we have matching results
-  useEffect(() => {
-    if (searchQuery) {
-      focusActiveTabSearch();
-    }
-  }, [searchQuery, focusActiveTabSearch]);
+  };
 
   const isComponentHidden = (component): boolean => {
     if (formState.name === "modalSettings") {
@@ -110,7 +85,7 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
     }
   };
 
-  const newFilteredTabs = useMemo(() => (tabs
+  const newFilteredTabs = tabs
     .map((tab: any, index: number) => {
       const filteredComponents = tab.children ?? filterDynamicComponents(tab.components, searchQuery);
 
@@ -132,21 +107,7 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
         children: visibleComponents.length === 0
           ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Properties not found" />
           : (
-            <ParentProvider
-              name={`SearchableTab-${tabKey}`}
-              model={model}
-            >
-              {renderSearchInput({
-                ref: (el) => {
-                  if (el) {
-                    searchRefs.current.set(tabKey, el);
-                  } else {
-                    searchRefs.current.delete(tabKey);
-                  }
-                },
-                className: styles.searchField,
-                autoFocus: true,
-              })}
+            <ParentProvider model={model}>
               <ComponentsContainer
                 containerId={tab.id + tab.key}
                 dynamicComponents={visibleComponents}
@@ -157,8 +118,7 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
         hidden: tab.hidden || !hasVisibleComponents,
       };
     })
-    .filter((tab) => !tab.hidden)
-  ), [model, searchQuery, tabs]);
+    .filter((tab) => !tab.hidden);
 
   // Auto-switch to the first tab that has visible components when searching
   useEffect(() => {
@@ -179,28 +139,26 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
     }
   }, [newFilteredTabs, activeTabKey]);
 
-  const tabPlacement = model.position === 'left' ? 'start' : model.position === 'right' ? 'end' : model.position;
-
-  const localTabs = useMemo(() => (
-    <Tabs
-      key="searchable-tabs"
-      activeKey={activeTabKey}
-      onChange={handleTabChange}
-      size={model.size}
-      type={model.tabType || 'card'}
-      tabPlacement={tabPlacement || 'top'}
-      items={newFilteredTabs}
-      className={styles.content}
-    />
-  ), [activeTabKey, handleTabChange, model.size, model.tabType, newFilteredTabs, styles.content, tabPlacement]);
 
   return (
     <>
-      {newFilteredTabs.length === 0 &&
-        renderSearchInput({ autoFocus: true })}
+      {renderSearchInput({
+        autoFocus: newFilteredTabs.length === 0,
+        className: styles.searchField,
+      })}
       {newFilteredTabs.length === 0 && searchQuery
         ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Property Not Found" />
-        : localTabs}
+        : (
+          <Tabs
+            activeKey={activeTabKey}
+            onChange={handleTabChange}
+            size={model.size}
+            type={model.tabType || 'card'}
+            tabPosition={model.position || 'top'}
+            items={newFilteredTabs}
+            className={styles.content}
+          />
+        )}
     </>
   );
 };
