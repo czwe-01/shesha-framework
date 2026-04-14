@@ -46,7 +46,7 @@ export const DesignerMainArea: FC<{ viewType?: IViewType }> = ({ viewType = 'con
   }, [formSettings, shaForm]);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (readOnly) return;
+    if (readOnly || formMode !== 'designer' || event.repeat) return;
 
     const isDelete = event.key === 'Delete';
     const isBackspace = event.key === 'Backspace';
@@ -66,7 +66,7 @@ export const DesignerMainArea: FC<{ viewType?: IViewType }> = ({ viewType = 'con
       event.preventDefault();
       deleteComponent({ componentId: selectedComponentId });
     }
-  }, [readOnly, selectedComponentId, deleteComponent]);
+  }, [readOnly, formMode, selectedComponentId, deleteComponent]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
