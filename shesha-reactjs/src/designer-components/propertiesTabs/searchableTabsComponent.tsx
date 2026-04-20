@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Tabs, Input, Empty } from 'antd';
 import ParentProvider from '@/providers/parentProvider';
-import { ComponentsContainer } from '@/components';
+import ComponentsContainer from '@/components/formDesigner/containers/componentsContainer';
 import { useStyles } from './style';
 import { SearchOutlined } from '@ant-design/icons';
 import { filterDynamicComponents } from './utils';
