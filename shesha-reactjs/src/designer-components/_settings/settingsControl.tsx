@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, useEffect } from 'react';
+import React, { ReactElement, ReactNode, useCallback } from 'react';
 import { getPropertySettingsFromValue } from './utils/utils';
 import { useStyles } from './styles/styles';
 import { ICodeExposedVariable } from '@/components/codeVariablesTable';
@@ -11,6 +11,8 @@ import { Button } from 'antd';
 import { CodeOutlined, CodeFilled } from '@ant-design/icons';
 import { IPropertySetting, PropertySettingMode } from '@/providers/form/models';
 import { CodeEditor } from '../codeEditor/codeEditor';
+import { useDeepCompareEffect } from '@/hooks/useDeepCompareEffect';
+import { useDeepCompareMemo } from '@/hooks';
 
 export type SettingsControlChildrenType = (value: any, onChange: (val: any) => void, propertyName: string) => ReactElement | ReactNode;
 
@@ -44,7 +46,7 @@ export const defaultExposedVariables: ICodeExposedVariable[] = [
   { name: "modal", description: "API for displaying modal dialogs and forms", type: "object" },
 ];
 
-export const SettingsControl = <Value = any>(props: ISettingsControlProps<Value>): ReactElement => {
+export const SettingsControl = <Value extends unknown = unknown>(props: ISettingsControlProps<Value>): ReactElement => {
   const constantsEvaluator = useConstantsEvaluator({ availableConstantsExpression: props.availableConstantsExpression });
   const resultType = useResultTypeEvaluator({ resultTypeExpression: props.resultTypeExpression });
 
@@ -53,27 +55,29 @@ export const SettingsControl = <Value = any>(props: ISettingsControlProps<Value>
 
   const { styles } = useStyles();
 
-  const onInternalChange = (value: IPropertySetting<Value>, m?: PropertySettingMode): void => {
+  const onInternalChange = useCallback((value: IPropertySetting<Value>, m?: PropertySettingMode): void => {
     const newSetting = { ...value, _mode: (m ?? mode) };
     const newValue = !!newSetting._code || newSetting._mode === 'code' ? newSetting : value._value;
     if (props.onChange)
       props.onChange(newValue);
-  };
+  }, [mode, props]);
 
-  useEffect(() => {
+  useDeepCompareEffect(() => {
     if (setting._mode !== mode)
       onInternalChange({ ...setting, _mode: mode }, mode);
-  }, [mode]);
+  }, [mode, onInternalChange, setting]);
 
   const codeOnChange = (val: string): void => {
     const newValue: IPropertySetting<Value> = { ...setting, _code: val, _lazy: props.lazy ?? setting._lazy } as IPropertySetting<Value>;
     onInternalChange(newValue);
   };
 
-  const valueOnChange = (val: Value): void => {
-    const newValue = { ...setting, _value: val };
-    onInternalChange(newValue);
-  };
+  const valueOnChange = useDeepCompareMemo(() => {
+    return (val: Value): void => {
+      const newValue = { ...setting, _value: val };
+      onInternalChange(newValue);
+    };
+  }, [setting]);
 
   const onSwitchMode = (): void => {
     const newMode = mode === 'code' ? 'value' : 'code';

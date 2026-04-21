@@ -1,6 +1,6 @@
 import React, { FC, useMemo } from 'react';
 import { Form, FormItemProps } from 'antd';
-import { getFieldNameFromExpression, getValidationRules, useAvailableConstantsData } from '@/providers/form/utils';
+import { getFieldNameFromExpression, getValidationRules, useAvailableConstantsDataNoRefresh } from '@/providers/form/utils';
 import classNames from 'classnames';
 import { useFormItem, useShaFormInstance } from '@/providers';
 import { IConfigurableFormItemProps } from './model';
@@ -20,24 +20,22 @@ export const ConfigurableFormItemLive: FC<IConfigurableFormItemProps> = ({
   wrapperCol,
   autoAlignLabel = true,
 }) => {
-  const { getPublicFormApi } = useShaFormInstance();
+  const { getPublicFormApi, formMode } = useShaFormInstance();
   const getFormData = getPublicFormApi().getFormData;
   const formItem = useFormItem();
   const { namePrefix, wrapperCol: formItemWrapperCol, labelCol: formItemlabelCol } = formItem;
-  const shaForm = useShaFormInstance();
-  const isInDesigner = shaForm.formMode === 'designer';
-  const allData = useAvailableConstantsData();
+  const isInDesigner = formMode === 'designer';
+  const allData = useAvailableConstantsDataNoRefresh();
   const { styles } = useStyles({ autoAlignLabel, labelAlign: model.labelAlign });
 
   const layout = useMemo(() => {
     // Make sure the `wrapperCol` and `labelCol` from `FormItemProver` override the ones from the main form
     return { labelCol: formItemlabelCol || labelCol, wrapperCol: formItemWrapperCol || wrapperCol };
-  }, [formItemlabelCol, formItemWrapperCol, labelCol, wrapperCol]);
+  }, [formItemlabelCol, labelCol, formItemWrapperCol, wrapperCol]);
 
   const isVertical = (model.layout ?? shaForm.settings?.layout) === 'vertical';
 
   const { hideLabel, hidden } = model;
-  if (hidden) return null;
 
   const { top: defaultMarginTop, left: defaultMarginLeft, right: defaultMarginRight, bottom: defaultMarginBottom } = designerConstants.DEFAULT_FORM_ITEM_MARGINS;
 
@@ -59,7 +57,7 @@ export const ConfigurableFormItemLive: FC<IConfigurableFormItemProps> = ({
     ? namePrefix + '.' + model.propertyName
     : model.propertyName;
 
-  const formItemProps: FormItemProps = {
+  const formItemProps: FormItemProps = useMemo(() => ({
     className: classNames(className, styles.formItem),
     label: hideLabel ? null : model.label,
     labelAlign: model.labelAlign,
@@ -78,7 +76,9 @@ export const ConfigurableFormItemLive: FC<IConfigurableFormItemProps> = ({
       marginRight: addPx(marginRight, allData),
       marginLeft: addPx(marginLeft, allData),
     },
-  };
+  }), [allData, className, getFormData, hideLabel, initialValue, layout?.labelCol, layout?.wrapperCol, marginBottom, marginLeft, marginRight, marginTop, model, propName, styles.formItem, valuePropName]);
+
+  if (hidden) return null;
 
   if (typeof children === 'function') {
     if (model.context) {
