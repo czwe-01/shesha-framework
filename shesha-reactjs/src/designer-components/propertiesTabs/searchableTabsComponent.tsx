@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Tabs, Input, Empty } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
+import { Tabs, Input, Empty, InputRef } from 'antd';
 import ParentProvider from '@/providers/parentProvider';
 import ComponentsContainer from '@/components/formDesigner/containers/componentsContainer';
 import { useStyles } from './style';
 import { SearchOutlined } from '@ant-design/icons';
 import { filterDynamicComponents } from './utils';
-import { IPropertiesTabsComponentProps } from './models';
+import { ITabPaneProps, IPropertiesTabsComponentProps } from './models';
+import { IConfigurableFormComponent } from '@/interfaces';
 import { useFormState, useFormActions } from '@/providers/form';
 import { useShaFormDataUpdate } from '@/providers/form/providers/shaFormProvider';
 
@@ -24,12 +25,14 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
 
   useShaFormDataUpdate();
 
+  const searchInputRef = useRef<InputRef>(null);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSearchQuery(e.target.value);
   };
 
   const renderSearchInput = (options?: {
-    ref?: (el: any) => void;
+    ref?: React.RefObject<InputRef>;
     className?: string;
     style?: React.CSSProperties;
     autoFocus?: boolean;
@@ -60,9 +63,10 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
 
   const handleTabChange = (newActiveKey: string): void => {
     setActiveTabKey(newActiveKey);
+    requestAnimationFrame(() => searchInputRef.current?.focus());
   };
 
-  const isComponentHidden = (component): boolean => {
+  const isComponentHidden = (component: IConfigurableFormComponent & { inputs?: IConfigurableFormComponent[] }): boolean => {
     if (formState.name === "modalSettings") {
       if (component.inputs) {
         const visibleInputs = component.inputs.filter((input) => {
@@ -85,9 +89,11 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
     }
   };
 
+  type TabItem = ITabPaneProps & { children?: IConfigurableFormComponent[] };
+
   const newFilteredTabs = tabs
-    .map((tab: any, index: number) => {
-      const filteredComponents = tab.children ?? filterDynamicComponents(tab.components, searchQuery);
+    .map((tab: TabItem, index: number) => {
+      const filteredComponents = tab.children ?? filterDynamicComponents(tab.components ?? [], searchQuery);
 
       const visibleComponents = Array.isArray(filteredComponents)
         ? filteredComponents.filter((comp) => isComponentHidden(comp))
@@ -143,6 +149,7 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
   return (
     <>
       {renderSearchInput({
+        ref: searchInputRef,
         autoFocus: newFilteredTabs.length === 0,
         className: styles.searchField,
       })}
