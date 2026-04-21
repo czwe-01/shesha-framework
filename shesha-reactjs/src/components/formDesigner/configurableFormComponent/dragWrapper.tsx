@@ -41,7 +41,7 @@ export const DragWrapper: FC<PropsWithChildren<IDragWrapperProps>> = (props) => 
         <div><strong>Component name: </strong>{componentModel.componentName}</div>
       )}
     </div>
-  ), [componentModel]);
+  ), [componentModel.componentName, componentModel.id, componentModel.propertyName, componentModel.type, isDebug]);
 
   const onClick = (event: React.MouseEvent<HTMLElement>): void => {
     event.stopPropagation();
