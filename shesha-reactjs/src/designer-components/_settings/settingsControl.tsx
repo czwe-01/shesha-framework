@@ -14,7 +14,8 @@ import { CodeEditor } from '../codeEditor/codeEditor';
 import { useDeepCompareEffect } from '@/hooks/useDeepCompareEffect';
 import { useDeepCompareMemo } from '@/hooks';
 
-export type SettingsControlChildrenType = (value: any, onChange: (val: any) => void, propertyName: string) => ReactElement | ReactNode;
+export type SettingsControlChildrenFunc<T = unknown> = (value: T, onChange: (val: T) => void, propertyName: string) => ReactElement;
+export type SettingsControlChildrenType<T = unknown> = SettingsControlChildrenFunc<T> | ReactNode;
 
 export interface ISettingsControlProps<Value = any> {
   propertyName: string;
@@ -24,7 +25,7 @@ export interface ISettingsControlProps<Value = any> {
   hasCode?: boolean;
   mode: PropertySettingMode;
   onChange?: (value: IPropertySetting<Value>) => void;
-  readonly children?: SettingsControlChildrenType;
+  readonly children?: SettingsControlChildrenFunc<Value>;
   availableConstantsExpression?: string | GetAvailableConstantsFunc;
   resultTypeExpression?: string | GetResultTypeFunc;
   useAsyncEvaluation?: boolean;
@@ -47,6 +48,8 @@ export const defaultExposedVariables: ICodeExposedVariable[] = [
 ];
 
 export const SettingsControl = <Value extends unknown = unknown>(props: ISettingsControlProps<Value>): ReactElement => {
+  const { onChange } = props;
+
   const constantsEvaluator = useConstantsEvaluator({ availableConstantsExpression: props.availableConstantsExpression });
   const resultType = useResultTypeEvaluator({ resultTypeExpression: props.resultTypeExpression });
 
@@ -58,13 +61,12 @@ export const SettingsControl = <Value extends unknown = unknown>(props: ISetting
   const onInternalChange = useCallback((value: IPropertySetting<Value>, m?: PropertySettingMode): void => {
     const newSetting = { ...value, _mode: (m ?? mode) };
     const newValue = !!newSetting._code || newSetting._mode === 'code' ? newSetting : value._value;
-    if (props.onChange)
-      props.onChange(newValue);
-  }, [mode, props]);
+    if (onChange)
+      onChange(newValue);
+  }, [mode, onChange]);
 
   useDeepCompareEffect(() => {
-    if (setting._mode !== mode)
-      onInternalChange({ ...setting, _mode: mode }, mode);
+    onInternalChange({ ...setting, _mode: mode }, mode);
   }, [mode, onInternalChange, setting]);
 
   const codeOnChange = (val: string): void => {

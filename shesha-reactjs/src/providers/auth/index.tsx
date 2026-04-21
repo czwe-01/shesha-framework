@@ -1,4 +1,4 @@
-import React, { FC, MutableRefObject, PropsWithChildren, useContext, useEffect } from 'react';
+import React, { FC, MutableRefObject, PropsWithChildren, useContext, useLayoutEffect } from 'react';
 import { URL_HOME_PAGE, URL_LOGIN_PAGE } from '@/shesha-constants';
 import { useShaRouting } from '@/providers/shaRouting';
 import { useAuthenticatorInstance } from './authenticator';
@@ -65,7 +65,7 @@ const AuthProvider: FC<PropsWithChildren<IAuthProviderProps>> = ({
     },
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (authRef)
       authRef.current = {
         anyOfPermissionsGranted: authenticator.anyOfPermissionsGranted,

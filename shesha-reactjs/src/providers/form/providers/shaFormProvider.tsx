@@ -13,9 +13,7 @@ const ShaFormProvider = <TValues extends object = object>({ children, shaForm }:
 
   // force update context on change form data
   useEffect(() => {
-    if (shaForm.updateData === undefined) {
-      shaForm.updateData = () => setState({});
-    }
+    shaForm.updateData = () => setState({});
   }, [shaForm]);
 
   // TODO V1: replace with generic provider and remove unsafe type cast

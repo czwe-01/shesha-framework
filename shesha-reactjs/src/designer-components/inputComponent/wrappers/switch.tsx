@@ -8,7 +8,7 @@ export const SwitchWrapper: FCUnwrapped<ISwitchSettingsInputProps> = (props) => 
   return (
     <Switch
       value={value}
-      onChange={(checked: boolean) => onChange(checked)}
+      onChange={(checked: boolean) => onChange?.(checked)}
       disabled={readOnly}
       size="small"
     />

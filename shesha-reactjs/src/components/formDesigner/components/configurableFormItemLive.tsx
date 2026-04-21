@@ -20,11 +20,11 @@ export const ConfigurableFormItemLive: FC<IConfigurableFormItemProps> = ({
   wrapperCol,
   autoAlignLabel = true,
 }) => {
-  const { getPublicFormApi, formMode } = useShaFormInstance();
-  const getFormData = getPublicFormApi().getFormData;
+  const shaForm = useShaFormInstance();
+  const getFormData = shaForm.getPublicFormApi().getFormData;
   const formItem = useFormItem();
   const { namePrefix, wrapperCol: formItemWrapperCol, labelCol: formItemlabelCol } = formItem;
-  const isInDesigner = formMode === 'designer';
+  const isInDesigner = shaForm.formMode === 'designer';
   const allData = useAvailableConstantsDataNoRefresh();
   const { styles } = useStyles({ autoAlignLabel, labelAlign: model.labelAlign });
 

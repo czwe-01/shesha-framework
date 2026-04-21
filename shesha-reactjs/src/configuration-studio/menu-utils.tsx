@@ -169,7 +169,7 @@ export const buildConfiguraitonItemMenu = (args: BuildNodeMenuArgs<ConfigItemTre
   if (!args.node)
     return menu;
   const definition = args.getDocumentDefinition?.(args.node.itemType);
-  return definition && definition.contextMenuBuilder
+  return definition?.contextMenuBuilder
     ? definition.contextMenuBuilder(menu, args.configurationStudio)
     : menu;
 };

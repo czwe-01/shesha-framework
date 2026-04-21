@@ -1,7 +1,7 @@
 import React, { cloneElement, FC, ReactElement, useState } from 'react';
 import { ConfigurableFormItem } from '@/components/formDesigner/components/formItem';
-import SettingsControl from '../settingsControl';
-import { ISettingsFormItemChildFunc, ISettingsFormItemProps } from '../settingsFormItem';
+import SettingsControl, { SettingsControlChildrenFunc } from '../settingsControl';
+import { ISettingsFormItemProps } from '../settingsFormItem';
 import { useStyles } from '../styles/styles';
 import { useDefaultModelPropertyUpdateSubscription, useDefaultModelProviderStateOrUndefined } from '../defaultModelProvider/defaultModelProvider';
 import { getValueByPropertyName } from '@/utils/object';
@@ -22,10 +22,10 @@ const FormItem: FC<ISettingsFormItemProps> = (props) => {
   const defaultValue = getValueByPropertyName(defaultModel?.getDefaultModel() as Record<string, unknown>, defaultModelPropName);
   const className = valueInfo?.state === 'usedDefault' ? styles.inheritedValue : valueInfo?.state === 'usedModel' ? styles.overriddenValue : '';
 
-  let childFunc: ISettingsFormItemChildFunc | undefined = undefined;
+  let childFunc: SettingsControlChildrenFunc | undefined = undefined;
   let readOnly = props.readOnly;
   if (typeof children === 'function') {
-    childFunc = children as ISettingsFormItemChildFunc;
+    childFunc = children as SettingsControlChildrenFunc;
   } else {
     const childElement = children as ReactElement;
     readOnly = readOnly || childElement.props.readOnly || childElement.props.disabled;
@@ -33,7 +33,7 @@ const FormItem: FC<ISettingsFormItemProps> = (props) => {
     childFunc = (value, onChange): ReactElement => cloneElement(
       childElement,
       {
-        ...childElement?.props,
+        ...childElement.props,
         readOnly: readOnly,
         size: 'small',
         disabled: readOnly,
@@ -68,7 +68,7 @@ const FormItem: FC<ISettingsFormItemProps> = (props) => {
       {(value, onChange) => {
         const localValue = defaultModel?.getValueInfo(defaultModelPropName)?.state === 'usedDefault' ? defaultValue : value;
         return !jsSetting ? (
-          childFunc(localValue, onChange)
+          childFunc(localValue, onChange, name)
         ) : (
           <SettingsControl
             propertyName={name}
@@ -81,7 +81,7 @@ const FormItem: FC<ISettingsFormItemProps> = (props) => {
             lazy={jsSetting === 'lazy'}
             availableConstantsExpression={availableConstantsExpression}
           >
-            {(val, onChange) => childFunc(val, onChange)}
+            {(val, onChange) => childFunc(val, onChange, name)}
           </SettingsControl>
         );
       }}

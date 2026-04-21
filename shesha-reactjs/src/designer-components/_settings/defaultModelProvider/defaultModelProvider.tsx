@@ -8,8 +8,8 @@ export interface IDefaultModelProviderProps<TData extends object = object> {
 }
 
 export interface IDefaultModelProviderState<TData extends object = object> {
-  subscribePropertyUpdate(propertyName: string, callback: () => void): () => void;
-  subscribe(type: DefaultModelSubscriptionType, callback: () => void, data?: Record<string, any>): () => void;
+  subscribePropertyUpdate(propertyName: string, callback: (dfi: DefaultModelInstance<TData>) => void): () => void;
+  subscribe(type: DefaultModelSubscriptionType, callback: (dfi: DefaultModelInstance<TData>) => void, data?: Record<string, any>): () => void;
   notifySubscribers(type: DefaultModelSubscriptionType): void;
 
   setDefaultModel: (name: string, model: TData) => void;
@@ -44,6 +44,7 @@ export const useDefaultModelSubscription = (subscriptionType: DefaultModelSubscr
   const defaultModel = useDefaultModelProviderStateOrUndefined();
   const [dummy, forceUpdate] = useState({});
   useEffect(() => {
+    if (!defaultModel) return undefined;
     // Subscribe to changes
     const unsubscribe = defaultModel.subscribe(subscriptionType, () => forceUpdate({}));
     return unsubscribe; // Cleanup on unmount
@@ -72,8 +73,8 @@ const DefaultModelProvider = <TData extends object = object>(props: PropsWithChi
   }, [instance, props.defaultModel, props.model, props.name]);
 
   const state: IDefaultModelProviderState<TData> = {
-    subscribePropertyUpdate: (propertyName: string, callback: () => void) => instance.subscribePropertyUpdate(propertyName, callback),
-    subscribe: (type: DefaultModelSubscriptionType, callback: () => void, data?: Record<string, any>) => instance.subscribe(type, callback, data),
+    subscribePropertyUpdate: (propertyName: string, callback: (dfi: DefaultModelInstance<TData>) => void) => instance.subscribePropertyUpdate(propertyName, callback),
+    subscribe: (type: DefaultModelSubscriptionType, callback: (dfi: DefaultModelInstance<TData>) => void, data?: Record<string, any>) => instance.subscribe(type, callback, data),
     notifySubscribers: (type: DefaultModelSubscriptionType) => instance.notifySubscribers(type),
 
     setDefaultModel: (name: string, model: TData) => {

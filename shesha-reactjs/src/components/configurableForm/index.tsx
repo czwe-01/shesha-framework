@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import ConfigurableComponent from '../appConfigurator/configurableComponent';
 import EditViewMsg from '../appConfigurator/editViewMsg';
-import React, { MutableRefObject, ReactElement, useEffect, useState } from 'react';
+import React, { MutableRefObject, ReactElement, useEffect, useLayoutEffect, useState } from 'react';
 import { IConfigurableFormProps, SheshaFormProps } from './models';
 import { Form, FormInstance } from 'antd';
 import { useAppConfigurator, useShaRoutingOrUndefined, useSheshaApplication } from '@/providers';
@@ -77,7 +77,7 @@ export const ConfigurableForm = <Values extends object = object>(props: Configur
   });
   shaForm.setOnMarkupLoaded(onMarkupLoaded);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (shaFormRef)
       shaFormRef.current = shaForm;
   }, [shaForm, shaFormRef]);

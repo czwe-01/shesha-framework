@@ -2,10 +2,9 @@ import React, {
   cloneElement,
   FC,
   ReactElement,
-  ReactNode,
   useEffect,
 } from 'react';
-import SettingsControl, { SettingsControlChildrenType } from './settingsControl';
+import SettingsControl, { SettingsControlChildrenFunc, SettingsControlChildrenType } from './settingsControl';
 import { Form, FormItemProps } from 'antd';
 import { getPropertySettingsFromData } from './utils/utils';
 import { useSettingsForm } from './settingsForm';
@@ -15,13 +14,8 @@ import { IConfigurableFormItemProps } from '@/components/formDesigner/components
 import { ConfigurableFormItem } from '@/components/formDesigner/components/formItem';
 import { GetAvailableConstantsFunc } from "@/designer-components/codeEditor/interfaces";
 
-export type ISettingsFormItemChildFunc = (
-  value: unknown,
-  onChange: (...args: unknown[]) => void,
-) => ReactElement;
-
 export interface ISettingsFormItemProps extends Omit<IConfigurableFormItemProps, 'model' | 'children'> {
-  readonly children?: ReactNode | ISettingsFormItemChildFunc;
+  readonly children?: SettingsControlChildrenType;
   id?: string;
   name?: string;
   label?: string | React.ReactNode;
@@ -57,7 +51,7 @@ const SettingsFormComponent: FC<ISettingsFormItemProps> = (props) => {
   };
 
   if (typeof props.children === 'function') {
-    const children = props.children as SettingsControlChildrenType;
+    const children = props.children as SettingsControlChildrenFunc;
     if (!props.jsSetting) {
       return (
         <ConfigurableFormItem

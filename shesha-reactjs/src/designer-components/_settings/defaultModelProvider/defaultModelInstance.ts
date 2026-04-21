@@ -10,9 +10,9 @@ export interface IDefaultModelValueInfo {
   latestDefaultModelName: string;
 }
 
-export interface IDefaultModelInstance<T> {
-  subscribePropertyUpdate(propertyName: string, callback: () => void): () => void;
-  subscribe(type: DefaultModelSubscriptionType, callback: () => void, data?: Record<string, any>): () => void;
+export interface IDefaultModelInstance<T extends object = object> {
+  subscribePropertyUpdate(propertyName: string, callback: (dfi: DefaultModelInstance<T>) => void): () => void;
+  subscribe(type: DefaultModelSubscriptionType, callback: (dfi: DefaultModelInstance<T>) => void, data?: Record<string, any>): () => void;
   notifySubscribers(type: DefaultModelSubscriptionType): void;
 
   setModel: (model: T) => void;
@@ -28,7 +28,7 @@ export interface IDefaultModelInstance<T> {
 
 export type DefaultModelSubscription<Values extends object = object> = {
   callback: (dfi: DefaultModelInstance<Values>) => void;
-  data: Record<string, any>;
+  data?: Record<string, any>;
 };
 export type DefaultModelSubscriptionType = 'property-modified';
 
@@ -46,7 +46,7 @@ const getDataForPropertyUpdateSubscription: (dfi: DefaultModelInstance, property
 
 const defaultModelSubscriptionFuncs = new Map<DefaultModelSubscriptionType, (subscr: DefaultModelSubscription, dfi: DefaultModelInstance) => Record<string, any>>([
   ['property-modified', (subscr, dfi) => {
-    const data = getDataForPropertyUpdateSubscription(dfi, subscr.data.propertyName);
+    const data = getDataForPropertyUpdateSubscription(dfi, subscr.data?.propertyName);
     if (isEqual(subscr.data, data)) return subscr.data;
     subscr.callback(dfi);
     return data;
@@ -71,29 +71,33 @@ export class DefaultModelInstance<T extends object = object> implements IDefault
     this.subscriptions = new Map<DefaultModelSubscriptionType, Set<DefaultModelSubscription<T>>>();
   }
 
-  subscribePropertyUpdate(propertyName: string, callback: () => void): () => void {
+  subscribePropertyUpdate(propertyName: string, callback: (dfi: DefaultModelInstance<T>) => void): () => void {
     return this.subscribe('property-modified', callback, getDataForPropertyUpdateSubscription(this, propertyName));
   }
 
-  subscribe(type: DefaultModelSubscriptionType, callback: () => void, data?: Record<string, any>): () => void {
+  subscribe(type: DefaultModelSubscriptionType, callback: (dfi: DefaultModelInstance<T>) => void, data?: Record<string, any>): () => void {
     const current = this.subscriptions.get(type) ?? new Set<DefaultModelSubscription<T>>();
     current.add({ callback, data });
     this.subscriptions.set(type, current);
     return () => this.unsubscribe(type, callback);
   }
 
-  private unsubscribe(type: DefaultModelSubscriptionType, callback: () => void): void {
+  private unsubscribe(type: DefaultModelSubscriptionType, callback: (dfi: DefaultModelInstance<T>) => void): void {
     const current = this.subscriptions.get(type);
     if (!current)
       return;
-    current.delete(current.values().find((e) => e.callback === callback));
+    const subscription = Array.from(current).find((e) => e.callback === callback);
+    if (subscription) {
+      current.delete(subscription);
+    }
     this.subscriptions.set(type, current);
   }
 
   notifySubscribers(type: DefaultModelSubscriptionType): void {
     const func = defaultModelSubscriptionFuncs.get(type);
-    const sbscriptions = this.subscriptions.get(type);
-    sbscriptions?.forEach((sbscription) => sbscription.data = func(sbscription, this));
+    const subscriptions = this.subscriptions.get(type);
+    if (func && subscriptions)
+      subscriptions.forEach((subscription) => subscription.data = func(subscription, this));
   }
 
   #updateMergedModel = (): void => {
