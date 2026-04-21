@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import ConfigurableComponent from '../appConfigurator/configurableComponent';
 import EditViewMsg from '../appConfigurator/editViewMsg';
-import React, { MutableRefObject, ReactElement, useEffect } from 'react';
+import React, { MutableRefObject, ReactElement, useEffect, useLayoutEffect, useState } from 'react';
 import { IConfigurableFormProps, SheshaFormProps } from './models';
 import { Form, FormInstance } from 'antd';
 import { useAppConfigurator, useShaRoutingOrUndefined, useSheshaApplication } from '@/providers';
@@ -36,7 +36,6 @@ export const ConfigurableForm = <Values extends object = object>(props: Configur
     cacheKey,
     isSettingsForm = false,
     onFinish,
-    initialValues,
     parentFormValues,
     onSubmitted,
     onValuesChange,
@@ -56,6 +55,10 @@ export const ConfigurableForm = <Values extends object = object>(props: Configur
     formDataSetter,
     setFormDataNewDataAction,
   } = props;
+
+  // memoize initial values once to avoid unnecessary form initialization
+  const [initialValues] = useState(props.initialValues);
+
   const { switchApplicationMode } = useAppConfigurator();
   const app = useSheshaApplication();
 
@@ -74,8 +77,10 @@ export const ConfigurableForm = <Values extends object = object>(props: Configur
   });
   shaForm.setOnMarkupLoaded(onMarkupLoaded);
 
-  if (shaFormRef)
-    shaFormRef.current = shaForm;
+  useLayoutEffect(() => {
+    if (shaFormRef)
+      shaFormRef.current = shaForm;
+  }, [shaForm, shaFormRef]);
 
   //#region shaForm sync
   useEffect(() => {
@@ -90,7 +95,8 @@ export const ConfigurableForm = <Values extends object = object>(props: Configur
         initialValues: initialValues,
       });
     }
-  }, [shaForm, formId, formArguments]);
+  }, [shaForm, formId, formArguments, initialValues]);
+
   useEffect(() => {
     if (markup) {
       void shaForm.initByRawMarkup({

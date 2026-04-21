@@ -472,7 +472,7 @@ class ShaFormInstance<Values extends object = object> implements IShaFormInstanc
       : {};
   };
 
-  loadFormByRawMarkupAsync = async (): Promise<void> => {
+  loadFormByRawMarkupAsync = async (forceRootUpdate: boolean = false): Promise<void> => {
     try {
       if (!isDefined(this.rawMarkup))
         throw new Error('Raw markup is not defined');
@@ -495,7 +495,8 @@ class ShaFormInstance<Values extends object = object> implements IShaFormInstanc
         await this.events.onBeforeDataLoad();
 
       this.markupLoadingState = { status: 'ready' };
-      this.forceRootUpdate();
+      if (forceRootUpdate)
+        this.forceRootUpdate();
     } catch (error) {
       this.markupLoadingState = { status: 'failed', error: extractErrorInfo(error), hint: 'Failed to load form' };
       this.forceRootUpdate();
@@ -581,7 +582,6 @@ class ShaFormInstance<Values extends object = object> implements IShaFormInstanc
     this.formArguments = formArguments;
     this.isSettingsForm = isSettingsForm ?? false;
 
-    // ToDo: AS - recheck if data initialization is ok before markup initialization
     this.initialValues = initialValues;
     this.formData = initialValues;
 

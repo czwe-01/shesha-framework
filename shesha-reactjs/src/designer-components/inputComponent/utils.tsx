@@ -108,22 +108,21 @@ export const CustomLabelValueEditorInputs = (props: ILabelValueEditorProps): Rea
                 ? dropdownOptions.map<DefaultOptionType>((option) => ({ label: option.label, value: option.value }))
                 : dropdownOptions}
             />
+            <InputComponent
+              type="iconPicker"
+              placeholder={iconTitle}
+              readOnly={readOnly}
+              size="small"
+              label=""
+              id={iconName}
+              propertyName={iconName}
+              value={item[iconName]}
+              width={getWidth("iconPicker", 24)}
+              onChange={(value: string) => {
+                itemOnChange({ ...item, [iconName]: value }, undefined);
+              }}
+            />
           </Row>
-          <InputComponent
-            type="iconPicker"
-            placeholder={iconTitle}
-            readOnly={readOnly}
-            size="small"
-            label=""
-            id={iconName}
-            propertyName={iconName}
-            value={item[iconName]}
-            iconSize={16}
-            width={getWidth("iconPicker", 24)}
-            onChange={(value: string) => {
-              itemOnChange({ ...item, [iconName]: value }, undefined);
-            }}
-          />
         </div>
       )}
     </ListEditor>

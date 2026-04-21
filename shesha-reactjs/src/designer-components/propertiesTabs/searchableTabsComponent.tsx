@@ -150,7 +150,7 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
               />
             </ParentProvider>
           ),
-        forceRender: true,
+        forceRender: false,
         hidden: tab.hidden || !hasVisibleComponents,
       };
     })

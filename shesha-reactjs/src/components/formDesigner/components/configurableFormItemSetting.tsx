@@ -2,12 +2,12 @@ import React, { FC, cloneElement } from 'react';
 import { Form, FormItemProps } from 'antd';
 import { getFieldNameFromExpression } from '@/providers/form/utils';
 import { getPropertySettingsFromData } from '@/designer-components/_settings/utils/utils';
-import { IConfigurableFormItemChildFunc, IConfigurableFormItemProps } from './model';
+import { IConfigurableFormItemProps } from './model';
 import { ConfigurableFormItemLive } from './configurableFormItemLive';
 import { useStyles } from './styles';
 import classNames from 'classnames';
 import { useShaFormInstance } from '@/providers/form/providers/shaFormProvider';
-import SettingsControl from '@/designer-components/_settings/settingsControl';
+import SettingsControl, { SettingsControlChildrenFunc } from '@/designer-components/_settings/settingsControl';
 
 export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
   children,
@@ -33,7 +33,7 @@ export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
   };
 
   if (typeof children === 'function') {
-    const childrenFunc = children as IConfigurableFormItemChildFunc;
+    const childrenFunc = children as SettingsControlChildrenFunc;
     return (
       <Form.Item {...formProps}>
         <SettingsControl propertyName={model.propertyName} mode={mode} lazy={lazy} availableConstantsExpression={availableConstantsExpression}>
