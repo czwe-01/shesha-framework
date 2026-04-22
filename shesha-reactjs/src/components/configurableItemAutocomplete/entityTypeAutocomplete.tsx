@@ -153,10 +153,15 @@ export const EntityTypeAutocomplete: FC<IEntityTypeAutocompleteProps> = (props) 
       } else {
         setSelectedItem({});
         // Fetch directly with the new value to avoid selectedItem.value being stale in debouncedFetchItems
-        listFetcher.refetch({ queryParams: getListFetcherQueryParams(type, undefined, value, baseModel) });
+        listFetcher
+          .refetch({ queryParams: getListFetcherQueryParams(type, undefined, value, baseModel) })
+          .catch((error) => {
+            console.error('Failed to fetch entity type', error);
+            throw error;
+          });
       }
     }
-  }, [value]);
+  }, [value, type, baseModel]);
 
   useEffect(() => {
     // If value exists and has changed
