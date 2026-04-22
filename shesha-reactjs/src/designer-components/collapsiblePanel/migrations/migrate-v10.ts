@@ -122,6 +122,7 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
         (c: any) => c.id,
       );
       existingComponents.forEach((c: any) => {
+        c.parentId = extraAreaId;
         if (context.flatStructure.allComponents[c.id]) {
           context.flatStructure.allComponents[c.id].parentId = extraAreaId;
         }
