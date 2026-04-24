@@ -14,7 +14,6 @@ import {
 } from '../form/models';
 import { createNamedContext } from '@/utils/react';
 import { BaseHistoryItem, FormDesignerSubscription, FormDesignerSubscriptionType } from './models';
-import { MutableRefObject } from 'react';
 
 export interface AddComponentPayloadBase {
   index: number;
@@ -91,7 +90,7 @@ export type FormDesignerState = {
   formMode: FormMode;
   activeSettingsTabKey: string | undefined;
 
-  settingsPanelRef: MutableRefObject<HTMLDivElement | undefined>;
+  settingsPanelElement: HTMLDivElement | null;
 };
 
 export type FormDesignerActions = {
