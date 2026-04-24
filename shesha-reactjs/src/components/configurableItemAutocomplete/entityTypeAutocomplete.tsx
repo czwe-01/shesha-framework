@@ -97,12 +97,12 @@ const getListFetcherQueryParams = (
     term: term ?? undefined,
     selectedValue: typeof value === 'string'
       ? value
-      : value?.module && value?.name
+      : value?.name
         ? getEntityIdentifier(value)
         : undefined,
     baseModel: typeof baseModel === 'string'
       ? baseModel
-      : baseModel?.module && baseModel?.name
+      : baseModel?.name
         ? getEntityIdentifier(baseModel)
         : undefined,
   };
@@ -151,11 +151,17 @@ export const EntityTypeAutocomplete: FC<IEntityTypeAutocompleteProps> = (props) 
         // set the selected item
         setSelectedItem({ value: value, key: getDisplayText(foundItem), item: foundItem });
       } else {
-        // fetch the item
-        debouncedFetchItems();
+        setSelectedItem({});
+        // Fetch directly with the new value to avoid selectedItem.value being stale in debouncedFetchItems
+        listFetcher
+          .refetch({ queryParams: getListFetcherQueryParams(type, undefined, value, baseModel) })
+          .catch((error) => {
+            console.error('Failed to fetch entity type', error);
+            throw error;
+          });
       }
     }
-  }, [value]);
+  }, [value, type, baseModel]);
 
   useEffect(() => {
     // If value exists and has changed
