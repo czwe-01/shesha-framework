@@ -172,17 +172,8 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
       })}
       {newFilteredTabs.length === 0 && searchQuery
         ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Property Not Found" />
-        : (
-          <Tabs
-            activeKey={activeTabKey}
-            onChange={handleTabChange}
-            size={model.size}
-            type={model.tabType || 'card'}
-            tabPosition={model.position || 'top'}
-            items={newFilteredTabs}
-            className={styles.content}
-          />
-        )}
+        : localTabs
+      }
     </>
   );
 };
