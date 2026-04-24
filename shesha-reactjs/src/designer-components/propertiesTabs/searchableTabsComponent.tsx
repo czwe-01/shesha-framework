@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Tabs, Input, Empty, InputRef } from 'antd';
 import ParentProvider from '@/providers/parentProvider';
 import ComponentsContainer from '@/components/formDesigner/containers/componentsContainer';
@@ -7,8 +7,9 @@ import { SearchOutlined } from '@ant-design/icons';
 import { filterDynamicComponents } from './utils';
 import { ITabPaneProps, IPropertiesTabsComponentProps } from './models';
 import { IConfigurableFormComponent } from '@/interfaces';
-import { useFormState, useFormActions } from '@/providers/form';
+import { useFormStateOrUndefined, useFormActionsOrUndefined } from '@/providers/form';
 import { useShaFormDataUpdate } from '@/providers/form/providers/shaFormProvider';
+import { useFormDesignerActiveSettingsTabKey, useFormDesigner } from '@/providers/formDesigner';
 
 interface SearchableTabsProps {
   model: IPropertiesTabsComponentProps;
@@ -17,11 +18,15 @@ interface SearchableTabsProps {
 const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
   const { tabs } = model;
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTabKey, setActiveTabKey] = useState('1');
   const { styles } = useStyles();
 
-  const formState = useFormState();
-  const formActions = useFormActions();
+  const formState = useFormStateOrUndefined();
+  const formActions = useFormActionsOrUndefined();
+  const formDesigner = useFormDesigner();
+  const persistedActiveTabKey = useFormDesignerActiveSettingsTabKey();
+
+  // Use persisted tab key if available, otherwise default to first tab
+  const activeTabKey = persistedActiveTabKey ?? '1';
 
   useShaFormDataUpdate();
 
@@ -62,7 +67,7 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
   };
 
   const handleTabChange = (newActiveKey: string): void => {
-    setActiveTabKey(newActiveKey);
+    formDesigner.setActiveSettingsTabKey(newActiveKey);
     requestAnimationFrame(() => searchInputRef.current?.focus());
   };
 
@@ -133,18 +138,30 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
         Array.isArray(tab.components) ? tab.components.length > 0 : !!tab.components,
       );
       if (firstVisibleTab && firstVisibleTab.key !== activeTabKey) {
-        setActiveTabKey(firstVisibleTab.key);
+        formDesigner.setActiveSettingsTabKey(firstVisibleTab.key);
       }
     }
-  }, [searchQuery, newFilteredTabs, activeTabKey]);
+  }, [searchQuery, newFilteredTabs, activeTabKey, formDesigner]);
 
   // Ensure we have a valid active tab key
   useEffect(() => {
     if (newFilteredTabs.length > 0 && !newFilteredTabs.find((tab) => tab.key === activeTabKey)) {
-      setActiveTabKey(newFilteredTabs[0].key);
+      formDesigner.setActiveSettingsTabKey(newFilteredTabs[0].key);
     }
-  }, [newFilteredTabs, activeTabKey]);
+  }, [newFilteredTabs, activeTabKey, formDesigner]);
 
+  const localTabs = useMemo(() => (
+    <Tabs
+      key="searchable-tabs"
+      activeKey={activeTabKey}
+      onChange={handleTabChange}
+      size={model.size}
+      type={model.tabType || 'card'}
+      tabPosition={model.position || 'top'}
+      items={newFilteredTabs}
+      className={styles.content}
+    />
+  ), [activeTabKey, handleTabChange, model.size, model.tabType, newFilteredTabs, styles.content, model.position]);
 
   return (
     <>
@@ -155,17 +172,7 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
       })}
       {newFilteredTabs.length === 0 && searchQuery
         ? <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Property Not Found" />
-        : (
-          <Tabs
-            activeKey={activeTabKey}
-            onChange={handleTabChange}
-            size={model.size}
-            type={model.tabType || 'card'}
-            tabPosition={model.position || 'top'}
-            items={newFilteredTabs}
-            className={styles.content}
-          />
-        )}
+        : localTabs}
     </>
   );
 };
