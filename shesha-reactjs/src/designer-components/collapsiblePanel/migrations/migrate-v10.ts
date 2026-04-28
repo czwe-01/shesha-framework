@@ -79,7 +79,7 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
       id: labelTextId,
       type: "text",
       propertyName: "panelLabel",
-      componentName: "panelLabel",      label: "Panel Label",
+      componentName: "panelLabel",
       labelAlign: "right",
       parentId: headerLayoutId,
       hidden: false,
