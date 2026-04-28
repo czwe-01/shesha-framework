@@ -11,6 +11,8 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
   const customHeader = model.customHeader;
   const label = model.label;
   const header = model.header;
+  const textContent = typeof label === 'string' ? label : undefined;
+
 
   // Skip if already migrated to the new structure
   const alreadyMigrated = header?.components?.some(
@@ -77,15 +79,13 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
       id: labelTextId,
       type: "text",
       propertyName: "panelLabel",
-      componentName: "panelLabel",
-      name: "Panel Label",
-      label: "Panel Label",
+      componentName: "panelLabel",      label: "Panel Label",
       labelAlign: "right",
       parentId: headerLayoutId,
       hidden: false,
       isDynamic: false,
       textType: "span",
-      content: label || "Panel",
+      content: textContent,
       contentDisplay: "content",
       code: false,
       copyable: false,
@@ -102,7 +102,6 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
       type: "container",
       propertyName: "extraArea",
       componentName: "extraArea",
-      name: "Extra Area",
       label: "Extra Area",
       labelAlign: "right",
       parentId: headerLayoutId,
@@ -117,7 +116,6 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
       type: "container",
       propertyName: "headerLayout",
       componentName: "headerLayout",
-      name: "Header Layout",
       label: "Header Layout",
       labelAlign: "right",
       parentId: headerId,
