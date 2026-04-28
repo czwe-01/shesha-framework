@@ -351,7 +351,7 @@ export const useBackendRepository = (args: IWithBackendRepositoryArgs): IBackend
   return repository;
 };
 
-const useNew: boolean = true;
+const useNew: boolean = false;
 export const BackendDataSourceTable: FC<IHasEntityDataSourceConfig & PropsWithChildren<Omit<IDataTableProviderWithRepositoryProps, 'repository'>>> = (props) => {
   const { entityType, getDataPath, ...restProps } = props;
 

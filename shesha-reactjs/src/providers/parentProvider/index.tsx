@@ -11,6 +11,7 @@ import { DataContextManager } from "../dataContextManager";
 import { DataContextProvider, IDataContextProviderProps } from "../dataContextProvider";
 import { useShaFormInstanceOrUndefined } from "../form/providers/shaFormProvider";
 import { FormMode, IConfigurableFormComponent, IFlatComponentsStructure, isConfigurableFormComponent } from "../form/models";
+import ComponentApiProvider from "../componentApi/provider";
 
 export interface IParentProviderStateContext<Values extends object = object> {
   id: string;
@@ -111,15 +112,17 @@ const ParentProvider = <TValue extends object = object>(props: PropsWithChildren
       condition={isScope}
       wrap={(children: React.ReactNode) => {
         return (
-          <ValidateProvider>
-            <DataContextManager id={id}>
-              <ConfigurableActionDispatcherProvider>
-                {addContext && contextProps
-                  ? <DataContextProvider {...contextProps}>{children}</DataContextProvider>
-                  : children}
-              </ConfigurableActionDispatcherProvider>
-            </DataContextManager>
-          </ValidateProvider>
+          <ComponentApiProvider id={props.name || id}>
+            <ValidateProvider>
+              <DataContextManager id={id}>
+                <ConfigurableActionDispatcherProvider>
+                  {addContext && contextProps
+                    ? <DataContextProvider {...contextProps}>{children}</DataContextProvider>
+                    : children}
+                </ConfigurableActionDispatcherProvider>
+              </DataContextManager>
+            </ValidateProvider>
+          </ComponentApiProvider>
         );
       }}
     >

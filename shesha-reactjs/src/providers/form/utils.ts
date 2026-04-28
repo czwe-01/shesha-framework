@@ -91,6 +91,8 @@ import {
 import { IMetadataDispatcher } from '../metadataDispatcher/contexts';
 import { IModalApi } from '../dynamicModal/modalApi';
 import { useModalApiWithFallback } from '../dynamicModal';
+import { IComponentApiActions } from '../componentApi/model';
+import { useComponentApi } from '../componentApi/provider';
 
 export {
   executeExpression, executeScript,
@@ -107,6 +109,8 @@ type MomentType = typeof moment;
 
 /** Interface to get all avalilable data */
 export interface IApplicationContext<Value extends object = object> {
+  components: Record<string, Record<string, unknown>>;
+
   application?: IApplicationApi;
   contextManager?: IDataContextManagerFullInstance;
   metadataDispatcher?: IMetadataDispatcher;
@@ -164,6 +168,7 @@ export type GetAvailableConstantsDataArgs<TValues extends object = object> = {
 };
 
 export type AvailableConstantsContext = {
+  componentApi?: IComponentApiActions | undefined;
   closestShaFormApi: IFormApi | undefined;
   selectedRow?: ISelectionProps | undefined;
   dcm: IDataContextManagerActionsContext | undefined;
@@ -193,8 +198,10 @@ const useBaseAvailableConstantsContexts = (): AvailableConstantsContext => {
   // get selected row if exists
   const selectedRow = useDataTableStateOrUndefined()?.selectedRow;
   const httpClient = useHttpClient();
+  const componentApi = useComponentApi();
 
   const result: AvailableConstantsContext = {
+    componentApi: componentApi,
     closestShaFormApi: undefined,
     selectedRow,
     dcm: undefined,
@@ -281,10 +288,27 @@ export const wrapConstantsData = <TValues extends object = object>(args: WrapCon
     message,
     metadataDispatcher,
     modal,
+
+    componentApi,
   } = fullContext;
   const shaFormInstance = (shaForm?.getPublicFormApi() ?? closestShaForm) as IFormApi<TValues> | undefined;
 
   const accessors: ProxyPropertiesAccessors<IApplicationContext<TValues>> = {
+    components: () => {
+      const api: Record<string, Record<string, unknown>> = {};
+      if (componentApi) {
+        const components = componentApi.getComponents();
+        components.forEach((component) => {
+          if (component.api === undefined || !component.componentName) return;
+          if (api[component.componentName]) {
+            console.warn(`Duplicate componentName "${component.componentName}" detected. The earlier component's API will be overwritten.`);
+          }
+          api[component.componentName] = component.api;
+        });
+      }
+      return api;
+    },
+
     application: () => {
       // get application context
       const application = dcm?.getDataContext(SheshaCommonContexts.ApplicationContext);

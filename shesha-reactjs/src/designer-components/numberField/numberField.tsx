@@ -1,5 +1,5 @@
 import { NumberOutlined } from '@ant-design/icons';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { ConfigurableFormItem } from '@/components/formDesigner/components/formItem';
 import ReadOnlyDisplayFormItem from '@/components/readOnlyDisplayFormItem';
 import { DataTypes, NumberFormats } from '@/interfaces/dataTypes';
@@ -14,14 +14,27 @@ import { asPropertiesArray, IDecimalFormatting, INumberFormatting, isDecimalForm
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
 import { getSettings } from './settingsForm';
 import { migratePrevStyles, migrateStyles } from '../_common-migrations/migrateStyles';
-import { getEventHandlers, customOnChangeValueEventHandler, addContextData } from '@/components/formDesigner/components/utils';
+import { customOnChangeValueEventHandler, addContextData, getAllEventHandlers } from '@/components/formDesigner/components/utils';
 import { defaultStyles } from './utils';
 import { useStyles } from './styles';
 import { InputNumber, InputNumberProps } from 'antd';
 import { ShaIcon } from '@/components/shaIcon';
 import { isPropertySettings } from '../_settings/utils/utils';
+import { useComponentApi } from '@/providers/componentApi/provider';
+import { NumberFieldApi } from '../../componentsApi/componentApi';
+
+import apiCode from "../../componentsApi/componentApi.ts?raw";
 
 const suffixStyle = { color: 'rgba(0,0,0,.45)' };
+
+export interface InputFocusOptions extends FocusOptions {
+  cursor?: 'start' | 'end' | 'all';
+}
+export interface InputNumberRef extends HTMLInputElement {
+  focus: (options?: InputFocusOptions) => void;
+  blur: () => void;
+  nativeElement: HTMLElement;
+}
 
 const NumberFieldComponent: NumberFieldComponentDefinition = {
   allowInherit: true,
@@ -35,12 +48,16 @@ const NumberFieldComponent: NumberFieldComponentDefinition = {
   dataTypeSupported: ({ dataType }) => dataType === DataTypes.number,
   calculateModel: (model, allData) => {
     return {
-      eventHandlers: { ...getEventHandlers(model, allData), ...customOnChangeValueEventHandler(model, allData) },
+      eventHandlers: { ...getAllEventHandlers(model, allData), ...customOnChangeValueEventHandler(model, allData) },
       executeCustomFormat: (value: unknown, code: string): string => executeScriptSync(code, addContextData(allData, { value })),
     };
   },
   Factory: ({ model, calculatedModel }) => {
     const [, forceRefresh] = useState({});
+
+    const componentApi = useComponentApi();
+    const inputRef = useRef<InputNumberRef>();
+    const focus = (): void => inputRef.current?.focus();
 
     const { styles } = useStyles({
       fontFamily: model.font?.type,
@@ -154,17 +171,20 @@ const NumberFieldComponent: NumberFieldComponentDefinition = {
             // force refresh because Antd InputNumber does not trigger render
             forceRefresh({});
           };
+
+          // ToDo: AS - move to the useEffect or optimize
+          componentApi?.updateApi<NumberFieldApi>(
+            {
+              componentName: model.componentName,
+              typeDefinition: { typeName: 'NumberFieldApi', files: [{ content: apiCode, fileName: 'apis/componentApi.ts' }] },
+              api: { value, focus },
+            },
+            [{ name: 'value', getter: () => value, setter: (val) => onChangeInternal(val) }],
+          );
+
           return model.readOnly
             ? <ReadOnlyDisplayFormItem type="number" value={getNumberFormat(value, getDataProperty(properties, model.propertyName, 'dataFormat'))} style={finalStyle} />
-            : (
-              <InputNumber
-                value={value}
-                {...inputProps}
-                style={{ ...model.allStyles.fullStyle }}
-                className={styles.numberField}
-                onChange={onChangeInternal}
-              />
-            );
+            : <InputNumber value={value} {...inputProps} style={model.allStyles.fullStyle} className={styles.numberField} onChange={onChangeInternal} ref={inputRef} />;
         }}
       </ConfigurableFormItem>
     );
