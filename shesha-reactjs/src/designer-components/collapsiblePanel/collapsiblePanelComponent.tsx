@@ -153,7 +153,7 @@ const CollapsiblePanelComponent: CollapsiblePanelComponentDefinition = {
           mobile: { ...newModel.mobile, overflow: prev.overflow || 'auto', headerStyles: defaultHeaderStyle },
         };
       })
-      .add<any>(10, migrateV9toV10),
+      .add<ICollapsiblePanelComponentProps>(10, migrateV9toV10),
   customContainerNames: ['header', 'content'],
 };
 

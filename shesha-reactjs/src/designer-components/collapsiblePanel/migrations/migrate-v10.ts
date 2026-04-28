@@ -1,5 +1,8 @@
 import { SettingsMigrationContext } from "@/interfaces";
 import { nanoid } from "@/utils/uuid";
+import { IConfigurableFormComponent } from "@/providers/form/models";
+import { IContainerComponentProps } from "@/designer-components/container/interfaces";
+import { ITextComponentProps } from "@/designer-components/text/models";
 import { ICollapsiblePanelComponentProps } from "../interfaces";
 
 export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: SettingsMigrationContext): ICollapsiblePanelComponentProps => {
@@ -11,7 +14,7 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
 
   // Skip if already migrated to the new structure
   const alreadyMigrated = header?.components?.some(
-    (c: any) => c.type === "container" && c.componentName === "headerLayout",
+    (c: IConfigurableFormComponent) => c.type === "container" && c.componentName === "headerLayout",
   );
 
   if (alreadyMigrated) {
@@ -22,21 +25,42 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
 
   // Case 1: hasCustomHeader=true -> preserve customHeader content as the header
   if (hasCustomHeader && customHeader) {
+    // Remove previous header subtree from flat structure
+    if (header?.id) {
+      const removeSubtree = (rootId: string): void => {
+        const childIds = context.flatStructure.componentRelations[rootId] ?? [];
+        childIds.forEach((childId) => {
+          removeSubtree(childId);
+          delete context.flatStructure.allComponents[childId];
+          delete context.flatStructure.componentRelations[childId];
+        });
+        delete context.flatStructure.allComponents[rootId];
+        delete context.flatStructure.componentRelations[rootId];
+      };
+      removeSubtree(header.id);
+    }
+
     model.header = customHeader;
 
-    // customHeader was removed from customContainerNames, so its children may not be in the flat structure.
-    // Ensure they are registered so componentsFlatStructureToTree can rebuild them.
+    // Recursively register customHeader components in flat structure
     if (customHeader.components?.length > 0) {
-      context.flatStructure.componentRelations[customHeader.id] = customHeader.components.map(
-        (c: any) => c.id,
-      );
-      customHeader.components.forEach((c: any) => {
-        context.flatStructure.allComponents[c.id] = {
-          ...context.flatStructure.allComponents[c.id],
-          ...c,
-          parentId: customHeader.id,
-        };
-      });
+      const registerComponents = (components: IConfigurableFormComponent[], parentId: string): void => {
+        context.flatStructure.componentRelations[parentId] = components.map((c) => c.id);
+        components.forEach((component) => {
+          context.flatStructure.allComponents[component.id] = {
+            ...context.flatStructure.allComponents[component.id],
+            ...component,
+            parentId,
+          };
+          const nested = (component as IConfigurableFormComponent & { components?: IConfigurableFormComponent[] }).components;
+          if (Array.isArray(nested) && nested.length > 0) {
+            registerComponents(nested, component.id);
+          } else {
+            context.flatStructure.componentRelations[component.id] = [];
+          }
+        });
+      };
+      registerComponents(customHeader.components, customHeader.id);
     } else {
       context.flatStructure.componentRelations[customHeader.id] = [];
     }
@@ -47,6 +71,7 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
     const headerLayoutId = nanoid();
     const labelTextId = nanoid();
     const extraAreaId = nanoid();
+    const clonedComponents = existingComponents.map((c) => ({ ...c, parentId: extraAreaId }));
 
     const labelText = {
       id: labelTextId,
@@ -70,7 +95,7 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
       italic: false,
       underline: false,
       level: 1,
-    } as any;
+    } satisfies ITextComponentProps;
 
     const extraArea = {
       id: extraAreaId,
@@ -84,8 +109,8 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
       hidden: false,
       isDynamic: false,
       direction: "horizontal",
-      components: existingComponents,
-    } as any;
+      components: clonedComponents,
+    } satisfies IContainerComponentProps;
 
     const headerLayout = {
       id: headerLayoutId,
@@ -102,7 +127,7 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
       justifyContent: "space-between",
       alignItems: "center",
       components: [labelText, extraArea],
-    } as any;
+    } satisfies IContainerComponentProps;
 
     model.header = {
       id: headerId,
@@ -117,15 +142,10 @@ export const migrateV9toV10 = (prev: ICollapsiblePanelComponentProps, context: S
     context.flatStructure.componentRelations[headerLayoutId] = [labelTextId, extraAreaId];
 
     // Migrate existing header components into the extra area
-    if (existingComponents.length > 0) {
-      context.flatStructure.componentRelations[extraAreaId] = existingComponents.map(
-        (c: any) => c.id,
-      );
-      existingComponents.forEach((c: any) => {
-        c.parentId = extraAreaId;
-        if (context.flatStructure.allComponents[c.id]) {
-          context.flatStructure.allComponents[c.id].parentId = extraAreaId;
-        }
+    if (clonedComponents.length > 0) {
+      context.flatStructure.componentRelations[extraAreaId] = clonedComponents.map((c) => c.id);
+      clonedComponents.forEach((c) => {
+        context.flatStructure.allComponents[c.id] = c;
       });
     } else {
       context.flatStructure.componentRelations[extraAreaId] = [];
