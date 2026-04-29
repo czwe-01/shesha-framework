@@ -141,6 +141,7 @@ export class FormDesignerInstance implements IFormDesignerInstance {
       formSettings: settings,
     });
     this.selectedComponentId = undefined;
+    this.activeSettingsTabKey = undefined;
     this.isDataModified = false;
     this.notifySubscribers(['markup', 'selection', 'history', 'data-modified']);
   };
@@ -364,8 +365,10 @@ export class FormDesignerInstance implements IFormDesignerInstance {
         componentRelations[component.parentId] = parentRelations;
       } else console.warn(`component ${payload.componentId} has no parent`);
 
-      if (this.selectedComponentId === payload.componentId)
+      if (this.selectedComponentId === payload.componentId) {
         this.selectedComponentId = undefined; // clear selection if we delete current component
+        this.activeSettingsTabKey = undefined;
+      }
       return {
         ...state,
         formFlatMarkup: {
@@ -424,6 +427,7 @@ export class FormDesignerInstance implements IFormDesignerInstance {
       };
 
       this.selectedComponentId = clone.id;
+      this.activeSettingsTabKey = undefined;
 
       return {
         ...state,
@@ -589,6 +593,7 @@ export class FormDesignerInstance implements IFormDesignerInstance {
       const newStructure = this.addComponentToFlatStructure(newFlatMarkup, newComponents, containerId, index);
 
       this.selectedComponentId = newComponents[0]?.id;
+      this.activeSettingsTabKey = undefined;
 
       return {
         ...state,
@@ -656,7 +661,9 @@ export class FormDesignerInstance implements IFormDesignerInstance {
   };
 
   setSelectedComponent = (id: string): void => {
+    if (this.selectedComponentId === id) return;
     this.selectedComponentId = id;
+    this.activeSettingsTabKey = undefined;
     this.notifySubscribers(['selection']);
   };
 
@@ -703,6 +710,7 @@ export class FormDesignerInstance implements IFormDesignerInstance {
       const newStructure = this.addComponentToFlatStructure(newFlatMarkup, [formComponent], containerId, index);
 
       this.selectedComponentId = formComponent.id;
+      this.activeSettingsTabKey = undefined;
 
       return {
         ...state,
