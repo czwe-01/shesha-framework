@@ -135,8 +135,8 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
 
     const persistedKey = formDesigner?.activeSettingsTabKey ?? localActiveTabKey;
 
-    // When searching, prefer first tab with visible components
-    if (searchQuery) {
+    // When searching, only auto-switch if the currently persisted tab is no longer visible
+    if (searchQuery && !newFilteredTabs.some((tab) => tab.key === persistedKey)) {
       const firstVisibleTab = newFilteredTabs.find((tab) =>
         Array.isArray(tab.components) ? tab.components.length > 0 : !!tab.components,
       );
