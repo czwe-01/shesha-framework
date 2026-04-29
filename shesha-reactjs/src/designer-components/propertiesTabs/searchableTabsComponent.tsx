@@ -64,8 +64,8 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
   };
 
   const handleTabChange = useCallback((newActiveKey: string): void => {
-      formDesigner.setActiveSettingsTabKey(newActiveKey);
-      setLocalActiveTabKey(newActiveKey);
+    formDesigner?.setActiveSettingsTabKey(newActiveKey);
+    setLocalActiveTabKey(newActiveKey);
   }, [formDesigner]);
 
   const isComponentHidden = (component: IConfigurableFormComponent & { inputs?: IConfigurableFormComponent[] }): boolean => {
