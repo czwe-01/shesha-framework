@@ -137,7 +137,7 @@ export const Tabs: FC<Omit<IWizardComponentProps, 'size'>> = ({ form, ...model }
             <Steps
               type={wizardType}
               current={current}
-              items={steps.map((step) => ({ ...step, style: {} }))}
+              items={steps.map(({ bodyContent: _, ...step }) => ({ ...step, style: {} }))}
               size={model['size']}
               orientation={direction}
               titlePlacement={labelPlacement}
