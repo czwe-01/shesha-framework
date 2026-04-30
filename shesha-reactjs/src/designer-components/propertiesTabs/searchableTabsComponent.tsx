@@ -17,13 +17,13 @@ interface SearchableTabsProps {
 
 const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
   const { tabs } = model;
+  const formDesigner = useFormDesignerOrUndefined();
   const [searchQuery, setSearchQuery] = useState('');
-  const [localActiveTabKey, setLocalActiveTabKey] = useState<string>('1');
+  const [localActiveTabKey, setLocalActiveTabKey] = useState<string>(formDesigner?.activeSettingsTabKey ?? '1');
   const { styles } = useStyles();
 
   const formState = useFormStateOrUndefined();
   const formActions = useFormActionsOrUndefined();
-  const formDesigner = useFormDesignerOrUndefined();
 
   useShaFormDataUpdate();
 
@@ -135,6 +135,7 @@ const SearchableTabs: React.FC<SearchableTabsProps> = ({ model }) => {
 
     const persistedKey = formDesigner?.activeSettingsTabKey ?? localActiveTabKey;
 
+    console.log("KEYS ::: ", formDesigner.activeSettingsTabKey, localActiveTabKey);
     // When searching, only auto-switch if the currently persisted tab is no longer visible
     if (searchQuery && !newFilteredTabs.some((tab) => tab.key === persistedKey)) {
       const firstVisibleTab = newFilteredTabs.find((tab) =>
