@@ -83,7 +83,7 @@ export interface IComponentValidationRules {
   validator?: string;
 }
 
-export type EditMode = 'editable' | 'readOnly' | 'inherited' | 'default' | boolean;
+export type EditMode = 'editable' | 'readOnly' | 'inherited' | boolean;
 export type PositionType = 'relative' | 'fixed';
 export interface IStyleType {
   border?: IBorderValue | undefined;

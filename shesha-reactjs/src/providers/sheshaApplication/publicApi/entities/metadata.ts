@@ -187,12 +187,18 @@ const entitiesConfigurationToTypeDefinition = async (configurations: EntityConfi
         if (typeDef) {
           typesImporter.import(typeDef);
 
-          if (!isDefined(typeDef.metadata))
-            throw new Error(`Metadata is not defined for entity '${prop.entityModule}:${prop.entityType}'`);
+          if (!isDefined(typeDef.metadata)) {
+            // throw new Error(`Metadata is not defined for entity '${prop.entityModule}:${prop.entityType}'`);
+            console.error(`Metadata is not defined for entity '${prop.entityModule}:${prop.entityType}'`);
+            continue;
+          }
 
           const idType = getEntityIdJsType(typeDef.metadata);
-          if (!idType)
-            throw new Error(`Failed to find identifier type for entity '${prop.entityModule}:${prop.entityType}'`);
+          if (!idType) {
+            // throw new Error(`Failed to find identifier type for entity '${prop.entityModule}:${prop.entityType}'`);
+            console.error(`Failed to find identifier type for entity '${prop.entityModule}:${prop.entityType}'`);
+            continue;
+          }
 
           if (prop.description)
             sb.append(`/** ${prop.description} */`);
