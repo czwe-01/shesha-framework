@@ -76,7 +76,7 @@ export const ConfigurableFormItemLive: FC<IConfigurableFormItemProps> = ({
       marginRight: addPx(marginRight, allData),
       marginLeft: addPx(marginLeft, allData),
     },
-  }), [allData, className, getFormData, hideLabel, initialValue, layout?.labelCol, layout?.wrapperCol, marginBottom, marginLeft, marginRight, marginTop, model, propName, styles.formItem, valuePropName]);
+  }), [allData, className, getFormData, hideLabel, initialValue, layout?.labelCol, layout?.wrapperCol, marginBottom, marginLeft, marginRight, marginTop, model, propName, styles.formItem, valuePropName, isVertical]);
 
   if (hidden) return null;
 
