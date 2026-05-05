@@ -1,5 +1,5 @@
 import React from 'react';
-import { ConfigurableForm } from '@/components';
+import { ConfigurableForm } from '@/components/configurableForm';
 import { FormMarkup } from '@/providers/form/models';
 import { useShaFormRef } from '@/providers/form/providers/shaFormProvider';
 
@@ -18,7 +18,7 @@ export function GenericSettingsEditor<TModel extends object = object>({
   markup,
   onValuesChange,
   readOnly = false,
-}: IProps<TModel>): JSX.Element {
+}: IProps<TModel>): React.JSX.Element {
   const formRef = useShaFormRef();
 
   return (

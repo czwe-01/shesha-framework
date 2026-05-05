@@ -6,7 +6,6 @@ import { useTheme } from '@/providers';
 import { removeUndefinedProps } from '@/utils/object';
 import { SettingInput } from '../settingsInput/settingsInput';
 import { gradientDirectionOptions } from '../_settings/utils/background/utils';
-import { InputRow } from '../settingsInputRow';
 import { ReactElement } from 'react-markdown/lib/react-markdown';
 
 type MultiColorInputProps = {
@@ -37,7 +36,6 @@ export const MultiColorInput = ({ value = {}, onChange, readOnly, propertyName }
             <Tag
               key={id}
               style={{ backgroundColor: '#fff', padding: 0, margin: 0, display: 'flex', flexDirection: 'row' }}
-              bordered={false}
               closable={id !== '1' && id !== '2'}
               onClose={() => {
                 onChange({ ...value, [id]: undefined });
@@ -70,18 +68,15 @@ export const MultiColorInput = ({ value = {}, onChange, readOnly, propertyName }
         >
         </Button>
       </Row>
-
-      <InputRow inline={true} readOnly={readOnly}>
-        <SettingInput
-          id={directionInputId}
-          propertyName={propertyName.replace('gradient.colors', 'gradient.direction')}
-          label="Direction"
-          hideLabel={true}
-          width="120px"
-          type="dropdown"
-          dropdownOptions={gradientDirectionOptions}
-        />
-      </InputRow>
+      <SettingInput
+        id={directionInputId}
+        propertyName={propertyName.replace('gradient.colors', 'gradient.direction')}
+        label="Direction"
+        hideLabel={true}
+        width="120px"
+        type="dropdown"
+        dropdownOptions={gradientDirectionOptions}
+      />
     </>
   );
 };

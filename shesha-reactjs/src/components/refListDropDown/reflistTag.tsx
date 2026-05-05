@@ -2,7 +2,7 @@ import { getTagStyle } from '@/utils/style';
 import convertCssColorNameToHex from 'convert-css-color-name-to-hex';
 import { Tag, Tooltip, TooltipProps } from 'antd';
 import React, { CSSProperties } from 'react';
-import ShaIcon, { IconType } from '../shaIcon';
+import { ShaIcon, IconType } from '../shaIcon';
 
 interface IReflistTagProps {
   value?: string | number;
@@ -16,7 +16,7 @@ interface IReflistTagProps {
   label?: string | React.ReactNode;
   placement?: TooltipProps['placement'];
 }
-function ReflistTag({ value, description, color, icon, showIcon, tagStyle, solidColor, showItemName, label, placement = 'right' }: IReflistTagProps): JSX.Element {
+function ReflistTag({ value, description, color, icon, showIcon, tagStyle, solidColor, showItemName, label, placement = 'right' }: IReflistTagProps): React.JSX.Element {
   const memoizedColor = !solidColor
     ? color?.toLowerCase()
     : convertCssColorNameToHex(color ?? '');

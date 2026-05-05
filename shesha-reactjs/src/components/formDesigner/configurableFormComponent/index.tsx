@@ -3,22 +3,21 @@ import DragWrapper from './dragWrapper';
 import FormComponent from '../formComponent';
 import React, {
   FC,
-  MutableRefObject,
   memo,
   useMemo,
   useRef,
 } from 'react';
 import { createPortal } from 'react-dom';
 import ValidationIcon from './validationIcon';
-import { DataContextTopLevels, EditMode, IComponentModelProps, IConfigurableFormComponent, useCanvas } from '@/providers';
+import { EditMode, IComponentModelProps, IConfigurableFormComponent, useCanvas } from '@/providers';
 import {
   EditOutlined,
   EyeInvisibleOutlined,
   FunctionOutlined,
   StopOutlined,
 } from '@ant-design/icons';
-import { getActualPropertyValue, getStyle, useAvailableConstantsData } from '@/providers/form/utils';
-import { isPropertySettings } from '@/designer-components/_settings/utils';
+import { getStyle } from '@/providers/form/utils';
+import { isPropertySettings } from '@/designer-components/_settings/utils/utils';
 import { Show } from '@/components/show';
 import { Tooltip } from 'antd';
 import { ShaForm, useIsDrawingForm } from '@/providers/form';
@@ -37,7 +36,7 @@ export interface IConfigurableFormComponentDesignerProps {
   componentModel: IComponentModelProps;
   selectedComponentId?: string;
   readOnly?: boolean;
-  settingsPanelRef?: MutableRefObject<HTMLElement>;
+  settingsPanelElement?: HTMLDivElement | null;
   hidden?: boolean;
   componentEditMode?: EditMode;
 }
@@ -45,9 +44,7 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
   componentModel,
   selectedComponentId,
   readOnly,
-  settingsPanelRef,
-  hidden,
-  componentEditMode,
+  settingsPanelElement,
 }) => {
   const { styles } = useStyles();
   const getToolboxComponent = useFormDesignerComponentGetter();
@@ -125,7 +122,7 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
   // when typing in the properties panel. The portal is created once and the component
   // receives updates through its own internal state management.
   const settingsEditor = useMemo(() => {
-    const renderRequired = isSelected && settingsPanelRef?.current;
+    const renderRequired = isSelected && settingsPanelElement;
 
     if (!renderRequired)
       return null;
@@ -137,15 +134,15 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
         onMouseOut={(e) => e.stopPropagation()}
       >
         <ComponentProperties
-          componentModel={fullComponentModel}
+          componentModel={componentModel}
           readOnly={readOnly}
           toolboxComponent={component}
         />
       </div>
-    ), settingsPanelRef.current, "propertiesPanel");
+    ), settingsPanelElement, "propertiesPanel");
 
     return result;
-  }, [isSelected, settingsPanelRef, readOnly, component]);
+  }, [isSelected, settingsPanelElement, readOnly, component]);
 
   // Extract margins from ORIGINAL component styling (both stylingBox and custom styles)
   // Custom style margins take precedence over stylingBox margins
@@ -268,19 +265,19 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
           </Tooltip>
         </Show>
 
-        <Show when={!hiddenFx && hidden}>
+        <Show when={!hiddenFx && (componentModel.hidden === true || componentModel.visible === false)}>
           <Tooltip title="This component is hidden. It's now showing because we're in a designer mode">
             <EyeInvisibleOutlined />
           </Tooltip>
         </Show>
 
-        <Show when={!componentEditModeFx && (componentEditMode === 'readOnly' || componentEditMode === false)}>
+        <Show when={!componentEditModeFx && (componentModel.editMode === 'readOnly' || componentModel.editMode === false)}>
           <Tooltip title="This component is always in Read only mode. It's now enabled because we're in a designer mode">
             <StopOutlined />
           </Tooltip>
         </Show>
 
-        <Show when={!componentEditModeFx && componentEditMode === 'editable'}>
+        <Show when={!componentEditModeFx && componentModel.editMode === 'editable'}>
           <Tooltip title="This component is always in Edit/Action mode">
             <EditOutlined />
           </Tooltip>
@@ -304,29 +301,15 @@ const ConfigurableFormComponentDesignerInner: FC<IConfigurableFormComponentDesig
 const ConfigurableFormComponentDesignerMemo = memo(ConfigurableFormComponentDesignerInner);
 
 export const ConfigurableFormComponentDesigner: FC<IConfigurableFormComponentDesignerProps> = (props) => {
-  const allData = useAvailableConstantsData({ topContextId: DataContextTopLevels.All });
-  const { settingsPanelRef } = useFormDesigner();
+  const { settingsPanelElement } = useFormDesigner();
   const selectedComponentId = useFormDesignerSelectedComponentId();
   const readOnly = useFormDesignerReadOnly();
-  const isEditMode = (value: unknown): value is EditMode =>
-    value === 'editable' || value === 'readOnly' || value === 'inherited' || typeof value === 'boolean';
-
-  const { hidden, componentEditMode } = useMemo(() => {
-    const resolvedHidden = getActualPropertyValue(props.componentModel, allData, 'hidden')?.hidden;
-    const resolvedEditMode = getActualPropertyValue(props.componentModel, allData, 'editMode')?.editMode;
-
-    return {
-      hidden: resolvedHidden,
-      componentEditMode: isEditMode(resolvedEditMode) ? resolvedEditMode : undefined,
-    };
-  }, [props.componentModel, allData]);
-
-  return <ConfigurableFormComponentDesignerMemo {...props} {...{ selectedComponentId, readOnly, settingsPanelRef, hidden, componentEditMode }} />;
+  return <ConfigurableFormComponentDesignerMemo {...props} {...{ selectedComponentId, readOnly, settingsPanelElement }} />;
 };
 
 export interface IConfigurableFormComponentProps {
   id: string;
-  model?: IConfigurableFormComponent;
+  model?: IConfigurableFormComponent | undefined;
 }
 
 export const ConfigurableFormComponent: FC<IConfigurableFormComponentProps> = ({ id, model }) => {

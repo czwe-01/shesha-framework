@@ -1,6 +1,5 @@
 import { getDimensionsStyle } from '@/designer-components/_settings/utils/dimensions/utils';
 import { getFontStyle } from '@/designer-components/_settings/utils/font/utils';
-import { ConfigurableForm, ShaIcon, useAvailableConstantsData, useConfigurableActionDispatcher } from '@/index';
 import { useRefListItemGroupConfigurator } from '@/components/refListSelectorDisplay/provider';
 import { LeftOutlined, MoreOutlined, PlusOutlined, RightOutlined, SettingOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Flex, MenuProps, Popconfirm } from 'antd';
@@ -8,6 +7,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { useStyles } from '../styles/styles';
 import { useKanbanActions } from '../utils';
+import { useAvailableConstantsData } from '@/providers/form/utils';
+import { useConfigurableActionDispatcher } from '@/providers/configurableActionsDispatcher';
+import { ShaIcon } from '@/components/shaIcon';
+import { ConfigurableForm } from '@/components/configurableForm';
 
 interface KanbanColumnProps {
   column: any;
@@ -61,7 +64,10 @@ const RenderColumn: React.FC<KanbanColumnProps> = ({
         ...userSettings,
         [column.itemValue]: newCollapseState,
       };
-      updateUserSettings(updatedSettings, props.componentName);
+      updateUserSettings(updatedSettings, props.componentName).catch((error) => {
+        console.error('Failed to update user settings', error);
+        throw error;
+      });
     } catch (error) {
       console.error('Error updating collapse state:', error);
       setIsCollapsed(!isCollapsed);
@@ -107,7 +113,7 @@ const RenderColumn: React.FC<KanbanColumnProps> = ({
         };
 
         // Perform the action
-        executeAction({
+        void executeAction({
           actionConfiguration: targetColumn?.actionConfiguration,
           argumentsEvaluationContext: evaluationContext,
           success: () => {
@@ -145,7 +151,10 @@ const RenderColumn: React.FC<KanbanColumnProps> = ({
         if (task.id === taskId) {
           const updatedTask = { ...task, [props.groupingProperty]: newColumnValue };
           const payload = { id: task.id, [props.groupingProperty]: newColumnValue };
-          updateKanban(payload, urls.updateUrl);
+          updateKanban(payload, urls.updateUrl).catch((error) => {
+            console.error('Failed to update item', error);
+            throw error;
+          });
           return updatedTask;
         }
         return task;

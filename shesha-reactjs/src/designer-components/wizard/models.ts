@@ -1,6 +1,17 @@
 import { IConfigurableFormComponent, IStyleType } from '@/interfaces';
 import { IConfigurableActionConfiguration } from '@/interfaces/configurableAction';
-import { FormInstance, StepProps } from 'antd';
+import { FormInstance } from 'antd';
+import { Steps } from 'antd';
+import { ComponentProps } from 'react';
+
+type StepsProps = ComponentProps<typeof Steps>;
+type StepProps = StepsProps['items'][number];
+type StepStatus = 'wait' | 'process' | 'finish' | 'error';
+
+export interface IStepFooterContainer {
+  id: string;
+  components?: IConfigurableFormComponent[];
+}
 
 export interface IWizardStepProps extends IStyleType {
   id: string;
@@ -10,7 +21,7 @@ export interface IWizardStepProps extends IStyleType {
   subTitle: string;
   description: string;
   allowCancel?: boolean;
-  status?: StepProps['status'];
+  status?: StepStatus;
 
   label?: string;
   name?: string;
@@ -28,6 +39,7 @@ export interface IWizardStepProps extends IStyleType {
 
   showBackButton?: boolean;
   showDoneButton?: boolean;
+  hasCustomFooter?: boolean;
 
   cancelButtonActionConfiguration?: IConfigurableActionConfiguration;
   nextButtonActionConfiguration?: IConfigurableActionConfiguration;
@@ -39,6 +51,7 @@ export interface IWizardStepProps extends IStyleType {
   permissions?: string[];
   components?: IConfigurableFormComponent[];
   childItems?: IWizardStepProps[];
+  stepFooter?: IStepFooterContainer;
 
   onBeforeRenderActionConfiguration?: IConfigurableActionConfiguration;
 
@@ -62,10 +75,12 @@ export interface IWizardSequence {
 }
 
 export interface IStepProps extends StepProps {
-  content?: JSX.Element;
+  content?: string;
+  bodyContent?: React.JSX.Element;
 }
 
-export interface IWizardComponentProps extends Omit<IConfigurableFormComponent, 'size'>, Pick<StepProps, 'status'>, Omit<IStyleType, 'size'> {
+export interface IWizardComponentProps extends Omit<IConfigurableFormComponent, 'size'>, Omit<IStyleType, 'size'> {
+  status?: StepStatus;
   steps: IWizardStepProps[];
   wizardType?: 'default' | 'navigation';
   form?: FormInstance<any>;

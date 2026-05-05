@@ -1,4 +1,3 @@
-import { ConfigurableForm, DataTypes, pickStyleFromModel, StyleBoxValue, useDataTableStore, useFormState, useMetadataDispatcher } from '@/index';
 import { useRefListItemGroupConfigurator } from '@/components/refListSelectorDisplay/provider';
 import { App, Flex, Form, Modal } from 'antd';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -9,7 +8,13 @@ import { useKanbanActions } from './utils';
 import { addPx } from '@/utils/style';
 import { getOverflowStyle } from '@/designer-components/_settings/utils/overflow/util';
 import { jsonSafeParse } from '@/utils/object';
-import { useAvailableConstantsData } from '@/providers/form/utils';
+import { pickStyleFromModel, useAvailableConstantsData } from '@/providers/form/utils';
+import { useDataTableStore } from '@/providers/dataTable/hooks';
+import { useFormState } from '@/providers/form';
+import { useMetadataDispatcher } from '@/providers/metadataDispatcher/provider';
+import { StyleBoxValue } from '@/providers/form/models';
+import { DataTypes } from '@/interfaces/dataTypes';
+import { ConfigurableForm } from '../configurableForm';
 
 const KanbanReactComponent: React.FC<IKanbanProps> = (props) => {
   const { gap, groupingProperty, createFormId, items, componentName, editFormId } = props;
@@ -46,6 +51,9 @@ const KanbanReactComponent: React.FC<IKanbanProps> = (props) => {
             postUrl: create?.url,
           });
         }
+      }).catch((error) => {
+        console.error('Failed to fetch metadata', error);
+        throw error;
       });
 
       const filteredTasks = tableData.filter((item: any) => item?.[groupingProperty]);
@@ -77,7 +85,10 @@ const KanbanReactComponent: React.FC<IKanbanProps> = (props) => {
       }
     };
 
-    initializeSettings();
+    initializeSettings().catch((error) => {
+      console.error('Failed to initialize settings', error);
+      throw error;
+    });
   }, []);
 
   useEffect(() => {
@@ -122,7 +133,10 @@ const KanbanReactComponent: React.FC<IKanbanProps> = (props) => {
   const handleDelete = (id: string): void => {
     const updatedTasks = tasks.filter((task) => task.id !== id);
     setTasks(updatedTasks);
-    deleteKanban(id, urls.deleteUrl);
+    deleteKanban(id, urls.deleteUrl).catch((error) => {
+      console.error('Failed to delete item', error);
+      throw error;
+    });
   };
 
   const handleCreate = (): void => {

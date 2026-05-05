@@ -7,7 +7,7 @@ import { ColorPickerWrapper } from "./colorPicker";
 import { DropDownWrapper } from "./dropDown";
 import { CustomDropdownWrapper } from "./customDropdown";
 import { RadioWrapper } from "./radio";
-import { SwithcWrapper } from "./switch";
+import { SwitchWrapper } from "./switch";
 import { NumberFieldWrapper } from "./numberField";
 import { TextFieldWrapper } from "./textField";
 import { TextAreaWrapper } from "./textArea";
@@ -43,6 +43,8 @@ import { KeyInformationBarColumnsWrapper } from "./keyInformationBarColumns";
 import { SizableColumnsConfigWrapper } from "./sizableColumnsConfig";
 import { LayerSelectorSettingsModalWrapper } from "./layerSelectorSettingsModal";
 import { ThreeStateSwitchWrapper } from "./threeStateSwitch";
+import { SectionSeparatorWrapper } from "./sectionSeparator";
+import { UnwrapCodeEvaluators } from "@/providers/form/models";
 
 
 type InputType = ISettingsInputProps['type'];
@@ -50,7 +52,7 @@ type InputType = ISettingsInputProps['type'];
 export type EditorComponent = FC<ISettingsInputProps>;
 
 type EditorDictionary = {
-  [K in InputType]: FC<BaseInputProps & { type: K }>;
+  [K in InputType]: FC<UnwrapCodeEvaluators<BaseInputProps & { type: K }>> | FC<BaseInputProps & { type: K }>;
 };
 
 export const editorRegistry: EditorDictionary = {
@@ -62,7 +64,7 @@ export const editorRegistry: EditorDictionary = {
   dropdown: DropDownWrapper,
   customDropdown: CustomDropdownWrapper,
   radio: RadioWrapper,
-  switch: SwithcWrapper,
+  switch: SwitchWrapper,
   numberField: NumberFieldWrapper,
   textField: TextFieldWrapper,
   textArea: TextAreaWrapper,
@@ -100,4 +102,5 @@ export const editorRegistry: EditorDictionary = {
   customLabelValueEditor: CustomLabelValueEditorWrapper,
   keyInformationBarColumnsList: KeyInformationBarColumnsWrapper,
   sizableColumnsConfig: SizableColumnsConfigWrapper,
+  sectionSeparator: SectionSeparatorWrapper,
 };

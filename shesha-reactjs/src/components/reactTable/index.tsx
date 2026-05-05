@@ -26,7 +26,7 @@ import { ItemInterface, ReactSortable } from 'react-sortablejs';
 import { IConfigurableActionConfiguration, useConfigurableActionDispatcher, useDataTableStore, useShaFormInstanceOrUndefined } from '@/providers';
 import { useAvailableConstantsData } from '@/providers/form/utils';
 import { useStyles, useMainStyles } from './styles/styles';
-import { IAnchoredColumnProps } from '@/providers/dataTable/interfaces';
+import { IAnchoredColumnProps, ITableRowData } from '@/providers/dataTable/interfaces';
 import { DataTableColumn } from '../dataTable/interfaces';
 import { EmptyState } from '..';
 import { ErrorDetails } from '@/utils/configurationFramework/actions';
@@ -43,8 +43,7 @@ interface IReactTableState {
 export const ReactTable: FC<IReactTableProps> = ({
   columns = [],
   data = [],
-  useMultiSelect = false,
-  selectionMode,
+  selectionMode = "none",
   loading = false,
   defaultSorting = [],
   defaultCanSort = false,
@@ -115,6 +114,7 @@ export const ReactTable: FC<IReactTableProps> = ({
   rowBorder,
   rowBorderStyle,
   boxShadow,
+  dimensions,
   sortableIndicatorColor,
   striped,
   cellBorderColor,
@@ -136,7 +136,7 @@ export const ReactTable: FC<IReactTableProps> = ({
     allRows: data,
     allColumns: columns,
   });
-  const mode = selectionMode ?? (useMultiSelect ? 'multiple' : 'single');
+  const mode = selectionMode;
   const multiSelect = mode === 'multiple';
 
   const { notification } = App.useApp();
@@ -156,6 +156,7 @@ export const ReactTable: FC<IReactTableProps> = ({
     rowHoverBackgroundColor,
     rowSelectedBackgroundColor,
     border,
+    dimensions,
     backgroundColor,
     headerFontFamily,
     headerFontSize,
@@ -213,7 +214,7 @@ export const ReactTable: FC<IReactTableProps> = ({
       ? { ...allData, row: rowData, rowIndex, selectedRow: overrideSelectedRow }
       : { ...allData, row: rowData, rowIndex };
 
-    executeAction({
+    void executeAction({
       actionConfiguration: actionConfig,
       argumentsEvaluationContext: context,
     });
@@ -227,15 +228,15 @@ export const ReactTable: FC<IReactTableProps> = ({
     [],
   );
 
-  const onChangeHeader = (callback: (...args: any) => void, rows: Row<any>[] | Row) => (e: ChangeEvent) => {
+  const onChangeHeader = (callback: (...args: any) => void, rows: Row<ITableRowData>[] | Row<ITableRowData>) => (e: ChangeEvent) => {
     callback(e);
 
     if (onMultiRowSelect) {
       const isSelected = !!(e.target as any)?.checked;
-      let selectedRows: Row<any>[] | Row;
+      let selectedRows: Row<ITableRowData>[] | Row<ITableRowData>;
 
       if (Array.isArray(rows)) {
-        selectedRows = getPlainValue(rows).map((i) => ({ ...i, isSelected }));
+        selectedRows = getPlainValue(rows).map<Row<ITableRowData>>((i) => ({ ...i, isSelected }));
       } else {
         selectedRows = { ...getPlainValue(rows), isSelected };
       }
@@ -348,7 +349,7 @@ export const ReactTable: FC<IReactTableProps> = ({
     columns: tableColumns,
     toggleRowSelected,
     toggleAllRowsSelected,
-  } = useTable(
+  } = useTable<ITableRowData>(
     {
       columns: preparedColumns,
       data: allRows,
@@ -549,7 +550,7 @@ export const ReactTable: FC<IReactTableProps> = ({
         selectedRow: selectedRow || rowData,
       };
 
-      executeAction({
+      void executeAction({
         actionConfiguration: onRowDoubleClick as IConfigurableActionConfiguration,
         argumentsEvaluationContext: evaluationContext,
       });
@@ -567,7 +568,7 @@ export const ReactTable: FC<IReactTableProps> = ({
 
   const Row = useMemo(() => (allowReordering ? SortableRow : TableRow), [allowReordering]);
 
-  const renderNewRowEditor = (): JSX.Element => (
+  const renderNewRowEditor = (): React.JSX.Element => (
     <NewTableRowEditor
       columns={tableColumns}
       creater={createAction}
@@ -595,7 +596,7 @@ export const ReactTable: FC<IReactTableProps> = ({
     return result;
   }, [containerStyle, minHeight, maxHeight, freezeHeaders]);
 
-  const renderExpandedContentView = (cellRef): JSX.Element => {
+  const renderExpandedContentView = (cellRef): React.JSX.Element => {
     const cellRect = cellRef?.current?.getBoundingClientRect();
 
     const getSmartPosition = (): { top: number; left: number } => {
@@ -696,7 +697,7 @@ export const ReactTable: FC<IReactTableProps> = ({
     );
   };
 
-  const renderRow = (row: Row<any>, rowIndex: number): JSX.Element => {
+  const renderRow = (row: Row<any>, rowIndex: number): React.JSX.Element => {
     const id = row.original?.id;
     return (
       <Row

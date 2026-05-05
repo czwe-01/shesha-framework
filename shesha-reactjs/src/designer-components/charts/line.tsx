@@ -1,5 +1,5 @@
 import React from 'react';
-import { ConfigurableFormItem } from '@/components';
+import { ConfigurableFormItem } from '@/components/formDesigner/components/formItem';
 import { validateConfigurableComponentSettings } from '@/formDesignerUtils';
 import { IToolboxComponent } from '@/interfaces';
 import { LineChartOutlined } from '@ant-design/icons';
@@ -56,7 +56,7 @@ const LineChartComponent: IToolboxComponent<IChartProps> = {
         <ConfigurableFormItem model={model} className={styles.formItem}>
           <Alert
             showIcon
-            message="Error evaluating filters"
+            title="Error evaluating filters"
             description={filterError}
             type="error"
             style={{ margin: '16px' }}

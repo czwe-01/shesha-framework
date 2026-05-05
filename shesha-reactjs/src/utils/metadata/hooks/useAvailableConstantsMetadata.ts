@@ -15,10 +15,12 @@ const ALL_STANDARD_CONSTANTS = [
   SheshaConstants.pageContext,
   SheshaConstants.http,
   SheshaConstants.message,
+  SheshaConstants.modal,
   SheshaConstants.moment,
   SheshaConstants.fileSaver,
   SheshaConstants.form,
   SheshaConstants.formData,
+  SheshaConstants.components,
 ];
 
 export interface AvailableConstantsArgs {
@@ -43,12 +45,13 @@ export const useAvailableConstantsMetadata = ({ addGlobalConstants, onBuild, sta
 
     const meta = objectBuilder.build();
 
-    if (addGlobalConstants && globalProps && isPropertiesArray(meta.properties)) {
+    if (addGlobalConstants && isPropertiesArray(meta.properties)) {
       meta.properties.push(...globalProps);
     }
 
     return meta;
-  }, [addGlobalConstants, globalProps]);
+    // TODO (performance): test re-renders and optimize if required
+  }, [addGlobalConstants, globalProps, onBuild, metadataBuilderFactory, standardConstants]);
 
   return response;
 };

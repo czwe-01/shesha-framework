@@ -54,9 +54,12 @@ export type EntityTypeAutocompleteType = 'All' | 'Entity' | 'JsonEntity';
 
 interface IEntityTypeAutocompleteProps {
   value?: EntityIdentifier;
+  placeholder?: string;
   baseModel?: EntityIdentifier;
   readOnly?: boolean;
   onChange?: (value: EntityIdentifier | null) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   type?: EntityTypeAutocompleteType;
   size?: SizeType;
 }
@@ -94,12 +97,12 @@ const getListFetcherQueryParams = (
     term: term ?? undefined,
     selectedValue: typeof value === 'string'
       ? value
-      : value?.module && value?.name
+      : value?.name
         ? getEntityIdentifier(value)
         : undefined,
     baseModel: typeof baseModel === 'string'
       ? baseModel
-      : baseModel?.module && baseModel?.name
+      : baseModel?.name
         ? getEntityIdentifier(baseModel)
         : undefined,
   };
@@ -108,9 +111,12 @@ const getListFetcherQueryParams = (
 export const EntityTypeAutocomplete: FC<IEntityTypeAutocompleteProps> = (props) => {
   const {
     value,
+    placeholder,
     readOnly,
     size,
     onChange,
+    onFocus,
+    onBlur,
     type = 'All',
     baseModel,
   } = props;
@@ -126,7 +132,11 @@ export const EntityTypeAutocomplete: FC<IEntityTypeAutocompleteProps> = (props) 
 
   const debouncedFetchItems = useDebouncedCallback<(term?: string) => void>(
     (term?: string) => {
-      listFetcher.refetch({ queryParams: getListFetcherQueryParams(type, term, selectedItem.value ?? value, baseModel) });
+      listFetcher.refetch({ queryParams: getListFetcherQueryParams(type, term, selectedItem.value ?? value, baseModel) })
+        .catch((error) => {
+          console.error('Failed to init form', error);
+          throw error;
+        });
     },
     // delay in ms
     100,
@@ -141,11 +151,17 @@ export const EntityTypeAutocomplete: FC<IEntityTypeAutocompleteProps> = (props) 
         // set the selected item
         setSelectedItem({ value: value, key: getDisplayText(foundItem), item: foundItem });
       } else {
-        // fetch the item
-        debouncedFetchItems();
+        setSelectedItem({});
+        // Fetch directly with the new value to avoid selectedItem.value being stale in debouncedFetchItems
+        listFetcher
+          .refetch({ queryParams: getListFetcherQueryParams(type, undefined, value, baseModel) })
+          .catch((error) => {
+            console.error('Failed to fetch entity type', error);
+            throw error;
+          });
       }
     }
-  }, [value]);
+  }, [value, type, baseModel]);
 
   useEffect(() => {
     // If value exists and has changed
@@ -176,8 +192,9 @@ export const EntityTypeAutocomplete: FC<IEntityTypeAutocompleteProps> = (props) 
     }
   };
 
-  const onFocus = (): void => {
+  const onFocusHandler = (): void => {
     debouncedFetchItems();
+    onFocus?.();
   };
 
   const fetchedOptions = useMemo<IOption[]>(() => {
@@ -220,7 +237,7 @@ export const EntityTypeAutocomplete: FC<IEntityTypeAutocompleteProps> = (props) 
   }, [fetchedItems]);
 
   const loading = listFetcher.loading;
-  const loadingInitialItem = loading && Boolean(value) && !selectedItem;
+  const loadingInitialItem = loading && Boolean(value) && !selectedItem?.key;
 
   return (
     <Select<string, IOption>
@@ -228,12 +245,12 @@ export const EntityTypeAutocomplete: FC<IEntityTypeAutocompleteProps> = (props) 
       notFoundContent={loading ? <Spin /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No matches" />}
       style={{ width: '100%' }}
       options={fetchedOptions}
-      showSearch={true}
-      onSearch={onSearch}
+      showSearch={{ onSearch: onSearch }}
       onChange={onSelect}
-      onFocus={onFocus}
+      onFocus={onFocusHandler}
+      onBlur={onBlur}
       onClear={onClear}
-      placeholder={loadingInitialItem ? 'Loading...' : 'Type to search'}
+      placeholder={loadingInitialItem ? 'Loading...' : placeholder ?? 'Type to search'}
       disabled={loadingInitialItem || readOnly}
       value={selectedItem?.key ??
         (typeof value === 'string'

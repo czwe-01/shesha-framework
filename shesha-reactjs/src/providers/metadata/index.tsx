@@ -14,9 +14,10 @@ import metadataReducer from './reducer';
 import camelcase from 'camelcase';
 import { IEntityTypeIdentifier } from '../sheshaApplication/publicApi/entities/models';
 import { isEntityTypeIdEmpty } from '../metadataDispatcher/entities/utils';
+import { isDefined, isNullOrWhiteSpace } from '@/utils/nullables';
 
 export interface IMetadataProviderProps {
-  id?: string;
+  id?: string | undefined;
   modelType: string | IEntityTypeIdentifier;
   dataType?: MetadataType;
 }
@@ -38,6 +39,8 @@ const MetadataProvider: FC<PropsWithChildren<IMetadataProviderProps>> = ({ id = 
     if (!isEntityTypeIdEmpty(modelType)) {
       getMetadata({ modelType, dataType }).then((meta) => {
         dispatch(setMetadataAction({ metadata: meta, dataType, modelType }));
+      }).catch((error) => {
+        console.error('Failed to fetch metadata', error);
       });
     }
   }, [modelType, dataType, getMetadata, dispatch]);
@@ -67,10 +70,13 @@ const useMetadata = (require: boolean): IMetadataContext | undefined => {
   return context;
 };
 
-const ConditionalMetadataProvider: FC<PropsWithChildren<IMetadataProviderProps>> = (props) => {
-  return props.modelType
+type ConditionalMetadataProviderProps = Omit<IMetadataProviderProps, 'modelType'> & {
+  modelType?: string | IEntityTypeIdentifier | undefined | null;
+};
+const ConditionalMetadataProvider: FC<PropsWithChildren<ConditionalMetadataProviderProps>> = (props) => {
+  return isDefined(props.modelType) && !(typeof (props.modelType) === "string" && isNullOrWhiteSpace(props.modelType))
     ? (
-      <MetadataProvider {...props}>
+      <MetadataProvider {...props} modelType={props.modelType}>
         {props.children}
       </MetadataProvider>
     )

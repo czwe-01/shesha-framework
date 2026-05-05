@@ -17,42 +17,19 @@ export const getDataSourceList = (
     case 'referenceList':
       return (refList || [])?.map(({ id, item, itemValue }) => ({ id, value: itemValue, label: item }));
     case 'url':
-      return urlList?.map((props) => (props?.id ? props : { ...props, id: nanoid() }));
+      return urlList
+        ?.filter((props): props is ILabelValue & Partial<ReferenceListItemDto> => {
+          if (!props || typeof props !== 'object') return false;
+          const raw = props as unknown as Record<string, unknown>;
+          const hasLabel = raw.label != null || raw.item != null;
+          const hasValue = raw.value != null || raw.itemValue != null;
+          return hasLabel && hasValue;
+        })
+        .map((props) => {
+          const label = props.label ?? props.item;
+          const value = props.value ?? props.itemValue;
+          const id = props.id ?? nanoid();
+          return { id, label, value };
+        });
   }
-};
-
-export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
-  const themeDefaults = getInputComponentThemeDefaults(theme);
-
-  return {
-    background: { type: 'color', color: '' },
-    font: {
-      weight: '400',
-      size: 14,
-      color: '#000',
-      type: 'Segoe UI',
-    },
-    border: {
-      border: {
-        all: {
-          width: 0,
-          style: 'solid',
-          color: 'transparent',
-        },
-      },
-      radius: { all: 0 },
-      borderType: 'all',
-      radiusType: 'all',
-    },
-    dimensions: {
-      width: '100%',
-      height: 'auto',
-      minHeight: '0px',
-      maxHeight: 'auto',
-      minWidth: '0px',
-      maxWidth: 'auto',
-    },
-    // Apply theme stylingBox as default if available
-    stylingBox: themeDefaults?.stylingBox,
-  };
 };

@@ -9,8 +9,9 @@ import { InterfaceOutlined } from '@/icons/interfaceOutlined';
 import { ISetGroupingArguments, getSetGroupingArgumentsForm } from './set-grouping-arguments';
 import { IUpdateItemArguments, updateItemArgumentsForm } from './update-item-arguments';
 import { ISetSearchTextArguments, setSearchTextArgumentsForm } from './set-search-text-arguments';
-import { ShaSpin, useAvailableConstantsData } from '@/index';
 import { isAjaxSuccessResponse } from '@/interfaces/ajaxResponse';
+import { useAvailableConstantsData } from '@/providers/form/utils';
+import ShaSpin from '../shaSpin';
 
 export interface IPermissionedObjectsTreeProps {
   objectsType?: string;
@@ -46,7 +47,7 @@ export const PermissionedObjectsTree: FC<IPermissionedObjectsTreeProps> = (props
   const [objectId, setObjectId] = useState("");
 
   useEffect(() => {
-    fetcher.refetch();
+    void fetcher.refetch();
   }, [props.objectsType]);
 
   useEffect(() => {
@@ -129,7 +130,7 @@ export const PermissionedObjectsTree: FC<IPermissionedObjectsTreeProps> = (props
 
   const onChangeAction = (selectedRow: PermissionedObjectDto): void => {
     if (props.onSelectAction?.actionName) {
-      executeAction({
+      void executeAction({
         actionConfiguration: props.onSelectAction,
         argumentsEvaluationContext: { ...allData.current, selectedRow },
       });

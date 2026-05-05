@@ -198,14 +198,14 @@ export const getResponsiveStyle = (props: IChartsProps): CSSProperties => {
 
   return {
     // Responsive height with better mobile support
-    height: props?.height
+    height: props.height
       ? `${props.height}px`
       : isSmallScreen
         ? 'clamp(300px, 60vh, 600px)' // Better mobile height utilization
         : 'clamp(400px, 70vh, 800px)', // Better desktop height utilization
 
     // Responsive width - use full available space
-    width: props?.width
+    width: props.width
       ? `${props.width}px`
       : '100%', // Use full width available
 
@@ -226,7 +226,7 @@ export function filterNonNull<T extends object>(obj: T): Partial<T> {
   ) as Partial<T>;
 }
 
-export const renderChart = (chartType: string, data: IChartData): JSX.Element => {
+export const renderChart = (chartType: string, data: IChartData): React.JSX.Element => {
   switch (chartType) {
     case 'line':
       return <LineChart data={data} />;

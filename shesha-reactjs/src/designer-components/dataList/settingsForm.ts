@@ -81,7 +81,6 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                 parentId: commonTabId,
                 label: "Hide",
                 jsSetting: true,
-                value: 'checked',
               })
               .toJson(),
             ],
@@ -174,6 +173,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                       `{ name: "moment", description: "moment", type: "object" }`,
                       `{ name: "http", description: "axiosHttp", type: "object" }`,
                       `{ name: "message", description: "message framework", type: "object" }`,
+                      `{ name: "modal", description: "API for displaying modal dialogs and forms", type: "object" }`,
                     ],
                   },
                 ],
@@ -333,7 +333,6 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf }) => {
                     parentId: dataTabId,
                     label: "Show Edit Icon",
                     jsSetting: true,
-                    value: 'checked',
                   },
                 ],
               })

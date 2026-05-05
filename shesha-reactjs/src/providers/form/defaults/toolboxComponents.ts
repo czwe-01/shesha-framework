@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-deprecated */
 import Address from '@/designer-components/address';
+import AddressInput from '@/designer-components/addressInput';
 import Alert from '@/designer-components/alert';
 import AutocompleteTagGroup from '@/designer-components/autocompleteTagGroup';
 import Button from '@/designer-components/button/button';
@@ -102,7 +104,7 @@ import AdvancedFilterButton from '@/designer-components/dataTable/advancedFilter
 import { getToolboxComponentsVisibility } from '@/utils';
 import ThemeEditorComponent from '@/designer-components/settingsEditor/themeEditor';
 import MainMenuEditorComponent from '@/designer-components/settingsEditor/mainMenuEditor';
-import LabelConfigurator from '@/designer-components/styleLabel';
+import LabelConfigurator from '@/designer-components/labelConfigurator';
 import SearchableTabs from '@/designer-components/propertiesTabs';
 import PropertyRouterComponent from '@/designer-components/propertyRouter';
 import ChevronComponent from '@/designer-components/chevron/chevron';
@@ -114,14 +116,14 @@ import LineChartComponent from '@/designer-components/charts/line';
 import PieChartComponent from '@/designer-components/charts/pie';
 import PolarAreaChartComponent from '@/designer-components/charts/polarArea';
 import { ConfigurableItemAutocompleteComponent } from '@/designer-components/configurableItemAutocomplete';
-import DividerComponent from '@/designer-components/_legacyComponents/divider';
+import { DividerComponent } from '@/designer-components/_legacyComponents/divider';
 import EntityTypeAutocompleteComponent from '@/designer-components/configurableItemAutocomplete/entityTypeAutocomplete';
 import CalendarComponent from '@/designer-components/calendar';
 import TableContextComponentLegacy from '@/designer-components/dataTable/tableContext/tableContextComponentLegacy';
 
 export const getToolboxComponents = (
   devMode: boolean,
-  formMetadata: Pick<IFormPersisterStateContext, 'formId' | 'formProps'>,
+  formMetadata: Pick<IFormPersisterStateContext, 'formId' | 'formProps'> | undefined,
 ): IToolboxComponentGroup[] => {
   return [
     {
@@ -154,6 +156,7 @@ export const getToolboxComponents = (
       visible: true,
       components: [
         Address,
+        AddressInput,
         Autocomplete,
         ColorPickerComponent,
         IconPicker,
@@ -282,7 +285,7 @@ export const getToolboxComponents = (
     },
     {
       name: 'Header Components',
-      visible: getToolboxComponentsVisibility(formMetadata?.formProps, [
+      visible: formMetadata?.formProps && getToolboxComponentsVisibility(formMetadata.formProps, [
         HEADER_CONFIGURATION,
         HEADER_PUB_PORTAL_CONFIGURATION,
       ]),

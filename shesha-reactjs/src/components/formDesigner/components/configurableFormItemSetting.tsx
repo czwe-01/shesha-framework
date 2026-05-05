@@ -1,20 +1,24 @@
 import React, { FC, cloneElement } from 'react';
 import { Form, FormItemProps } from 'antd';
 import { getFieldNameFromExpression } from '@/providers/form/utils';
-import { getPropertySettingsFromData } from '@/designer-components/_settings/utils';
-import { SettingsControl, useShaFormInstance } from '@/index';
-import { IConfigurableFormItemChildFunc, IConfigurableFormItemProps } from './model';
+import { getPropertySettingsFromData } from '@/designer-components/_settings/utils/utils';
+import { IConfigurableFormItemProps } from './model';
 import { ConfigurableFormItemLive } from './configurableFormItemLive';
 import { useStyles } from './styles';
 import classNames from 'classnames';
+import { useShaFormInstance } from '@/providers/form/providers/shaFormProvider';
+import SettingsControl, { SettingsControlChildrenFunc } from '@/designer-components/_settings/settingsControl';
 
 export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
   children,
   model,
   valuePropName,
+  autoAlignLabel = true,
+  lazy,
+  availableConstantsExpression,
 }) => {
   const { formData } = useShaFormInstance();
-  const { styles } = useStyles();
+  const { styles } = useStyles({ autoAlignLabel });
   if (model.hidden) return null;
 
   const { _mode: mode } = getPropertySettingsFromData(formData, model.propertyName);
@@ -29,10 +33,10 @@ export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
   };
 
   if (typeof children === 'function') {
-    const childrenFunc = children as IConfigurableFormItemChildFunc;
+    const childrenFunc = children as SettingsControlChildrenFunc;
     return (
       <Form.Item {...formProps}>
-        <SettingsControl propertyName={model.propertyName} mode={mode}>
+        <SettingsControl propertyName={model.propertyName} mode={mode} lazy={lazy} availableConstantsExpression={availableConstantsExpression}>
           {(value, onChange, propertyName) => childrenFunc(value, onChange, propertyName)}
         </SettingsControl>
       </Form.Item>
@@ -56,6 +60,7 @@ export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
       className={classNames(styles.settingsFormItem, "sha-js-label")}
       labelCol={{ span: 24 }}
       wrapperCol={{ span: 24 }}
+      autoAlignLabel={autoAlignLabel}
     >
       {(value, onChange) => {
         return (
@@ -65,6 +70,8 @@ export const ConfigurableFormItemSetting: FC<IConfigurableFormItemProps> = ({
             onChange={onChange}
             value={value}
             readOnly={readOnly}
+            lazy={lazy}
+            availableConstantsExpression={availableConstantsExpression}
           >
             {(value, onChange) => {
               return cloneElement(

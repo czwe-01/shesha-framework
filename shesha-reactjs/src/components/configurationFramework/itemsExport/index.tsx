@@ -1,4 +1,3 @@
-import axios from 'axios';
 import FileSaver from 'file-saver';
 import React, { MutableRefObject, useMemo, useState, FC } from 'react';
 
@@ -14,7 +13,7 @@ import {
   Tree,
 } from 'antd';
 import { getFileNameFromResponse } from '@/utils/fetchers';
-import { useSheshaApplication } from '@/providers';
+import { useHttpClient } from '@/providers';
 import { EMPTY_FILTER, FilterState } from './models';
 import { ExportFilter } from './filter';
 import { useTreeForExport } from '@/configuration-studio/apis';
@@ -34,9 +33,9 @@ export interface IConfigurationItemsExportProps {
 }
 
 export const ConfigurationItemsExport: FC<IConfigurationItemsExportProps> = (props) => {
-  const { backendUrl, httpHeaders } = useSheshaApplication();
   const [filterState, setFilterState] = useState<FilterState>(EMPTY_FILTER);
   const [exportDependencies, setExportDependencies] = useState<boolean>(true);
+  const httpClient = useHttpClient();
 
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
   const [exportInProgress, setExportInProgress] = useState(false);
@@ -85,24 +84,17 @@ export const ConfigurationItemsExport: FC<IConfigurationItemsExportProps> = (pro
 
   const exportExecuter = (): Promise<void> => {
     const filter = getExportFilter();
-    const exportUrl = `${backendUrl}/api/services/app/ConfigurationStudio/ExportPackage`;
+    const exportUrl = `/api/services/app/ConfigurationStudio/ExportPackage`;
 
 
     setExportInProgress(true);
-    return axios({
-      url: exportUrl,
-      method: 'POST',
-      data: {
-        filter: JSON.stringify(filter),
-        exportDependencies: exportDependencies,
-        // versionSelectionMode: itemSelectionMode,
-      },
-      responseType: 'blob', // important
-      headers: httpHeaders,
-    })
+    return httpClient.post<BlobPart>(exportUrl, {
+      filter: JSON.stringify(filter),
+      exportDependencies: exportDependencies,
+    }, { responseType: 'blob' })
       .then((response) => {
         const fileName = getFileNameFromResponse(response) ?? 'package.zip';
-        FileSaver.saveAs(new Blob([response.data]), fileName);
+        FileSaver(new Blob([response.data]), fileName, { autoBom: false });
         setExportInProgress(false);
         if (Boolean(props.onExported)) props.onExported();
       })
@@ -120,7 +112,7 @@ export const ConfigurationItemsExport: FC<IConfigurationItemsExportProps> = (pro
     };
 
   const onRefreshClick = (): void => {
-    refreshTree();
+    void refreshTree();
   };
 
   const onCheck = (checkedIds: string[]): void => {
@@ -128,7 +120,7 @@ export const ConfigurationItemsExport: FC<IConfigurationItemsExportProps> = (pro
   };
 
   return (
-    <Spin spinning={exportInProgress} tip="Exporting...">
+    <Spin spinning={exportInProgress} description="Exporting...">
       <Form>
         <Form.Item label="Filter by">
           <ExportFilter value={filterState} onChange={setFilterState} />

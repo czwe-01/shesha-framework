@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 import TableViewSelectorRenderer from '@/components/tableViewSelectorRenderer';
 import { evaluateDynamicFilters } from '@/utils/datatable';
 import { ITableViewSelectorComponentProps } from './models';
@@ -22,7 +22,6 @@ export const TableViewSelector: FC<ITableViewSelectorProps> = ({
   id,
   filters,
   hidden,
-  persistSelectedFilters,
   showIcon,
 }) => {
   const {
@@ -30,7 +29,6 @@ export const TableViewSelector: FC<ITableViewSelectorProps> = ({
     selectedStoredFilterIds,
     setPredefinedFilters,
     predefinedFilters,
-    changePersistedFiltersToggle,
     modelType,
   } = useDataTableStore();
 
@@ -72,6 +70,9 @@ export const TableViewSelector: FC<ITableViewSelectorProps> = ({
     ).then((evaluatedFilters) => {
       dataFetchDep.ready();
       setPredefinedFilters(evaluatedFilters);
+    }).catch((error) => {
+      console.error('Failed to evaluate dynamic filters', error);
+      throw error;
     });
   };
 
@@ -79,9 +80,6 @@ export const TableViewSelector: FC<ITableViewSelectorProps> = ({
     debounceEvaluateDynamicFiltersHelper();
   }, [filters, formData, globalState, dataContextManager.lastUpdate]);
 
-  useEffect(() => {
-    changePersistedFiltersToggle(persistSelectedFilters);
-  }, [persistSelectedFilters]);
   //#endregion
 
   const changeSelectedFilter = (id: string): void => {

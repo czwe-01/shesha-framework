@@ -10,18 +10,15 @@ import { EventComponent } from './eventComponent';
 import { useCalendarLayers } from './hooks';
 import { getLayerOptions, getLayerEvents, isDateDisabled, getDayStyles } from './utils';
 import { useCalendarStyles } from './styles/styles';
-import {
-  evaluateString,
-  useActualContextExecution,
-  useAvailableConstantsData,
-  useConfigurableActionDispatcher,
-  useFormState,
-  useTheme,
-} from '@/index';
 import { ICalendarProps } from '@/designer-components/calendar/interfaces';
 import { DataContextProvider } from '@/providers/dataContextProvider';
 import { ICalendarEvent } from '@/providers/layersProvider/models';
-import { useCanvas } from '../../providers';
+import { evaluateString, useAvailableConstantsData } from '@/providers/form/utils';
+import { useActualContextExecution } from '@/hooks/formComponentHooks';
+import { useConfigurableActionDispatcher } from '@/providers/configurableActionsDispatcher';
+import { useTheme } from '@/providers/theme';
+import { useCanvas } from '@/providers/canvas';
+import { useFormState } from '@/providers/form';
 
 
 export const CalendarControl: FC<ICalendarProps> = (props) => {
@@ -172,7 +169,7 @@ export const CalendarControl: FC<ICalendarProps> = (props) => {
           selectedRow: event,
         };
 
-        executeAction({
+        void executeAction({
           actionConfiguration: event.onSelect,
           argumentsEvaluationContext: evaluationContext,
         });
@@ -202,7 +199,7 @@ export const CalendarControl: FC<ICalendarProps> = (props) => {
       event,
     };
 
-    executeAction({
+    void executeAction({
       actionConfiguration: event.onDblClick,
       argumentsEvaluationContext: evaluationContext,
     });
@@ -213,7 +210,7 @@ export const CalendarControl: FC<ICalendarProps> = (props) => {
       ...allData,
       event: view,
     };
-    executeAction({
+    void executeAction({
       actionConfiguration: onViewChange,
       argumentsEvaluationContext: evaluationContext,
     });
@@ -246,7 +243,7 @@ export const CalendarControl: FC<ICalendarProps> = (props) => {
       ...allData,
       event: adjustedSlotInfo,
     };
-    executeAction({
+    void executeAction({
       actionConfiguration: onSlotClick,
       argumentsEvaluationContext: evaluationContext,
     });
@@ -265,7 +262,7 @@ export const CalendarControl: FC<ICalendarProps> = (props) => {
     [calendarStyles.calendarMenu, items, onChange, defaultVisibleLayers],
   );
 
-  const renderLegend = (): JSX.Element => (
+  const renderLegend = (): React.JSX.Element => (
     <div className={calendarStyles.calendarLegendContainer}>
       {items?.map((layer) =>
         layer.showLegend ? (
@@ -290,10 +287,10 @@ export const CalendarControl: FC<ICalendarProps> = (props) => {
     </div>
   );
 
-  const renderHeader = (): JSX.Element => (
+  const renderHeader = (): React.JSX.Element => (
     <div className={calendarStyles.calendarHeader}>
       {renderLegend()}
-      <Dropdown menu={menuItems} dropdownRender={(): JSX.Element => dropdownContent}>
+      <Dropdown menu={menuItems} popupRender={(): React.JSX.Element => dropdownContent}>
         <a className="ant-dropdown-link" onClick={(e): void => e.preventDefault()}>
           Views <DownOutlined />
         </a>
@@ -315,7 +312,7 @@ export const CalendarControl: FC<ICalendarProps> = (props) => {
     visibleLayers: defaultVisibleLayers,
   }), [updatedEvents, defaultView, startDate, endDate, defaultVisibleLayers]);
 
-  const calendarContent = (): JSX.Element => {
+  const calendarContent = (): React.JSX.Element => {
     if (!displayPeriod?.length) {
       return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No Selected Calendar Views!" />;
     }
@@ -326,7 +323,10 @@ export const CalendarControl: FC<ICalendarProps> = (props) => {
         <Calendar
           views={displayPeriod as any}
           onView={(view) => {
-            updateDefaultCalendarView(view);
+            updateDefaultCalendarView(view).catch((error) => {
+              console.error('Failed to update default calendar view', error);
+              throw error;
+            });
             setDefaultView(view);
             handleViewChange(view);
           }}

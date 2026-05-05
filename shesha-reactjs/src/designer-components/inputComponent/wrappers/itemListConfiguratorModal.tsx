@@ -1,9 +1,10 @@
 import { IItemListConfiguratorModalSettingsInputProps } from '@/designer-components/settingsInput/interfaces';
-import React, { FC } from 'react';
+import React from 'react';
+import { FCUnwrapped } from '@/providers/form/models';
 import { ItemListConfiguratorModal } from '@/designer-components/itemListConfigurator/itemListConfiguratorModal';
 import { Alert } from 'antd';
 
-export const ItemListConfiguratorModalWrapper: FC<IItemListConfiguratorModalSettingsInputProps> = (props) => {
+export const ItemListConfiguratorModalWrapper: FCUnwrapped<IItemListConfiguratorModalSettingsInputProps> = (props) => {
   const { value, onChange, readOnly, size, onAddNewItem, listItemSettingsMarkup, buttonText, buttonTextReadOnly, modalSettings, modalReadonlySettings } = props;
   return (
     <ItemListConfiguratorModal
@@ -32,7 +33,7 @@ export const ItemListConfiguratorModalWrapper: FC<IItemListConfiguratorModalSett
       buttonText={readOnly ? buttonTextReadOnly : buttonText}
       modalSettings={{
         title: readOnly ? modalReadonlySettings.title : modalSettings.title,
-        header: <Alert message={readOnly ? modalReadonlySettings.header : modalSettings.header} />,
+        header: <Alert title={readOnly ? modalReadonlySettings.header : modalSettings.header} />,
       }}
     />
   );

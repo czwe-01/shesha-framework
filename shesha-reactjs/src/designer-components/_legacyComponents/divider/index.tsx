@@ -18,7 +18,7 @@ export interface IDividerProps extends IConfigurableFormComponent {
 const settingsForm = settingsFormJson as FormMarkup;
 
 /** @deprecated: Use Section Separator instead */
-const DividerComponent: IToolboxComponent<IDividerProps> = {
+export const DividerComponent: IToolboxComponent<IDividerProps> = {
   type: 'divider',
   isInput: false,
   name: 'Divider',
@@ -29,8 +29,8 @@ const DividerComponent: IToolboxComponent<IDividerProps> = {
     const { globalState } = useGlobalState();
 
     const props: DividerProps = {
-      type: model?.dividerType,
-      dashed: model?.dashed,
+      orientation: model.dividerType,
+      dashed: model.dashed,
     };
 
     return (
@@ -48,5 +48,3 @@ const DividerComponent: IToolboxComponent<IDividerProps> = {
     ...model,
   }),
 };
-
-export default DividerComponent;

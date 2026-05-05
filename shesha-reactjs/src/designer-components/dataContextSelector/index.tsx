@@ -1,6 +1,6 @@
 import { IToolboxComponent } from '@/interfaces';
 import { CodeOutlined } from '@ant-design/icons';
-import ConfigurableFormItem from '@/components/formDesigner/components/formItem';
+import { ConfigurableFormItem } from '@/components/formDesigner/components/formItem';
 import React, { FC } from 'react';
 import { IConfigurableFormComponent } from '@/providers';
 import { DataTypes, StringFormats } from '@/interfaces/dataTypes';
@@ -22,15 +22,19 @@ const DataContextSelector: FC<IDataContextSelectorProps> = (props) => {
   const dataContexts = getDataContexts('all');
 
   const onChange = (value: any): void => {
-    props?.onChange(value);
+    props.onChange(value);
   };
 
   return (
-    <Select allowClear={true} disabled={props.readOnly} showSearch value={props.value} size={props.size} onChange={onChange}>
-      {dataContexts.map((item) => {
-        return <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>;
-      })}
-    </Select>
+    <Select
+      allowClear={true}
+      disabled={props.readOnly}
+      showSearch
+      value={props.value}
+      size={props.size}
+      onChange={onChange}
+      options={dataContexts.map((item) => ({ value: item.id, label: item.name }))}
+    />
   );
 };
 

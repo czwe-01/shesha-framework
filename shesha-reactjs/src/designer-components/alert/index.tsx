@@ -3,7 +3,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Alert } from 'antd';
 import { evaluateString, getStyle, validateConfigurableComponentSettings } from '@/providers/form/utils';
 import { getSettings } from './settingsForm';
-import ShaIcon from '@/components/shaIcon';
+import { ShaIcon } from '@/components/shaIcon';
 import { AlertComponentDefinition, IAlertComponentProps } from './interfaces';
 import { migratePropertyName, migrateCustomFunctions } from '@/designer-components/_common-migrations/migrateSettings';
 import { migrateVisibility } from '@/designer-components/_common-migrations/migrateVisibility';
@@ -98,7 +98,7 @@ const AlertComponent: AlertComponentDefinition = {
     return (
       <Alert
         className="sha-alert"
-        message={model.marquee ? (
+        title={model.marquee ? (
           <Marquee pauseOnHover gradient={false}>
             {messageContent}
           </Marquee>

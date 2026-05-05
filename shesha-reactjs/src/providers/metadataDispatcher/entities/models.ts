@@ -93,6 +93,7 @@ export interface ISyncEntitiesContext {
 }
 
 export interface IEntityMetadataFetcher {
+  resetSynchronized: () => Promise<void>;
   syncAll: () => Promise<void>;
   getByTypeId: (typeId: IEntityTypeIdentifier) => Promise<IEntityMetadata | null>;
   getByClassName: (className: string) => Promise<IEntityMetadata | null>;

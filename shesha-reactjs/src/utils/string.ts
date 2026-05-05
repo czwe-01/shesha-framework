@@ -1,4 +1,4 @@
-import { isNullOrWhiteSpace } from '@/utils/nullables';
+import { isDefined, isNullOrWhiteSpace } from '@/utils/nullables';
 import camelcase from 'camelcase';
 
 /* tslint:disable:no-empty-character-class */
@@ -85,13 +85,16 @@ export function getLastSection(separator: string, value: string): string {
     : '';
 }
 
-export const getNumericValue = (localValue: number | string): number => {
+
+export const getNumberOrUndefined = (value: unknown | undefined): number | undefined => {
   try {
-    return Number(localValue);
+    return isDefined(value) ? Number(value) : undefined;
   } catch {
-    return 0;
+    return undefined;
   }
 };
+
+export const getNumericValue = (localValue: number | string): number => getNumberOrUndefined(localValue) ?? 0;
 
 export interface CamelCaseOptions {
   /** Keep the leading separator: `_foo_bar` → `_fooBar`.
@@ -144,16 +147,16 @@ export function toCamelCase(str: string | null | undefined, options?: CamelCaseO
     ? text.match(leadingSeparatorsRegex)?.[0] ?? ''
     : '';
 
-  const result = camelcase(text.replace(leadingSeparatorsRegex, ''), {
-    locale: options?.locale ?? undefined,
+  const result = camelcase(text, {
+    locale: options?.locale ?? false,
     pascalCase: options?.pascalCase ?? false,
     preserveConsecutiveUppercase: options?.preserveConsecutiveUppercase ?? false,
-  });
+  }).replace(/[^\p{L}\p{N}]/gu, ''); // remove all non-alphanumeric characters
 
-  return leadingSeparators + result;
+  return leadingSeparators + result; // restore the leading separators if needed
 }
 
-export function getNumberFormat(str: string, format: string): string {
+export function numberToFormattedString(str: string, format: string | undefined): string {
   if (!isNullOrWhiteSpace(str)) {
     const value = parseFloat(str);
 
@@ -219,4 +222,15 @@ export const trimPrefix = (s: string, w: string): string => {
 
 export const isEmptyString = (value: unknown): boolean => {
   return typeof (value) === 'string' && value.trim() === '';
+};
+
+export const truncateMiddle = (str: string, maxLength: number, ellipsis: string = '...'): string => {
+  if (!str) return str;
+  if (maxLength <= 0) return '';
+  if (str.length <= maxLength) return str;
+  if (maxLength <= ellipsis.length) return ellipsis.slice(0, maxLength);
+  const charsToShow = maxLength - ellipsis.length;
+  const start = Math.ceil(charsToShow / 2);
+  const end = Math.floor(charsToShow / 2);
+  return str.slice(0, start) + ellipsis + (end > 0 ? str.slice(-end) : '');
 };

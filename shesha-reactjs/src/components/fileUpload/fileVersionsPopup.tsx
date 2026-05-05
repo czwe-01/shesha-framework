@@ -4,7 +4,7 @@ import { Popover, Skeleton, Button } from 'antd';
 import { DateDisplay } from '@/components/';
 import { useStoredFileGetFileVersions, StoredFileVersionInfoDto } from '@/apis/storedFile';
 import filesize from 'filesize';
-import { useStoredFile } from '@/providers';
+import { useFileUpload } from '@/providers';
 import { isAjaxSuccessResponse } from '@/interfaces/ajaxResponse';
 
 interface IProps {
@@ -21,18 +21,25 @@ export const FileVersionsPopup: FC<IProps> = ({ fileId }) => {
     lazy: true,
   });
 
-  const { downloadFile } = useStoredFile();
+  const { downloadFile } = useFileUpload();
 
   if (fileId == null) return null;
 
   const handleVisibleChange = (open: boolean): void => {
-    if (open && !serverData) fetchHistory();
+    if (open && !serverData)
+      fetchHistory().catch((error) => {
+        console.error('Failed to fetch history', error);
+        throw error;
+      });
   };
 
   const uploads = isAjaxSuccessResponse(serverData) ? serverData.result : undefined;
 
   const handleVersionDownloadClick = (fileVersion: StoredFileVersionInfoDto): void => {
-    downloadFile({ fileId, versionNo: fileVersion.versionNo, fileName: fileVersion.fileName });
+    downloadFile({ fileId, versionNo: fileVersion.versionNo, fileName: fileVersion.fileName }).catch((error) => {
+      console.error('Failed to download file', error);
+      throw error;
+    });
   };
 
   const content = (
@@ -41,7 +48,7 @@ export const FileVersionsPopup: FC<IProps> = ({ fileId }) => {
         {uploads &&
           uploads.map((item, i) => (
             <li key={i}>
-              <strong>Version {i + 1}</strong> Uploaded {item.dateUploaded && <DateDisplay date={item.dateUploaded} />}{' '}
+              <strong>Version {i + 1}</strong> Uploaded {item.dateUploaded && <DateDisplay>{item.dateUploaded}</DateDisplay>}{' '}
               by {item.uploadedBy}
               <br />
               <Button type="link" onClick={() => handleVersionDownloadClick(item)}>

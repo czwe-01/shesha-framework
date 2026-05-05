@@ -1,4 +1,3 @@
-import { ICommonContainerProps, IContainerComponentProps, IStyleType } from '@/index';
 import { nanoid } from '@/utils/uuid';
 import { IConfigurableTheme, getLayoutComponentThemeDefaults } from "@/providers/theme";
 

@@ -1,6 +1,7 @@
-import { IBorderType, IStyleType } from "@/index";
+import { IStyleType } from "@/providers/form/models";
 import { IImageProps } from "./interfaces";
 import { IConfigurableTheme, getStandardComponentThemeDefaults } from "@/providers/theme";
+import { IBorderType } from "../_settings/utils/border/interfaces";
 
 export const defaultStyles = (prev: IImageProps, theme?: IConfigurableTheme): IStyleType => {
   const themeDefaults = getStandardComponentThemeDefaults(theme);

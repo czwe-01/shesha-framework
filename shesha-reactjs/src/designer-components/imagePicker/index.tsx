@@ -4,7 +4,7 @@ import { App, Button, Space, Upload } from 'antd';
 import type { UploadFile, UploadProps } from 'antd';
 import { useStyles } from './style';
 import { IToolboxComponent } from '@/interfaces';
-import ConfigurableFormItem from '@/components/formDesigner/components/formItem';
+import { ConfigurableFormItem } from '@/components/formDesigner/components/formItem';
 import { toBase64, validateConfigurableComponentSettings } from '@/providers/form/utils';
 import { isFileTypeAllowed } from '@/utils/fileValidation';
 import { IFileUploadProps } from '../fileUpload/interfaces';
@@ -17,7 +17,7 @@ interface IImageUploaderProps {
   allowedFileTypes?: string[];
 }
 
-export const ImagePicker = ({ onChange, value, readOnly, allowedFileTypes }: IImageUploaderProps): JSX.Element => {
+export const ImagePicker = ({ onChange, value, readOnly, allowedFileTypes }: IImageUploaderProps): React.JSX.Element => {
   const [fileList, setFileList] = useState<UploadFile[]>(typeof value == 'string' ? value : value ? [{ ...value }] : []);
   const { styles } = useStyles();
   const { message } = App.useApp();

@@ -1,4 +1,3 @@
-import { MutableRefObject } from 'react';
 import {
   IAsyncValidationError,
   IFormValidationErrors,
@@ -89,8 +88,9 @@ export type FormDesignerState = {
   isDebug: boolean;
   readOnly: boolean;
   formMode: FormMode;
+  activeSettingsTabKey: string | undefined;
 
-  settingsPanelRef: MutableRefObject<HTMLDivElement | undefined>;
+  settingsPanelElement: HTMLDivElement | null;
 };
 
 export type FormDesignerActions = {
@@ -118,12 +118,15 @@ export type FormDesignerActions = {
 
   setReadOnly: (value: boolean) => void;
   setFormMode: (value: FormMode) => void;
+  setActiveSettingsTabKey: (key: string) => void;
 
   getCachedComponentEditor: (type: string, evaluator: () => ISettingsFormFactory) => ISettingsFormFactory;
 
   subscribe: (type: FormDesignerSubscriptionType, callback: FormDesignerSubscription) => void;
   loadAsync: () => Promise<void>;
   saveAsync: () => Promise<void>;
+
+  setSettingsPanelElement: (element: HTMLDivElement | null) => void;
 };
 
 

@@ -14,7 +14,7 @@ import { getDimensionsStyle } from '../_settings/utils/dimensions/utils';
 import { getBorderStyle } from '../_settings/utils/border/utils';
 import { getShadowStyle } from '../_settings/utils/shadow/utils';
 import { getBackgroundStyle } from '../_settings/utils/background/utils';
-import { ValidationErrors } from '@/components';
+import { ValidationErrors } from '@/components/validationErrors';
 import { jsonSafeParse, removeUndefinedProps } from '@/utils/object';
 import { isValidGuid } from '@/components/formDesigner/components/utils';
 import { migratePrevStyles } from '../_common-migrations/migrateStyles';
@@ -35,10 +35,10 @@ const SizableColumnsComponent: IToolboxComponent<ISizableColumnComponentProps> =
 
     const { backendUrl, httpHeaders } = useSheshaApplication();
 
-    const dimensions = model?.dimensions;
-    const border = model?.border;
-    const shadow = model?.shadow;
-    const background = model?.background;
+    const dimensions = model.dimensions;
+    const border = model.border;
+    const shadow = model.shadow;
+    const background = model.background;
     const jsStyle = getStyle(model.style, data);
 
     const dimensionsStyles = useMemo(() => getDimensionsStyle(dimensions), [dimensions]);
@@ -62,12 +62,14 @@ const SizableColumnsComponent: IToolboxComponent<ISizableColumnComponentProps> =
         setBackgroundStyles(style);
       };
 
-      fetchStyles();
+      fetchStyles().catch((error) => {
+        console.error('Failed to fetch styles', error);
+      });
     }, [background, background?.gradient?.colors, backendUrl, httpHeaders]);
 
     if (model.hidden) return null;
 
-    if (model?.background?.type === 'storedFile' && model?.background.storedFile?.id && !isValidGuid(model?.background.storedFile.id)) {
+    if (model?.background?.type === 'storedFile' && model.background.storedFile?.id && !isValidGuid(model?.background.storedFile.id)) {
       return <ValidationErrors error="The provided StoredFileId is invalid" />;
     }
     const styling = jsonSafeParse<StyleBoxValue>(model.stylingBox || '{}');
@@ -84,7 +86,10 @@ const SizableColumnsComponent: IToolboxComponent<ISizableColumnComponentProps> =
     const finalStyle = removeUndefinedProps({ ...additionalStyles, fontWeight: Number(model?.font?.weight?.split(' - ')[0]) || 400 });
 
     return (
-      <ParentProvider model={model}>
+      <ParentProvider
+        name={`Columns-${model.id}`}
+        model={model}
+      >
         <SizableColumns
           key={`split-${columns?.length}`}
           cursor="col-resize"

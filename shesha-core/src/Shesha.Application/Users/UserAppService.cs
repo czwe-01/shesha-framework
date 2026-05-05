@@ -1,7 +1,6 @@
 ﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
 using Abp.Authorization;
-using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
 using Abp.Extensions;
 using Abp.IdentityFramework;
@@ -10,6 +9,7 @@ using Abp.Localization;
 using Abp.Runtime.Session;
 using Abp.UI;
 using Abp.Web.Models.AbpUserConfiguration;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Shesha.Authorization;
@@ -218,18 +218,6 @@ namespace Shesha.Users
                 .WhereIf(input.IsActive.HasValue, x => x.IsActive == input.IsActive);
         }
 
-        protected override async Task<User> GetEntityByIdAsync(long id)
-        {
-            var user = await Repository.GetAllIncluding(x => x.Roles).FirstOrDefaultAsync(x => x.Id == id);
-
-            if (user == null)
-            {
-                throw new EntityNotFoundException(typeof(User), id);
-            }
-
-            return user;
-        }
-
         protected override IQueryable<User> ApplySorting(IQueryable<User> query, PagedUserResultRequestDto input)
         {
             return query.OrderBy(r => r.UserName);
@@ -244,7 +232,7 @@ namespace Shesha.Users
 
         private async Task<User?> GetUniqueUserByMobileNoAsync(string mobileNo)
         {
-            var users = await _userRepository.GetAll().Where(u => u.PhoneNumber == mobileNo).ToListAsync();
+            var users = await _userRepository.GetAllListAsync(u => u.PhoneNumber == mobileNo);
 
             if (users.Count > 1)
                 throw new UserFriendlyException("Found more than one user with the provided Mobile No");
@@ -288,7 +276,7 @@ namespace Shesha.Users
         {
             var securitySettings = await _securitySettings.SecuritySettings.GetValueAsync();
 
-            var person = await _userRepository.GetAll().Where(p => p.UserName == username).FirstOrDefaultAsync();
+            var person = await _userRepository.FirstOrDefaultAsync(p => p.UserName == username);
 
             if (person == null)
             {
@@ -305,7 +293,7 @@ namespace Shesha.Users
             
             var hasPhoneNumber = !string.IsNullOrEmpty(person.PhoneNumber);
             var hasEmail = !string.IsNullOrEmpty(person.EmailAddress);
-            var hasQuestions = await _questionRepository.GetAll().Where(q => q.User == person).AnyAsync();
+            var hasQuestions = await (await _questionRepository.GetAllAsync()).Where(q => q.User == person).AnyAsync();
 
             if (supportedResetOptions.Length > 0)
             {
@@ -359,7 +347,7 @@ namespace Shesha.Users
         public async Task<bool> SendSmsOtpAsync(string username)
         {
             var securitySettings = await _securitySettings.SecuritySettings.GetValueAsync();
-            var user = await _userRepository.GetAll().Where(u => u.UserName == username).FirstOrDefaultAsync();
+            var user = await _userRepository.FirstOrDefaultAsync(u => u.UserName == username);
 
             ValidateUserPasswordResetMethod(user, (long)RefListPasswordResetMethods.SmsOtp);
 
@@ -382,11 +370,11 @@ namespace Shesha.Users
         [AbpAllowAnonymous]
         public async Task<List<SecurityQuestionDto>> GetSecurityQuestionsAsync(string username)
         {
-            var user = await _userRepository.GetAll().Where(u => u.UserName == username).FirstOrDefaultAsync();
+            var user = await _userRepository.FirstOrDefaultAsync(u => u.UserName == username);
 
             ValidateUserPasswordResetMethod(user, (long)RefListPasswordResetMethods.SecurityQuestions);
 
-            var questions = await _questionRepository.GetAllIncluding(q => q.User, q => q.SelectedQuestion).Where(q => q.User == user).Select(q => q.SelectedQuestion).ToListAsync();
+            var questions = await (await _questionRepository.GetAllAsync()).Where(q => q.User == user).Select(q => q.SelectedQuestion).ToListAsync();
 
             return ObjectMapper.Map<List<SecurityQuestionDto>>(questions);
         }
@@ -407,7 +395,7 @@ namespace Shesha.Users
                 username = Encoding.UTF8.GetString(Convert.FromBase64String(username));
             }
 
-            var user = await _userRepository.GetAll().Where(u => u.UserName == username).FirstOrDefaultAsync();
+            var user = await _userRepository.FirstOrDefaultAsync(u => u.UserName == username);
 
             ValidateUserPasswordResetMethod(user, input.Method);
 
@@ -453,7 +441,7 @@ namespace Shesha.Users
         [HttpPost]
         public async Task<ResetPasswordVerifyOtpResponse> ValidateSecurityQuestionsAsync(SecurityQuestionVerificationDto input)
         {
-            var user = await _userRepository.GetAll().Where(u => u.UserName == input.Username).FirstOrDefaultAsync();
+            var user = await _userRepository.FirstOrDefaultAsync(u => u.UserName == input.Username);
 
             ValidateUserPasswordResetMethod(user, (long)RefListPasswordResetMethods.SecurityQuestions);
 
@@ -463,7 +451,7 @@ namespace Shesha.Users
 
             foreach(var submittedQuestionPair in input.SubmittedQuestions)
             {
-                var answeredQuestion = await _questionRepository.GetAllIncluding(q => q.User, q => q.SelectedQuestion).Where(q => q.User == user && q.SelectedQuestion.Id == submittedQuestionPair.QuestionId).FirstOrDefaultAsync();
+                var answeredQuestion = await _questionRepository.FirstOrDefaultAsync(q => q.User == user && q.SelectedQuestion.Id == submittedQuestionPair.QuestionId);
 
                 if (submittedQuestionPair.SubmittedAnswer.ToLower() != answeredQuestion.Answer.ToLower())
                 {
@@ -506,7 +494,7 @@ namespace Shesha.Users
         {
             var securitySettings = await _securitySettings.SecuritySettings.GetValueAsync();
 
-            var user = await _userRepository.GetAll().Where(u => u.UserName == username).FirstOrDefaultAsync();
+            var user = await _userRepository.FirstOrDefaultAsync(u => u.UserName == username);
 
             ValidateUserPasswordResetMethod(user, (long)RefListPasswordResetMethods.EmailLink);
 
@@ -565,7 +553,7 @@ namespace Shesha.Users
         [AbpAllowAnonymous]
         public async Task<bool> ResetPasswordUsingTokenAsync(ResetPasswordUsingTokenInput input)
         {
-            var user = await _userRepository.GetAll().FirstOrDefaultAsync(u => u.UserName == input.Username);
+            var user = await _userRepository.FirstOrDefaultAsync(u => u.UserName == input.Username);
             if (user == null)
                 throw new UserFriendlyException("User not found");
 
@@ -580,7 +568,7 @@ namespace Shesha.Users
             }
             
             user.AddHistoryEvent("Password reset", "Password reset");
-            _personRepository.GetAll().FirstOrDefault(x => x.User == user)?.AddHistoryEvent("Password reset", "Password reset");
+            (await _personRepository.FirstOrDefaultAsync(x => x.User == user))?.AddHistoryEvent("Password reset", "Password reset");
 
             user.Password = _passwordHasher.HashPassword(user, input.NewPassword);
             user.PasswordResetCode = null;
@@ -630,11 +618,12 @@ namespace Shesha.Users
 
         #endregion
 
+        [AbpAllowAnonymous]
         public async Task<bool> ChangePasswordAsync(ChangePasswordDto input)
         {
             if (_abpSession.UserId == null)
             {
-                throw new UserFriendlyException("Please log in before attemping to change password.");
+                throw new UserFriendlyException("Please log in before attempting to change password.");
             }
             long userId = _abpSession.UserId.Value;
             var user = await _userManager.GetUserByIdAsync(userId);
@@ -650,9 +639,10 @@ namespace Shesha.Users
             }
 
             user.AddHistoryEvent("Password changed", "Password changed");
-            _personRepository.GetAll().FirstOrDefault(x => x.User == user)?.AddHistoryEvent("Password changed", "Password changed");
+            (await _personRepository.FirstOrDefaultAsync(x => x.User == user))?.AddHistoryEvent("Password changed", "Password changed");
 
             user.Password = _passwordHasher.HashPassword(user, input.NewPassword);
+            user.RequireChangePassword = false;
             await CurrentUnitOfWork.SaveChangesAsync();
             return true;
         }
@@ -684,6 +674,7 @@ namespace Shesha.Users
                 person?.AddHistoryEvent("Password reset", "Password reset");
 
                 user.Password = _passwordHasher.HashPassword(user, input.NewPassword);
+                user.RequireChangePassword = input.RequireChangePassword;
                 user.IsActive = true;
                 if (user.LockoutEndDateUtc.HasValue && user.LockoutEndDateUtc > DateTime.Now)
                     user.LockoutEndDateUtc = DateTime.Now;
@@ -698,7 +689,7 @@ namespace Shesha.Users
         {
             var config = new AbpUserAuthConfigDto();
 
-            var allPermissionNames = PermissionManager.GetAllPermissions(false).Select(p => p.Name).ToList();
+            var allPermissionNames = (await PermissionManager.GetAllPermissionsAsync(false)).Select(p => p.Name).ToList();
             var grantedPermissionNames = new List<string>();
 
             if (AbpSession.UserId.HasValue)

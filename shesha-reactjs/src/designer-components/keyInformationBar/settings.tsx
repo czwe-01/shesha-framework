@@ -7,16 +7,16 @@ import StyleBox from '../styleBox/components/box';
 import { Checkbox, Input, InputNumber, Select } from 'antd';
 import { ISettingsFormFactoryArgs } from '@/interfaces';
 import ColumnsList from './columnsList';
-import { IKeyInformationBarProps } from './interfaces';
-import { ColorPicker, Show } from '@/components';
+import { IKeyInformationBarComponentProps } from './interfaces';
+import { Show } from '@/components/show';
+import { ColorPicker } from '@/components/colorPicker';
 import { strings } from '@/components/keyInformationBar/utils';
 import SettingsCollapsiblePanel from '../_settings/settingsCollapsiblePanel';
 import { PermissionAutocomplete } from '@/components/permissionAutocomplete';
 
-const KeyInformationBarSettings: FC<ISettingsFormFactoryArgs<IKeyInformationBarProps>> = (props) => {
+const KeyInformationBarSettings: FC<ISettingsFormFactoryArgs<IKeyInformationBarComponentProps>> = (props) => {
   const { readOnly } = props;
-  const { Option } = Select;
-  const { values } = useSettingsForm<IKeyInformationBarProps>();
+  const { values } = useSettingsForm<IKeyInformationBarComponentProps>();
 
   const tooltip = strings.tooltip;
 
@@ -31,10 +31,12 @@ const KeyInformationBarSettings: FC<ISettingsFormFactoryArgs<IKeyInformationBarP
       </SettingsFormItem>
 
       <SettingsFormItem name="orientation" label="Orientation">
-        <Select>
-          <Option value="horizontal">Horizontal</Option>
-          <Option value="vertical">Vertical</Option>
-        </Select>
+        <Select
+          options={[
+            { value: 'horizontal', label: 'Horizontal' },
+            { value: 'vertical', label: 'Vertical' },
+          ]}
+        />
       </SettingsFormItem>
 
       <SettingsFormItem name="backgroundColor" label="Background Color" jsSetting>
@@ -47,11 +49,13 @@ const KeyInformationBarSettings: FC<ISettingsFormFactoryArgs<IKeyInformationBarP
 
       <Show when={values.orientation === "horizontal"}>
         <SettingsFormItem name="alignItems" label="Align Items">
-          <Select>
-            <Option value="flex-start">Flex Start</Option>
-            <Option value="flex-end">Flex End</Option>
-            <Option value="center">Center</Option>
-          </Select>
+          <Select
+            options={[
+              { value: 'flex-start', label: 'Flex Start' },
+              { value: 'flex-end', label: 'Flex End' },
+              { value: 'center', label: 'Center' },
+            ]}
+          />
         </SettingsFormItem>
       </Show>
 
@@ -116,5 +120,5 @@ const KeyInformationBarSettings: FC<ISettingsFormFactoryArgs<IKeyInformationBarP
   );
 };
 
-export const KeyInformationBarSettingsForm: FC<ISettingsFormFactoryArgs<IKeyInformationBarProps>> = (props) =>
+export const KeyInformationBarSettingsForm: FC<ISettingsFormFactoryArgs<IKeyInformationBarComponentProps>> = (props) =>
   SettingsForm<any>({ ...props, children: <KeyInformationBarSettings {...props} /> });

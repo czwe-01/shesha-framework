@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import { Tree } from 'antd';
-import ShaIcon from '@/components/shaIcon';
+import { ShaIcon } from '@/components/shaIcon';
 
 export interface IProps<TItem> {
   items: TItem[];
@@ -28,7 +28,7 @@ interface DataNodeWithObject<TItem> {
   object: TItem;
 }
 
-export const ObjectsTree = <TItem = unknown>(props: IProps<TItem>): JSX.Element => {
+export const ObjectsTree = <TItem = unknown>(props: IProps<TItem>): React.JSX.Element => {
   const [manuallyExpanded, setManuallyExpanded] = useState<string[]>([]);
   const [scrollId, setScrollId] = useState<string>(null);
   // const [nodes, setNodes] = useState<DataNode[]>([]);

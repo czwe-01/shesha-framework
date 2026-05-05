@@ -4,7 +4,7 @@ import { useMedia } from 'react-use';
 import { ColumnsItemProps } from '@/providers/datatableColumnsConfigurator/models';
 import { ColumnsConfigurator } from './columnsConfigurator';
 import { deepCopyViaJson } from '@/utils/object';
-import { useDataTableStore } from '@/providers/dataTable';
+import { useDataTableStoreOrUndefined } from '@/providers/dataTable';
 import { useMetadata } from '@/providers/metadata';
 import { calculateDefaultColumns } from '../utils';
 import { BackendRepositoryType } from '@/providers/dataTable/repository/backendRepository';
@@ -20,7 +20,7 @@ export interface IColumnsEditorModal {
 
 export const ColumnsEditorModal: FC<IColumnsEditorModal> = ({ onChange, value, visible, hideModal, readOnly, parentComponentType }) => {
   const isSmall = useMedia('(max-width: 480px)');
-  const dataTableStore = useDataTableStore(false); // Don't require - modal may not be in a DataTable context
+  const dataTableStore = useDataTableStoreOrUndefined(); // Don't require - modal may not be in a DataTable context
   const metadata = useMetadata(false); // Don't require - DataTable may not be in a DataSource
   const isEntitySource = dataTableStore?.getRepository?.()?.repositoryType === BackendRepositoryType;
 
@@ -45,7 +45,10 @@ export const ColumnsEditorModal: FC<IColumnsEditorModal> = ({ onChange, value, v
         }
       };
 
-      loadDefaultColumns();
+      loadDefaultColumns().catch((error) => {
+        console.error('Failed to fetch default columns', error);
+        throw error;
+      });
     }
   }, [metadata?.metadata, visible, onChange, isEntitySource]);
 

@@ -4,8 +4,8 @@ import { ICommonContainerProps, IContainerComponentProps } from '@/interfaces';
 import { getStyle, getLayoutStyle, validateConfigurableComponentSettings, useAvailableConstantsData } from '@/providers/form/utils';
 import { getSettings } from './settingsForm';
 import { migrateCustomFunctions, migratePropertyName } from '@/designer-components/_common-migrations/migrateSettings';
-import { useFormData, useGlobalState, useTheme } from '@/providers';
-import { ComponentsContainer } from '@/components';
+import { useFormData, useGlobalState } from '@/providers';
+import ComponentsContainer from '@/components/formDesigner/containers/componentsContainer';
 import { migrateVisibility } from '@/designer-components/_common-migrations/migrateVisibility';
 import ParentProvider from '@/providers/parentProvider/index';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
@@ -86,7 +86,7 @@ const ContainerComponent: ContainerComponentDefinition = {
       ...wrapperStyles,
       alignSelf: model.alignSelf,
       justifySelf: model.justifySelf,
-      ...getLayoutStyle({ ...model, style: model?.wrapperStyle }, { data: formData, globalState }),
+      ...getLayoutStyle({ ...model, style: model.wrapperStyle }, { data: formData, globalState }),
     }), [model, formData, globalState]);
 
     const style = useMemo(() => ({
@@ -97,14 +97,14 @@ const ContainerComponent: ContainerComponentDefinition = {
     if (model.hidden) return null;
 
     return (
-      <ParentProvider model={model}>
+      <ParentProvider model={model} name={`ContainerComponent-${model.id}`}>
         <ComponentsContainer
           containerId={model.id}
           wrapperStyle={wrapperStyle}
           style={style}
           noDefaultStyling={model.noDefaultStyling}
           className={cx(model.className, styles.container)}
-          dynamicComponents={model?.isDynamic ? model?.components : ContainerComponent.emptyComponents}
+          dynamicComponents={model?.isDynamic ? model.components : ContainerComponent.emptyComponents}
           {...flexAndGridStyles}
         />
       </ParentProvider>

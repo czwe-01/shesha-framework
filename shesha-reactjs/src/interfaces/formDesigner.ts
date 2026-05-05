@@ -1,7 +1,6 @@
 import { ColProps, FormInstance } from 'antd';
 import { FormLayout } from 'antd/lib/form/Form';
-import { InternalNamePath } from 'rc-field-form/lib/interface';
-import { FC, MutableRefObject, ReactNode } from 'react';
+import { ComponentProps, FC, MutableRefObject, ReactNode } from 'react';
 import { ConfigurableFormInstance } from '@/providers/form/contexts';
 import {
   FormMarkup,
@@ -13,11 +12,17 @@ import {
 } from '@/providers/form/models';
 import { Migrator, MigratorFluent } from '@/utils/fluentMigrator/migrator';
 import { IModelMetadata, IPropertyMetadata } from './metadata';
-import { IAjaxResponseBase, IApplicationContext, IDimensionsValue, IErrorInfo } from '..';
+import { IAjaxResponseBase, IApplicationContext, IDimensionsValue, IErrorInfo, IObjectMetadata, UnwrapCodeEvaluators } from '..';
 import { ISheshaApplicationInstance } from '@/providers/sheshaApplication/application';
 import { IConfigurableTheme } from '@/providers/theme';
 import { AxiosResponse } from 'axios';
 import { FormBuilderFactory } from '@/form-factory/interfaces';
+import { Form } from 'antd';
+
+type FormProps<T> = ComponentProps<typeof Form<T>>;
+type OnFormFinishFailed<T> = FormProps<T>['onFinishFailed'];
+type FirstArgument<T> = T extends (arg: infer A, ...args: unknown[]) => unknown ? A : never;
+type ValidateErrorEntity<T = unknown> = FirstArgument<OnFormFinishFailed<T>>;
 
 export interface ISettingsFormInstance {
   submit: () => void;
@@ -38,14 +43,16 @@ export const DEFAULT_FORM_LAYOUT_SETTINGS: IFormLayoutSettings = {
 export interface ISettingsFormFactoryArgs<TModel = IConfigurableFormComponent> {
   readOnly: boolean;
   model: TModel;
+  defaultConfig?: TModel;
   onSave: (values: TModel) => void;
   onCancel: () => void;
-  onValuesChange?: (changedValues: any, values: TModel) => void;
-  toolboxComponent: IToolboxComponentBase;
+  onValuesChange?: (changedValues: Partial<TModel>, values: TModel) => void;
+  toolboxComponent?: IToolboxComponentBase;
   formRef?: MutableRefObject<ISettingsFormInstance | null>;
   propertyFilter?: (name: string) => boolean;
   layoutSettings?: IFormLayoutSettings;
   isInModal?: boolean;
+  availableConstants?: IObjectMetadata | undefined;
 }
 
 export type ISettingsFormFactory<TModel = IConfigurableFormComponent> = FC<ISettingsFormFactoryArgs<TModel>>;
@@ -55,9 +62,9 @@ export type SettingsFormMarkupFactoryArgs = {
 };
 export type SettingsFormMarkupFactory = (args: SettingsFormMarkupFactoryArgs) => FormMarkup;
 
-export interface ComponentFactoryArguments<TModel extends IConfigurableFormComponent = IConfigurableFormComponent, TCalculatedModel = any> {
-  model: TModel;
-  children?: JSX.Element;
+export interface ComponentFactoryArguments<TModel extends IConfigurableFormComponent = IConfigurableFormComponent, TCalculatedModel extends object = object> {
+  model: UnwrapCodeEvaluators<TModel>;
+  children?: React.JSX.Element;
   calculatedModel?: TCalculatedModel;
   shaApplication?: ISheshaApplicationInstance;
 
@@ -65,7 +72,7 @@ export interface ComponentFactoryArguments<TModel extends IConfigurableFormCompo
   form: FormInstance;
 }
 
-export type FormFactory<TModel extends IConfigurableFormComponent = IConfigurableFormComponent, TCalculatedModel = any> = FC<ComponentFactoryArguments<TModel, TCalculatedModel>>;
+export type FormFactory<TModel extends IConfigurableFormComponent = IConfigurableFormComponent, TCalculatedModel extends object = object> = FC<ComponentFactoryArguments<TModel, TCalculatedModel>>;
 
 export type PropertyInclusionPredicate = (name: string) => boolean;
 
@@ -81,10 +88,16 @@ export type ToolboxComponentAsTemplate = {
   build?: never;
 };
 
-export type IToolboxComponent<TModel extends IConfigurableFormComponent = IConfigurableFormComponent, TCalculatedModel = any> = {
-/**
- * Type of the component. Must be unique in the project.
- */
+export type IToolboxComponent<TModel extends IConfigurableFormComponent = IConfigurableFormComponent, TCalculatedModel extends object = object> = {
+  // ToDo: AS - remove after all components are migrated to inheritance
+  /**
+   * If true, indicates that the component properties can be inherited
+   */
+  allowInherit?: boolean;
+
+  /**
+   * Type of the component. Must be unique in the project.
+   */
   type: string;
   /**
    * If true, indicates that the component has data bindings and can be used as an input. Note: not all form components can be bound to the model (layout components etc.)
@@ -136,7 +149,6 @@ export type IToolboxComponent<TModel extends IConfigurableFormComponent = IConfi
    */
   calculateModel?: (model: TModel, allData: IApplicationContext, useCalculatedModel?: TCalculatedModel) => TCalculatedModel;
   /**
-   * @deprecated - use `migrator` instead
    * Fills the component properties with some default values. Fired when the user drops a component to the form
    */
   initModel?: (model: TModel) => TModel;
@@ -144,6 +156,14 @@ export type IToolboxComponent<TModel extends IConfigurableFormComponent = IConfi
    * Link component to a model metadata
    */
   linkToModelMetadata?: (model: TModel, metadata: IPropertyMetadata) => TModel;
+  /**
+   * Init model from metadata. Fired when the user drops a component to the form and bind component to the Entity property
+   * @param currentModel - current component model
+   * @param newModel - new component model
+   * @param metadata - property metadata
+   * @returns - component model
+   */
+  initModelFromMetadata?: (currentModel: TModel, newModel: TModel, metadata: IPropertyMetadata) => Promise<TModel>;
   /**
    * Returns nested component containers. Is used in the complex components like tabs, panels etc.
    */
@@ -163,12 +183,12 @@ export type IToolboxComponent<TModel extends IConfigurableFormComponent = IConfi
   /**
    * Settings validator
    */
-  validateSettings?: ((model: TModel) => Promise<any>) | undefined;
+  validateSettings?: ((model: TModel) => Promise<unknown>) | undefined;
 
   /**
    * Return true to indicate that the data type is supported by the component
    */
-  dataTypeSupported?: (dataTypeInfo: { dataType: string; dataFormat?: string }) => boolean;
+  dataTypeSupported?: (dataTypeInfo: { dataType: string; dataFormat?: string | undefined }) => boolean;
 
   /**
    * Settings migrations. Returns last version of settings
@@ -178,7 +198,7 @@ export type IToolboxComponent<TModel extends IConfigurableFormComponent = IConfi
   /**
    * Returns fields to fetch, used when it is necessary to get additional fields, and not just what is specified in the propertyName field
    */
-  getFieldsToFetch?: (propertyName: string, rawModel: TModel, metadata: IModelMetadata) => string[];
+  getFieldsToFetch?: ((propertyName: string, rawModel: TModel, metadata: IModelMetadata) => string[]) | undefined;
 
   /**
    * Validate model before rendering a component, used to add user-friendly messages about the need to correctly configure the component fields in the designer
@@ -188,7 +208,7 @@ export type IToolboxComponent<TModel extends IConfigurableFormComponent = IConfi
   /**
    * Returns true if the property should be calculated for the actual model (calculated from JS code)
    */
-  actualModelPropertyFilter?: (name: string, value: any) => boolean;
+  actualModelPropertyFilter?: (name: string, value: unknown) => boolean;
 
   editorAdapter?: IEditorAdapter;
 
@@ -229,7 +249,7 @@ export type IToolboxComponent<TModel extends IConfigurableFormComponent = IConfi
   ) => IDimensionsValue | undefined;
 } & ToolboxComponentAsTemplate;
 
-export type ComponentDefinition<TType extends string = string, TModel extends IConfigurableFormComponent = IConfigurableFormComponent, TCalculatedModel = any> =
+export type ComponentDefinition<TType extends string = string, TModel extends IConfigurableFormComponent = IConfigurableFormComponent, TCalculatedModel extends object = object> =
   Omit<IToolboxComponent<TModel, TCalculatedModel>, 'type'> & {
     type: TType;
   } & ToolboxComponentAsTemplate;
@@ -263,12 +283,7 @@ export interface IToolboxComponents {
 
 export { type IConfigurableFormComponent as IConfigurableFormComponent, type IFormComponentContainer };
 
-export interface IFieldValidationErrors {
-  name: InternalNamePath;
-  errors: string[];
-}
-
-export { type ValidateErrorEntity } from 'rc-field-form/lib/interface';
+export { type ValidateErrorEntity, type OnFormFinishFailed };
 
 export interface IAsyncValidationError {
   field: string;

@@ -60,7 +60,7 @@ const ButtonGroupEditorHeader: FC<ListEditorSectionRenderingArgs<ButtonGroupItem
         ? (
           <Divider style={{ marginTop: 0, marginBottom: 0 }}>
             <Button shape="round" size="small" type="link" onClick={onAddItemClick}>Add item</Button>
-            <Divider type="vertical" />
+            <Divider orientation="vertical" />
             <Button shape="round" size="small" type="link" onClick={onAddGroupClick}>Add group</Button>
           </Divider>
         )
@@ -94,7 +94,7 @@ export const ButtonGroupSettingsEditor: FC<ButtonGroupSettingsEditorProps> = ({ 
       onChange={onChange}
       initNewItem={makeNewItem}
       readOnly={readOnly}
-      header={<Alert message={readOnly ? 'Here you can view buttons configuration.' : 'Here you can configure the button group by adjusting their settings and ordering.'} />}
+      header={<Alert title={readOnly ? 'Here you can view buttons configuration.' : 'Here you can configure the button group by adjusting their settings and ordering.'} />}
       itemProperties={(itemProps) => (<ButtonGroupProperties item={itemProps.item} onChange={itemProps.onChange} readOnly={itemProps.readOnly} />)}
       groupHeader={ButtonGroupEditorHeader}
     >

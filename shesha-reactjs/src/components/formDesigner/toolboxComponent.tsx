@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { IToolboxComponentBase } from '@/interfaces';
-import { Show } from '@/components';
+import { Show } from '@/components/show';
 import { Space, Tooltip } from 'antd';
 import { useStyles } from './styles/styles';
 
@@ -12,7 +12,7 @@ export interface IProps {
 
 const ToolbarComponent: FC<IProps> = ({ component /* , index*/ }) => {
   const { styles } = useStyles();
-  const ComponentContent = (): JSX.Element => (
+  const ComponentContent = (): React.JSX.Element => (
     <div>
       {component.icon}
       <Space size="small">

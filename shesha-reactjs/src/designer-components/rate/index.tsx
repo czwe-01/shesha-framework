@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import classNames from 'classnames';
 import React from 'react';
-import { getAllEventHandlers } from '@/components/formDesigner/components/utils';
+import { getAllEventHandlers, IEventHandlers } from '@/components/formDesigner/components/utils';
 import { getSettings } from './settingsForm';
 import { validateConfigurableComponentSettings } from '@/providers/form/utils';
 import { IconType } from '@/components/shaIcon';
@@ -11,13 +11,11 @@ import { Rate } from 'antd';
 import { migrateCustomFunctions, migratePropertyName, migrateReadOnly } from '@/designer-components/_common-migrations/migrateSettings';
 import { migrateVisibility } from '@/designer-components/_common-migrations/migrateVisibility';
 import { IConfigurableFormComponent } from '@/providers';
-import {
-  ConfigurableFormItem,
-  ShaIcon,
-} from '@/components';
+import { ShaIcon } from '@/components/shaIcon';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
 import { migratePrevStyles } from '../_common-migrations/migrateStyles';
 import { defaultStyles } from './utils';
+import { ConfigurableFormItem } from '@/components/formDesigner/components/formItem';
 
 export interface IRateProps extends IConfigurableFormComponent {
   value?: number;
@@ -30,7 +28,11 @@ export interface IRateProps extends IConfigurableFormComponent {
   className?: string;
 }
 
-const RateComponent: IToolboxComponent<IRateProps> = {
+type RateCalculatedProperties = {
+  eventHandlers: IEventHandlers;
+};
+
+const RateComponent: IToolboxComponent<IRateProps, RateCalculatedProperties> = {
   type: 'rate',
   name: 'Rate',
   icon: <LikeOutlined />,
@@ -67,6 +69,8 @@ const RateComponent: IToolboxComponent<IRateProps> = {
                 className={classNames(className, 'sha-rate')}
                 style={{ ...model.allStyles?.fullStyle, display: 'flex', alignItems: 'center' }}
                 {...customEvent}
+                onFocus={() => customEvent.onFocus(undefined)}
+                onBlur={() => customEvent.onBlur(undefined)}
                 value={value}
                 onChange={onChangeInternal}
               />

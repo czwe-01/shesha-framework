@@ -10,11 +10,10 @@ import { App, Button, Space, Upload } from 'antd';
 import { Image } from 'antd/lib';
 import { UploadProps } from 'antd/lib/upload/Upload';
 import filesize from 'filesize';
-import { UploadRequestOption as RcCustomRequestOptions } from 'rc-upload/lib/interface';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { listType } from '@/designer-components/attachmentsEditor/attachmentsEditor';
 import { getFileIcon, isImageType } from '@/icons/fileIcons';
-import { useSheshaApplication, useStoredFile, useTheme } from '@/providers';
+import { useFileUploadState, useSheshaApplication, useFileUpload, useTheme } from '@/providers';
 import { isFileTypeAllowed } from '@/utils/fileValidation';
 import FileVersionsPopup from './fileVersionsPopup';
 import { DraggerStub } from './stubs';
@@ -54,12 +53,11 @@ export const FileUpload: FC<IFileUploadProps> = ({
   styles: stylesProp,
 }) => {
   const {
-    fileInfo,
     downloadFile,
     deleteFile,
     uploadFile,
-    isInProgress: { uploadFile: isUploading },
-  } = useStoredFile();
+  } = useFileUpload();
+  const fileInfo = useFileUploadState();
   const { backendUrl, httpHeaders } = useSheshaApplication();
   const props = {
     style: stylesProp,
@@ -79,18 +77,32 @@ export const FileUpload: FC<IFileUploadProps> = ({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState({ url: '', uid: '', name: '' });
 
+  const isUploading = false; // TODO: replace with status of file
+
   const url = fileInfo?.url ? `${backendUrl}${fileInfo.url}` : '';
   useEffect(() => {
     if (fileInfo && url) {
       fetch(url, { headers: { ...httpHeaders, 'Content-Type': 'application/octet-stream' } })
         .then((response) => response.blob())
         .then((blob) => URL.createObjectURL(blob))
-        .then((url) => setImageUrl(url));
+        .then((url) => setImageUrl(url))
+        .catch((error) => {
+          console.error('Failed to fetch file', error);
+          throw error;
+        });
     }
   }, [fileInfo]);
 
-  const onCustomRequest = ({ file }: RcCustomRequestOptions): void => {
-    uploadFile({ file: file as File }, callback);
+  const onCustomRequest: UploadProps['customRequest'] = ({ file }): void => {
+    if (file instanceof File) {
+      uploadFile({ file }).then(() => {
+        callback?.();
+      }).catch((error) => {
+        console.error('Failed to upload file', error);
+        throw error;
+      });
+    } else
+      throw new Error('File is not an instance of File. Please check the file object.');
   };
 
   const onReplaceClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>): void => {
@@ -115,7 +127,10 @@ export const FileUpload: FC<IFileUploadProps> = ({
       cancelText: 'Cancel',
       okType: 'danger',
       onOk: () => {
-        deleteFile();
+        deleteFile().catch((error) => {
+          console.error('Failed to delete file', error);
+          throw error;
+        });
       },
     });
   };
@@ -136,7 +151,7 @@ export const FileUpload: FC<IFileUploadProps> = ({
     }
   };
 
-  const fileControls = (color: string): JSX.Element => (
+  const fileControls = (color: string): React.JSX.Element => (
     <Space>
       <a style={{ color: color }}>
         <FileVersionsPopup fileId={fileInfo?.id} />
@@ -169,7 +184,7 @@ export const FileUpload: FC<IFileUploadProps> = ({
     </Space>
   );
 
-  const iconRender = (fileInfo): JSX.Element => {
+  const iconRender = (fileInfo): React.JSX.Element => {
     const { type, name } = fileInfo;
     if (isImageType(type)) {
       if (listType === 'thumbnail' && !isDragger) {
@@ -179,7 +194,7 @@ export const FileUpload: FC<IFileUploadProps> = ({
     return getFileIcon(type);
   };
 
-  const styledfileControls = (): JSX.Element =>
+  const styledfileControls = (): React.JSX.Element =>
     fileInfo && (
       <div className={styles.styledFileControls}>
         {iconRender(fileInfo)}
@@ -189,14 +204,14 @@ export const FileUpload: FC<IFileUploadProps> = ({
       </div>
     );
 
-  const renderFileItem = (file: any): JSX.Element => {
+  const renderFileItem = (file: any): React.JSX.Element => {
     const showThumbnailControls = !isUploading && listType === 'thumbnail';
     const showTextControls = listType === 'text';
 
     return (
       <div>
         {showThumbnailControls && styledfileControls()}
-        <a title={file.name}>
+        <span title={file.name}>
           <Space>
             <div className="thumbnail-item-name">
               {(listType === 'text' || !hideFileName) && (
@@ -210,7 +225,7 @@ export const FileUpload: FC<IFileUploadProps> = ({
               {showTextControls && fileControls(theme.application.primaryColor)}
             </div>
           </Space>
-        </a>
+        </span>
       </div>
     );
   };
@@ -254,7 +269,7 @@ export const FileUpload: FC<IFileUploadProps> = ({
     )
   );
 
-  const renderStub = (): JSX.Element => {
+  const renderStub = (): React.JSX.Element => {
     if (isDragger) {
       return (
         <Dragger disabled>
@@ -275,7 +290,7 @@ export const FileUpload: FC<IFileUploadProps> = ({
     );
   };
 
-  const renderUploader = (): JSX.Element => {
+  const renderUploader = (): React.JSX.Element => {
     const antListType = listType === 'thumbnail' ? 'picture-card' : 'text';
 
     if (isDragger && allowUpload) {
@@ -303,7 +318,9 @@ export const FileUpload: FC<IFileUploadProps> = ({
       <span className={styles.shaStoredFilesRenderer}>{isStub ? renderStub() : !isUploading ? renderUploader() : <SyncOutlined spin style={{ color: theme.application.primaryColor }} />}</span>
       {previewOpen && (
         <Image
-          wrapperStyle={{ display: 'none' }}
+          styles={{
+            root: { display: 'none' },
+          }}
           preview={{
             visible: previewOpen,
             onVisibleChange: (visible) => setPreviewOpen(visible),
@@ -335,7 +352,10 @@ export const FileUpload: FC<IFileUploadProps> = ({
               e.target.value = '';
               return;
             }
-            uploadFile({ file }, callback);
+            uploadFile({ file }).then(() => callback?.()).catch((error) => {
+              console.error('Failed to upload file', error);
+              throw error;
+            });
           }
           e.target.value = '';
         }}

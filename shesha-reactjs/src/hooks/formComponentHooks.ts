@@ -20,7 +20,7 @@ import {
 } from "..";
 import { getThemeBaseStyles, getHardcodedDefaults, IThemeStyleType, ComponentCategory } from "@/providers/theme/styleUtils";
 import { TouchableProxy, makeTouchableProxy } from "@/providers/form/touchableProxy";
-import { useParent } from "@/providers/parentProvider";
+import { useParentOrUndefined } from "@/providers/parentProvider";
 import { isEqual } from "lodash";
 import { getBorderStyle } from "@/designer-components/_settings/utils/border/utils";
 import { getFontStyle } from "@/designer-components/_settings/utils/font/utils";
@@ -92,7 +92,7 @@ export function useActualContextData<T extends object = object>(
   propertyFilter?: (name: string, value: unknown) => boolean,
   executor?: (data: T, context: TouchableProxy<IApplicationContext>) => T,
 ): T {
-  const parent = useParent(false);
+  const parent = useParentOrUndefined();
   const fullContext = useAvailableConstantsContexts();
   const accessors = wrapConstantsData({ fullContext, topContextId: DataContextTopLevels.All });
 
@@ -129,15 +129,14 @@ export function useActualContextData<T extends object = object>(
       ? executor(preparedData, contextProxyRef.current)
       : getActualModel(preparedData, contextProxyRef.current, pReadonly, propertyFilter);
 
-    prevActualModelRef.current = JSON.stringify(actualModel);
+    // ToDo: AS - review copy and compare for performance and reliability
+    const actualModelJson = JSON.stringify(actualModel);
+    if (prevActualModelRef.current !== actualModelJson) {
+      actualModelRef.current = actualModel;
+    }
+    prevActualModelRef.current = actualModelJson;
     prevParentReadonly.current = pReadonly;
   }
-
-  actualModelRef.current = useMemo(() => {
-    return actualModel;
-    // TODO: Alex, please review. Refs are used by a wrong way here
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prevActualModelRef.current]);
 
   if (modelChanged)
     prevModel.current = model;
@@ -309,7 +308,9 @@ export const useFormComponentStyles = <TModel>(
     ?? hardcodedDefaults?.stylingBox;
   const overflow = modelOverflow;
 
-  const [backgroundStyles, setBackgroundStyles] = useState(
+  const backgroundLocal = getBackgroundStyle(background, jsStyle);
+
+  const [backgroundStyles, setBackgroundStyles] = useState(() =>
     background && background.storedFile?.id && background.type === 'storedFile'
       ? {
         backgroundImage: `url(${app.backendUrl}/api/StoredFile/Download?id=${background.storedFile.id})`,
@@ -317,7 +318,7 @@ export const useFormComponentStyles = <TModel>(
         backgroundPosition: background.position,
         backgroundRepeat: background.repeat,
       }
-      : getBackgroundStyle(background, jsStyle),
+      : backgroundLocal,
   );
 
   const stylingBoxParsed = useMemo(() => jsonSafeParse<StyleBoxValue>(stylingBox || '{}') ?? {}, [stylingBox]);
@@ -342,23 +343,26 @@ export const useFormComponentStyles = <TModel>(
           const url = URL.createObjectURL(blob);
           const style = getBackgroundStyle(background, jsStyle, url);
           setBackgroundStyles(style);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch image', error);
         });
     } else {
-      setBackgroundStyles(getBackgroundStyle(background, jsStyle));
+      setBackgroundStyles(backgroundLocal);
     }
   }, [background, jsStyle, app.backendUrl, app.httpHeaders]);
 
-  const appearanceStyle = useMemo(() => removeUndefinedProps(
+  const appearanceStyle = useDeepCompareMemo(() => removeUndefinedProps(
     {
       ...stylingBoxAsCSS,
       ...dimensionsStyles,
       ...borderStyles,
       ...fontStyles,
-      ...backgroundStyles,
+      ...((background && background.storedFile?.id && background.type === 'storedFile') ? backgroundStyles : backgroundLocal),
       ...shadowStyles,
       ...overflowStyles,
       fontWeight: fontStyles.fontWeight || 400,
-    }), [stylingBoxAsCSS, dimensionsStyles, borderStyles, fontStyles, backgroundStyles, shadowStyles, overflowStyles]);
+    }), [stylingBoxAsCSS, dimensionsStyles, borderStyles, fontStyles, background, backgroundStyles, backgroundLocal, shadowStyles, overflowStyles]);
 
   const fullStyle = useDeepCompareMemo(() => ({ ...appearanceStyle, ...jsStyle }), [appearanceStyle, jsStyle]);
 

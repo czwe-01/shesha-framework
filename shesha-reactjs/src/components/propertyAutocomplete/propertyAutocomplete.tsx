@@ -1,13 +1,13 @@
 import React, { CSSProperties, FC, useEffect, useMemo, useState } from 'react';
 import { AutoComplete, Button, Select, Space, Tag } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { useEntityMetadataFetcher, useForm, useMetadata, useMetadataDispatcher } from '@/providers';
+import { useEntityMetadataFetcher, useFormOrUndefined, useMetadata, useMetadataDispatcher } from '@/providers';
 import { SizeType } from 'antd/lib/config-provider/SizeContext';
 import { camelCase } from 'lodash';
 import { IPropertyMetadata, asPropertiesArray, isIHasEntityType } from '@/interfaces/metadata';
 import camelcase from 'camelcase';
 import { getIconByPropertyMetadata } from '@/utils/metadata';
-import { useConfigurableFormActions } from '@/providers/form/actions';
+import { useConfigurableFormActionsOrUndefined } from '@/providers/form/actions';
 import { IEntityTypeIdentifier } from '@/providers/sheshaApplication/publicApi/entities/models';
 import { DataTypes } from '@/interfaces';
 
@@ -69,8 +69,8 @@ export const PropertyAutocomplete: FC<IPropertyAutocompleteProps> = ({ mode = 's
   const [state, setState] = useState<IAutocompleteState>({ options: properties2options(initialProperties, null), properties: initialProperties });
   const [multipleValue, setMultipleValue] = useState('');
 
-  const form = useForm(false);
-  const { linkToModelMetadata } = useConfigurableFormActions(false) ?? {};
+  const form = useFormOrUndefined();
+  const { linkToModelMetadata } = useConfigurableFormActionsOrUndefined() ?? {};
 
   const containerPath = useMemo(() => {
     if (!props.value || Array.isArray(props.value))
@@ -243,7 +243,9 @@ export const PropertyAutocomplete: FC<IPropertyAutocompleteProps> = ({ mode = 's
       style={props.style}
       styles={props.dropdownStyle ? { popup: { root: props.dropdownStyle } } : undefined}
       onSelect={onSelect}
-      onSearch={onSearch}
+      showSearch={{
+        onSearch: onSearch,
+      }}
       notFoundContent="Not found"
       size={props.size}
       popupMatchSelectWidth={false}
@@ -256,16 +258,18 @@ export const PropertyAutocomplete: FC<IPropertyAutocompleteProps> = ({ mode = 's
 
   if (mode === 'tags')
     return (
-      <Select allowClear onChange={props?.onChange} value={props.value} mode={mode} /* showSearch*/ size={props.size} disabled={readOnly}>
-        {state.options.map((option, index) => (
-          <Select.Option key={index} value={camelCase(option.value)}>
-            {option.label}
-          </Select.Option>
-        ))}
-      </Select>
+      <Select
+        allowClear
+        onChange={props?.onChange}
+        value={props.value}
+        mode={mode}
+        size={props.size}
+        disabled={readOnly}
+        options={state.options.map((option) => ({ label: option.label, value: camelCase(option.value) }))}
+      />
     );
 
-  const forMap = (tag: string): JSX.Element => {
+  const forMap = (tag: string): React.JSX.Element => {
     const tagElem = (
       <>
         <Tag
@@ -305,7 +309,9 @@ export const PropertyAutocomplete: FC<IPropertyAutocompleteProps> = ({ mode = 's
           style={props.style}
           styles={props.dropdownStyle ? { popup: { root: props.dropdownStyle } } : undefined}
           onSelect={onSelectMultiple}
-          onSearch={onSearchMultiple}
+          showSearch={{
+            onSearch: onSearchMultiple,
+          }}
           notFoundContent="Not found"
           size={props.size}
           popupMatchSelectWidth={false}

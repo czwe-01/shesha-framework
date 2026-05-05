@@ -7,13 +7,13 @@ import { Empty, Form } from 'antd';
 import React, { useMemo, useRef } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { ItemSettingsMarkupFactory } from './interfaces';
-import { ConfigurableForm } from '@/components';
+import { ConfigurableForm } from '@/components/configurableForm';
 
 export interface IPropertiesPanelProps<TItem extends ListItemWithId> extends ItemPropertiesRendererProps<TItem> {
   settingsMarkupFactory: ItemSettingsMarkupFactory<TItem>;
 }
 
-export const PropertiesPanel = <TItem extends ListItemWithId>(props: IPropertiesPanelProps<TItem>): JSX.Element => {
+export const PropertiesPanel = <TItem extends ListItemWithId>(props: IPropertiesPanelProps<TItem>): React.JSX.Element => {
   const { item, onChange, readOnly, settingsMarkupFactory } = props;
 
   const [form] = Form.useForm();

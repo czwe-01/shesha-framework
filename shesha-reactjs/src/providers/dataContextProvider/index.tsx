@@ -7,7 +7,6 @@ import DataContextBinder from "./dataContextBinder";
 import { setValueByPropertyName } from "@/utils/object";
 import { IApplicationContext, useAvailableConstantsDataNoRefresh } from "../form/utils";
 import { IShaDataWrapper } from "./contexts/shaDataAccessProxy";
-import { IAnyObject } from "@/interfaces";
 import { Path } from "@/utils/dotnotation";
 import { GetShaDataContextAccessor, useShaDataContextAccessor } from "./contexts/contextDataAccessor";
 import { WebStorageType } from "./contexts/webStorageProxy";
@@ -72,7 +71,7 @@ export const DataContextProvider = <TData extends object = object>(props: PropsW
 
   const storage = useShaDataContextAccessor<TData>(id, onChange, webStorageType, getShaDataContextAccessor);
 
-  const initialDataRef = useRef<IAnyObject>(undefined);
+  const initialDataRef = useRef<Promise<TData>>(undefined);
 
   const onChangeData = useRef<ContextOnChangeData>();
   if (props.onChangeData) {
@@ -89,7 +88,7 @@ export const DataContextProvider = <TData extends object = object>(props: PropsW
 
   const onChangeAction = (changedData?: Partial<TData>): void => {
     if (props.onChangeAction?.actionName) {
-      executeAction({
+      void executeAction({
         actionConfiguration: props.onChangeAction,
         argumentsEvaluationContext: { ...allData.current, changedData },
       });
@@ -105,12 +104,15 @@ export const DataContextProvider = <TData extends object = object>(props: PropsW
         onChangeContextData();
       });
       if (props.onInitAction) {
-        executeAction({
+        void executeAction({
           actionConfiguration: props.onInitAction,
           argumentsEvaluationContext: { ...allData.current },
         });
       }
-    });
+    })
+      .catch((error) => {
+        console.error('Failed to fetch initial data', error);
+      });
   }
 
   return (

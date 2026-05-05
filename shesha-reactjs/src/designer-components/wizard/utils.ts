@@ -1,7 +1,7 @@
 import { findLastIndex } from 'lodash';
 import { nanoid } from '@/utils/uuid';
 import { IWizardSequence, IWizardStepProps } from './models';
-import { IStyleType } from '@/index';
+import { IStyleType } from "@/providers/form/models";
 import { CSSProperties } from 'react';
 import { IConfigurableTheme, getLayoutComponentThemeDefaults } from "@/providers/theme";
 
@@ -116,6 +116,11 @@ export const onAddNewItem = (items: IWizardStepProps[]): IWizardStepProps => {
     backButtonText: 'Back',
     components: [],
     status: undefined,
+    hasCustomFooter: false,
+    stepFooter: {
+      id: `${id}_footer`,
+      components: [],
+    },
   };
   return buttonProps;
 };

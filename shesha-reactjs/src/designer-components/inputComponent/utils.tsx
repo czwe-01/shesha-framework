@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
 import { Select, Row } from 'antd';
-import { CodeEditor, ListEditor } from '@/components';
+import { ListEditor } from '@/components/listEditor';
+import { CodeEditor } from '@/designer-components/codeEditor/codeEditor';
 import { CodeEditorWithStandardConstants } from '../codeEditor/codeEditorWithConstants';
 import { ILabelValueEditorProps, ILabelValueItem } from '@/components/labelValueEditor/labelValueEditor';
 import { useStyles } from './styles';
@@ -8,6 +9,18 @@ import { ICodeEditorProps } from '../codeEditor/interfaces';
 import { IObjectMetadata } from '@/interfaces';
 import { InputComponent } from '.';
 import { getWidth } from '../settingsInput/utils';
+import { DefaultOptionType } from 'antd/lib/select';
+
+const stringToFriendlyMap = new Map<string, string>([['true', 'On'], ['false', 'Off'], ['editable', 'Editable'], ['readOnly', 'Read only'], ['inherited', 'Inherited']]);
+
+export const convertValueToFriendlyString = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return stringToFriendlyMap.has(value) ? stringToFriendlyMap.get(value) : value;
+  }
+
+  return String(value);
+};
+
 export const getEditor = (
   availableConstantsExpression: string,
   codeEditorProps: ICodeEditorProps,
@@ -46,7 +59,7 @@ export const CustomLabelValueEditorInputs = (props: ILabelValueEditorProps): Rea
             propertyName={labelName}
             value={item[labelName]}
             width={getWidth("textField", 100)}
-            onChange={(value) => {
+            onChange={(value: string) => {
               itemOnChange({ ...item, [labelName]: value }, undefined);
             }}
           />
@@ -59,7 +72,7 @@ export const CustomLabelValueEditorInputs = (props: ILabelValueEditorProps): Rea
             propertyName={valueName}
             value={item[valueName]}
             width={getWidth("textField", 100)}
-            onChange={(value) => {
+            onChange={(value: string) => {
               itemOnChange({ ...item, [valueName]: value }, undefined);
             }}
           />
@@ -73,7 +86,7 @@ export const CustomLabelValueEditorInputs = (props: ILabelValueEditorProps): Rea
               propertyName={colorName}
               value={item[colorName]}
               width={getWidth("colorPicker", 24)}
-              onChange={(value) => {
+              onChange={(value: string) => {
                 itemOnChange({ ...item, [colorName]: value }, undefined);
               }}
             />
@@ -91,29 +104,25 @@ export const CustomLabelValueEditorInputs = (props: ILabelValueEditorProps): Rea
                 return '';
               }}
               disabled={readOnly}
-            >
-              {Array.isArray(dropdownOptions) ? dropdownOptions.map((option) => (
-                <Select.Option key={option.value} value={option.value}>
-                  {option.label}
-                </Select.Option>
-              )) : dropdownOptions}
-            </Select>
+              options={Array.isArray(dropdownOptions)
+                ? dropdownOptions.map<DefaultOptionType>((option) => ({ label: option.label, value: option.value }))
+                : dropdownOptions}
+            />
+            <InputComponent
+              type="iconPicker"
+              placeholder={iconTitle}
+              readOnly={readOnly}
+              size="small"
+              label=""
+              id={iconName}
+              propertyName={iconName}
+              value={item[iconName]}
+              width={getWidth("iconPicker", 24)}
+              onChange={(value: string) => {
+                itemOnChange({ ...item, [iconName]: value }, undefined);
+              }}
+            />
           </Row>
-          <InputComponent
-            type="iconPicker"
-            placeholder={iconTitle}
-            readOnly={readOnly}
-            size="small"
-            label=""
-            id={iconName}
-            propertyName={iconName}
-            value={item[iconName]}
-            iconSize={16}
-            width={getWidth("iconPicker", 24)}
-            onChange={(value) => {
-              itemOnChange({ ...item, [iconName]: value }, undefined);
-            }}
-          />
         </div>
       )}
     </ListEditor>

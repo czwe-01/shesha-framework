@@ -62,22 +62,22 @@ const EditableCell = ({ title, editable, children, dataIndex, record, handleSave
 
   let childNode = children;
 
-  const { Option } = Select;
-
-
   const textAlignValues = ['start', 'end', 'center', 'inherit'];
   const flexDirectionValues = ['row', 'column', 'row-reverse', 'column-reverse'];
 
   const Dropdown = (ref, values): ReactElement =>
     (
-      <Select ref={ref} onSelect={save} onBlur={save}>
-        {values.map((value, i) => (
-          <Option key={i} value={value}>{value.split('-').map((word) => {
+      <Select
+        ref={ref}
+        onSelect={save}
+        onBlur={save}
+        options={values.map((value) => ({
+          value: value,
+          label: value.split('-').map((word) => {
             return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-          }).join(' ')}
-          </Option>
-        ))}
-      </Select>
+          }).join(' '),
+        }))}
+      />
     );
 
   if (editable) {
@@ -302,7 +302,7 @@ export const ColumnsList: FC<IProps> = ({ value, onChange, readOnly, size }) => 
         onCancel={toggleModal}
         cancelText={readOnly ? 'Close' : undefined}
       >
-        <Space direction="vertical" style={{ width: '100%' }}>
+        <Space orientation="vertical" style={{ width: '100%' }}>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="columns">
               {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (

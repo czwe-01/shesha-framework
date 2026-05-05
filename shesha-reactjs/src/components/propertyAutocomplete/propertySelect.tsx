@@ -119,7 +119,7 @@ const propertyItems2options = (properties: IPropertyItem[], prefix: string, isSe
   return properties.filter((p) => !(p.itemType === 'property' && (p as IPropertyMetadata).dataType === DataTypes.array)).map((p) => propertyItem2option(p, prefix, isSelectable));
 };
 
-const modelMetadata2Properties = (modelMetadata?: IModelMetadata): IPropertyItem[] => {
+const modelMetadata2Properties = (modelMetadata: IModelMetadata | undefined): IPropertyItem[] => {
   if (!modelMetadata)
     return [];
 
@@ -191,6 +191,9 @@ export const PropertySelect: FC<IPropertySelectProps> = ({ readOnly = false, isP
       fetchContainer(containerPath).then((m) => {
         const propertyItems = modelMetadata2Properties(m);
         setProperties(propertyItems, containerPath);
+      }).catch((error) => {
+        console.error('Failed to fetch container', error);
+        throw error;
       });
     }
   }, [containerPath]);
@@ -234,8 +237,9 @@ export const PropertySelect: FC<IPropertySelectProps> = ({ readOnly = false, isP
     <Select
       onSelect={onSelect}
       value={props.value}
-      showSearch
-      onSearch={onSearch}
+      showSearch={{
+        onSearch: onSearch,
+      }}
       size={props.size}
       disabled={readOnly}
       options={state.options}

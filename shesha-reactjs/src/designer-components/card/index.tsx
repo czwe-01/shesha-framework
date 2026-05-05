@@ -36,7 +36,7 @@ const CardComponent: IToolboxComponent<ICardComponentProps> = {
 
     const newStyles = model.allStyles?.fullStyle ?? {};
 
-    const headerComponents = model?.header?.components ?? [];
+    const headerComponents = model.header?.components ?? [];
 
     const extra =
       (headerComponents?.length > 0 || formMode === 'designer') && !model.hideHeading ? (
@@ -50,7 +50,7 @@ const CardComponent: IToolboxComponent<ICardComponentProps> = {
     if (model.hidden) return null;
 
     return (
-      <ParentProvider model={model}>
+      <ParentProvider model={model} name={`Card-${model.id}`}>
         <Card
           className={classNames(model.className, { [styles.hideWhenEmpty]: model.hideWhenEmpty })}
           title={title}
@@ -60,7 +60,7 @@ const CardComponent: IToolboxComponent<ICardComponentProps> = {
         >
           <ComponentsContainer
             containerId={model?.content?.id}
-            dynamicComponents={model?.isDynamic ? model?.content.components : []}
+            dynamicComponents={model?.isDynamic ? model.content.components : []}
           />
         </Card>
       </ParentProvider>

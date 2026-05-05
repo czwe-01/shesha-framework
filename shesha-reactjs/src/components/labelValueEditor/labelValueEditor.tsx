@@ -13,7 +13,7 @@ import {
 import { BorderlessTableOutlined } from '@ant-design/icons';
 import { CodeVariablesTables, ICodeExposedVariable } from '@/components/codeVariablesTable';
 import { ILabelValueEditorPropsBase } from './interfaces';
-import { ListEditor } from '@/components';
+import { ListEditor } from '@/components/listEditor';
 import { ItemChangeDetails } from '../listEditor';
 
 export interface ILabelValueItem {
@@ -98,7 +98,7 @@ const LabelValueEditor: FC<ILabelValueEditorProps> = ({
             cancelText={readOnly ? 'Close' : undefined}
           >
             <Show when={!!description}>
-              <Alert type="info" message={description} />
+              <Alert type="info" title={description} />
               <br />
             </Show>
             <Tabs

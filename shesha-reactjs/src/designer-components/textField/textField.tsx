@@ -1,8 +1,8 @@
 import { CodeOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
 import { InputProps } from 'antd/lib/input';
-import React, { useMemo } from 'react';
-import ConfigurableFormItem from '@/components/formDesigner/components/formItem';
+import React, { useEffect, useMemo } from 'react';
+import { ConfigurableFormItem } from '@/components/formDesigner/components/formItem';
 import { getAllEventHandlers } from '@/components/formDesigner/components/utils';
 import { DataTypes, StringFormats } from '@/interfaces/dataTypes';
 import { IInputStyles } from '@/providers';
@@ -12,11 +12,15 @@ import { migrateCustomFunctions, migratePropertyName, migrateReadOnly } from '@/
 import { migrateVisibility } from '@/designer-components/_common-migrations/migrateVisibility';
 import ReadOnlyDisplayFormItem from '@/components/readOnlyDisplayFormItem/index';
 import { migrateFormApi } from '../_common-migrations/migrateFormApi1';
-import { IconType, ShaIcon } from '@/components';
+import { IconType, ShaIcon } from '@/components/shaIcon';
 import { useStyles } from './styles';
 import { migratePrevStyles } from '../_common-migrations/migrateStyles';
 import { getSettings } from './settingsForm';
 import { defaultStyles } from './utils';
+import { useComponentApi } from '@/providers/componentApi/provider';
+import { TextFieldApi } from '@/componentsApi/componentApi';
+
+import apiCode from "../../componentsApi/componentApi.ts?raw";
 
 const TextFieldComponent: TextFieldComponentDefinition = {
   type: 'textField',
@@ -36,7 +40,22 @@ const TextFieldComponent: TextFieldComponentDefinition = {
       dataFormat === StringFormats.password),
   calculateModel: (model, allData) => ({ eventHandlers: getAllEventHandlers(model, allData) }),
   Factory: ({ model, calculatedModel }) => {
-    const { styles } = useStyles({ fontFamily: model?.font?.type, fontWeight: model?.font?.weight, textAlign: model?.font?.align, color: model?.font?.color, fontSize: model?.font?.size });
+    const componentApi = useComponentApi();
+    const inputRef = React.useRef(null);
+    useEffect(() => {
+      if (componentApi === undefined) return undefined;
+      componentApi.updateApi<TextFieldApi>(
+        {
+          id: model.id,
+          componentName: model.componentName,
+          typeDefinition: { typeName: 'TextFieldApi', files: [{ content: apiCode, fileName: 'apis/componentApi.ts' }] },
+          api: { focus: () => inputRef.current?.focus() },
+        },
+      );
+      return () => componentApi.removeApi(model.id);
+    }, [componentApi, model.componentName, model.id]);
+
+    const { styles } = useStyles({ fontFamily: model.font?.type, fontWeight: model.font?.weight, textAlign: model.font?.align, color: model.font?.color, fontSize: model.font?.size });
     const InputComponentType = useMemo(() => model.textType === 'password' ? Input.Password : Input, [model.textType]);
 
     const finalStyle = useMemo(() => !model.enableStyleOnReadonly && model.readOnly ? {
@@ -52,7 +71,7 @@ const TextFieldComponent: TextFieldComponentDefinition = {
         console.warn(`Invalid regExp pattern for '${model.propertyName}':`, model, error);
         return null;
       }
-    }, [model.regExp]);
+    }, [model]);
 
     if (model.hidden) return null;
 
@@ -61,7 +80,7 @@ const TextFieldComponent: TextFieldComponentDefinition = {
       placeholder: model.placeholder,
       prefix: <>{model.prefix}{model.prefixIcon && <ShaIcon iconName={model.prefixIcon} style={{ color: 'rgba(0,0,0,.45)' }} />}</>,
       suffix: <>{model.suffix}{model.suffixIcon && <ShaIcon iconName={model.suffixIcon as IconType} style={{ color: 'rgba(0,0,0,.45)' }} />}</>,
-      variant: model?.border?.hideBorder ? 'borderless' : undefined,
+      variant: model.border?.hideBorder ? 'borderless' : undefined,
       size: model.size,
       disabled: model.readOnly,
       readOnly: model.readOnly,
@@ -77,7 +96,8 @@ const TextFieldComponent: TextFieldComponentDefinition = {
         {(value, onChange) => {
           const customEvents = calculatedModel.eventHandlers;
           const onChangeInternal = (...args: any[]): void => {
-            const inputValue: string | undefined = args[0]?.currentTarget?.value?.toString();
+            const rawValue = args[0]?.currentTarget ? args[0]?.currentTarget?.value : args[0];
+            const inputValue: string | undefined = rawValue == null ? undefined : String(rawValue);
             const isEmpty = inputValue === undefined || inputValue === null || inputValue === '';
             const isRegExpMatch = regExpObj && Boolean(inputValue?.match(regExpObj));
             if ((!isEmpty && isRegExpMatch) || !regExpObj || isEmpty) {
@@ -95,7 +115,7 @@ const TextFieldComponent: TextFieldComponentDefinition = {
 
           return inputProps.readOnly
             ? <ReadOnlyDisplayFormItem value={model.textType === 'password' ? ''.padStart(value?.length, '•') : value} style={finalStyle} />
-            : <InputComponentType {...inputProps} {...customEvents} disabled={model.readOnly} value={value} onChange={onChangeInternal} />;
+            : <InputComponentType ref={inputRef} {...inputProps} {...customEvents} disabled={model.readOnly} value={value} onChange={onChangeInternal} />;
         }}
       </ConfigurableFormItem>
     );

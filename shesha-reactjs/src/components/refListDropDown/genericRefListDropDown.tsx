@@ -1,5 +1,5 @@
 import { Empty, Select, SelectProps, Spin } from 'antd';
-import { ValidationErrors } from '@/components';
+import { ValidationErrors } from '@/components/validationErrors';
 import { useReferenceList } from '@/providers/referenceListDispatcher';
 import React, { useMemo } from 'react';
 import { ReferenceListItemDto } from '@/apis/referenceList';
@@ -7,7 +7,7 @@ import ReadOnlyDisplayFormItem from '@/components/readOnlyDisplayFormItem';
 import { CustomLabeledValue, IGenericRefListDropDownProps, ISelectOption } from './models';
 import ReflistTag from './reflistTag';
 
-export const GenericRefListDropDown = <TValue = unknown>(props: IGenericRefListDropDownProps<TValue>): JSX.Element => {
+export const GenericRefListDropDown = <TValue = unknown>(props: IGenericRefListDropDownProps<TValue>): React.JSX.Element => {
   const {
     referenceListId,
     value,
@@ -116,7 +116,6 @@ export const GenericRefListDropDown = <TValue = unknown>(props: IGenericRefListD
     return (
       <ReadOnlyDisplayFormItem
         value={wrapValue(value, options)}
-        disabled={disabled}
         showIcon={showIcon}
         showItemName={showItemName}
         solidColor={solidColor}
@@ -175,13 +174,8 @@ export const GenericRefListDropDown = <TValue = unknown>(props: IGenericRefListD
             />
           );
         }}
-      >
-        {options?.map(({ value: localValue, label, data, disabled }) => (
-          <Select.Option value={localValue} key={localValue} data={data} disabled={disabled}>
-            {label}
-          </Select.Option>
-        ))}
-      </Select>
+        options={options?.map(({ value: localValue, label, data, disabled }) => ({ value: localValue, label, data, disabled }))}
+      />
     );
   }
 
@@ -210,13 +204,8 @@ export const GenericRefListDropDown = <TValue = unknown>(props: IGenericRefListD
           );
         },
       } : {})}
-    >
-      {options?.map(({ value: localValue, label, data, disabled }) => (
-        <Select.Option value={localValue} key={localValue} data={data} disabled={disabled}>
-          {label}
-        </Select.Option>
-      ))}
-    </Select>
+      options={options?.map(({ value: localValue, label, data, disabled }) => ({ value: localValue, label, data, disabled }))}
+    />
   );
 };
 

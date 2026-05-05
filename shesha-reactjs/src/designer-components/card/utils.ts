@@ -1,4 +1,4 @@
-import { IStyleType } from "@/index";
+import { IStyleType } from "@/providers/form/models";
 import { ICardComponentProps } from "./interfaces";
 import { IConfigurableTheme, getLayoutComponentThemeDefaults } from "@/providers/theme";
 

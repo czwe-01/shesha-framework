@@ -1,4 +1,9 @@
-import { Autocomplete, CodeEditor, ColorPicker, FormAutocomplete, PropertyAutocomplete, Show } from '@/components';
+import { Autocomplete } from '@/components/autocomplete';
+import { ColorPicker } from '@/components/colorPicker';
+import { PropertyAutocomplete } from '@/components/propertyAutocomplete/propertyAutocomplete';
+import { Show } from '@/components/show';
+import { CodeEditor } from '@/designer-components/codeEditor/codeEditor';
+import { FormAutocomplete } from '@/components/configurableItemAutocomplete/formAutocomplete';
 import RefListItemSelectorSettingsModal from '@/components/refListSelectorDisplay/options/modal';
 import { Checkbox, Input } from 'antd';
 import React, { FC } from 'react';
@@ -6,14 +11,14 @@ import SettingsForm, { useSettingsForm } from '../_settings/settingsForm';
 import { ISettingsFormFactoryArgs } from '@/interfaces';
 import SettingsFormItem from '../_settings/settingsFormItem';
 import SettingsCollapsiblePanel from '../_settings/settingsCollapsiblePanel';
-import { MetadataProvider } from '@/providers';
+import { MetadataProvider, UnwrapCodeEvaluators } from '@/providers';
 import { IKanbanProps } from '@/components/kanban/model';
 import { SheshaConstants } from '@/utils/metadata/standardProperties';
 import { useAvailableConstantsMetadata } from '@/utils/metadata/hooks';
 import EntityTypeAutocomplete from '@/components/configurableItemAutocomplete/entityTypeAutocomplete';
 
 const KanbanSettings: FC<ISettingsFormFactoryArgs<IKanbanProps>> = (props) => {
-  const { values } = useSettingsForm<IKanbanProps>();
+  const { values } = useSettingsForm<UnwrapCodeEvaluators<IKanbanProps>>();
   const { readOnly } = props;
 
   const getStyleConstants = useAvailableConstantsMetadata({
@@ -101,14 +106,6 @@ const KanbanSettings: FC<ISettingsFormFactoryArgs<IKanbanProps>> = (props) => {
             label="Style"
             propertyName="externalColumnStyle"
             description="CSS Style"
-            exposedVariables={[
-              {
-                id: '788673a5-5eb9-4a9a-a34b-d8cea9cacb3c',
-                name: 'data',
-                description: 'Form data',
-                type: 'object',
-              },
-            ]}
             wrapInTemplate={true}
             availableConstants={getStyleConstants}
           />
@@ -148,14 +145,6 @@ const KanbanSettings: FC<ISettingsFormFactoryArgs<IKanbanProps>> = (props) => {
             label="Style"
             propertyName="headerStyles"
             description="CSS Style"
-            exposedVariables={[
-              {
-                id: '788673a5-5eb9-4a9a-a34b-d8cea9cacb3c',
-                name: 'data',
-                description: 'Form data',
-                type: 'object',
-              },
-            ]}
             wrapInTemplate={true}
             availableConstants={getStyleConstants}
           />
