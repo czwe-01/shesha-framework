@@ -17,19 +17,20 @@ import { getStyle, validateConfigurableComponentSettings } from "@/providers/for
 import { getShadowStyle } from "../_settings/utils/shadow/utils";
 import ConfigurableComponentRenderer from "@/components/configurableComponentRenderer";
 import { migratePrevStyles } from "../_common-migrations/migrateStyles";
+import { IShadowValue } from "../_settings/utils";
 
 interface IMenuListProps extends IConfigurableFormComponent, ILayoutColor {
-  items?: ItemType[];
-  menuOverflow?: "dropdown" | "menu" | "scroll";
-  fontSize?: string;
-  gap?: string;
-  height?: string;
-  containerStyle?: string;
-  styleOnHover?: string;
-  styleOnSelected?: string;
-  styleOnSubMenu?: string;
-  width?: string;
-  menuItemShadow?: IShadowValue;
+  items?: ItemType[] | undefined;
+  menuOverflow?: "dropdown" | "menu" | "scroll" | undefined;
+  fontSize?: string | undefined;
+  gap?: string | undefined;
+  height?: string | undefined;
+  containerStyle?: string | undefined;
+  styleOnHover?: string | undefined;
+  styleOnSelected?: string | undefined;
+  styleOnSubMenu?: string | undefined;
+  width?: string | undefined;
+  menuItemShadow?: IShadowValue | undefined;
 }
 
 type MenuOverflowValue = "dropdown" | "menu" | "scroll";

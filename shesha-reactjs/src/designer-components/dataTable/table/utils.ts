@@ -1,12 +1,12 @@
 import { nanoid } from '@/utils/uuid';
-import { ColumnsItemProps, IConfigurableColumnsProps, IDataColumnsProps, isDataColumn } from '@/providers/datatableColumnsConfigurator/models';
+import { ColumnsItemProps, IConfigurableColumnsProps, IDataColumnsProps, isColumnGroupProps, isDataColumn } from '@/providers/datatableColumnsConfigurator/models';
 import { IExpressionExecuterArguments, executeScriptSync } from '@/providers/form/utils';
 import { IModelMetadata, IPropertyMetadata, isPropertiesArray, isPropertiesLoader } from '@/interfaces/metadata';
 import { camelcaseDotNotation, toCamelCase, humanizeString } from '@/utils/string';
-import { isDefined } from '@/utils/nullables';
+import { isDefined, isNullOrWhiteSpace } from '@/utils/nullables';
 import { IConfigurableFormComponent } from '@/interfaces/formDesigner';
 import { IStyleType } from '@/providers/form/models';
-import { IConfigurableTheme, getInputComponentThemeDefaults } from '@/providers/theme';
+import { isNonEmptyArray } from '@/utils/array';
 
 const NEW_KEY = ['{{NEW_KEY}}', '{{GEN_KEY}}'];
 const MAX_NUMBER_OF_DEFAULT_COLS = 20;
@@ -30,11 +30,11 @@ export const flattenConfiguredColumns = (items?: ColumnsItemProps[]): IConfigura
   const result: IConfigurableColumnsProps[] = [];
 
   const walk = (item: ColumnsItemProps): void => {
-    if (!item) return;
+    if (!isDefined(item))
+      return;
 
-    const group = item as { childItems?: ColumnsItemProps[] };
-    if (Array.isArray(group.childItems) && group.childItems.length > 0) {
-      group.childItems.forEach(walk);
+    if (isColumnGroupProps(item) && isNonEmptyArray(item.childItems)) {
+      item.childItems.forEach(walk);
       return;
     }
 
@@ -60,7 +60,8 @@ export const collectMetadataPropertyPaths = (properties: IPropertyMetadata[]): s
   };
 
   const walk = (property: IPropertyMetadata, prefix: string = ''): void => {
-    if (!property) return;
+    if (!isDefined(property))
+      return;
 
     const segment = normalize(property.path);
     if (!segment) return;
@@ -84,7 +85,7 @@ export const collectMetadataPropertyPaths = (properties: IPropertyMetadata[]): s
     }
   };
 
-  (properties ?? []).forEach((property) => walk(property));
+  properties.forEach((property) => walk(property));
 
   return Array.from(names);
 };
@@ -92,16 +93,12 @@ export const collectMetadataPropertyPaths = (properties: IPropertyMetadata[]): s
 export const filterVisibility =
   (context: IExpressionExecuterArguments) =>
     ({ customVisibility }: IConfigurableColumnsProps): boolean => {
-      if (customVisibility) {
-        return executeScriptSync(customVisibility, context);
-      }
-
-      return true;
+      return customVisibility
+        ? executeScriptSync<boolean>(customVisibility, context) ?? false
+        : true;
     };
 
-export const defaultStyles = (theme?: IConfigurableTheme): IStyleType => {
-  const themeDefaults = getInputComponentThemeDefaults(theme);
-
+export const defaultStyles = (): IStyleType => {
   return {
     background: { type: 'color', color: themeDefaults?.background?.color || '#fff' },
     font: { weight: '400', size: 14, color: '#000', type: 'Segoe UI', align: 'left' },
@@ -234,20 +231,20 @@ export const filterPropertiesBySupportedTypes = (properties: IPropertyMetadata[]
  */
 export const propertyToDataColumn = (property: IPropertyMetadata, index: number): IDataColumnsProps => {
   // Guard against undefined or empty property.path
-  const rawPath = property.path ?? '';
+  const rawPath = property.path;
   const fallbackId = `col_${index}`;
 
   return {
     id: rawPath || fallbackId,
     caption: property.label ?? (rawPath ? humanizeString(rawPath) : `Column ${index + 1}`),
-    description: property.description,
+    description: property.description ?? undefined,
     columnType: 'data' as const,
     sortOrder: index,
     itemType: 'item' as const,
     isVisible: property.isVisible !== false, // Default to visible unless explicitly false
-    propertyName: rawPath !== '' ? toCamelCase(rawPath) : fallbackId,
+    propertyName: !isNullOrWhiteSpace(rawPath) ? toCamelCase(rawPath) : fallbackId,
     allowSorting: true,
-    accessor: rawPath !== '' ? toCamelCase(rawPath) : fallbackId,
+    accessor: !isNullOrWhiteSpace(rawPath) ? toCamelCase(rawPath) : fallbackId,
   };
 };
 
@@ -262,7 +259,7 @@ export const propertyToDataColumn = (property: IPropertyMetadata, index: number)
  * @param metadata - Model metadata containing properties
  * @returns Promise resolving to array of DataTable column configurations (max 20 valid columns)
  */
-export const calculateDefaultColumns = async (metadata: IModelMetadata): Promise<IDataColumnsProps[]> => {
+export const calculateDefaultColumns = async (metadata: IModelMetadata | undefined): Promise<IDataColumnsProps[]> => {
   if (!metadata || !metadata.properties) {
     console.warn('❌ No metadata available for column registration');
     return [];
@@ -275,7 +272,7 @@ export const calculateDefaultColumns = async (metadata: IModelMetadata): Promise
   } else if (isPropertiesLoader(metadata.properties)) {
     try {
       properties = await metadata.properties();
-      if (!properties) {
+      if (!isDefined(properties)) {
         console.warn('⚠️ PropertiesLoader returned null/undefined, using empty array');
         properties = [];
       }
@@ -295,7 +292,7 @@ export const calculateDefaultColumns = async (metadata: IModelMetadata): Promise
   const supportedProperties = filterPropertiesBySupportedTypes(filteredProperties);
 
   // Apply maxNumber limit to the list of supported properties
-  const tableColumns = MAX_NUMBER_OF_DEFAULT_COLS > 0 && supportedProperties.length > MAX_NUMBER_OF_DEFAULT_COLS
+  const tableColumns = supportedProperties.length > MAX_NUMBER_OF_DEFAULT_COLS
     ? supportedProperties.slice(0, MAX_NUMBER_OF_DEFAULT_COLS)
     : supportedProperties;
 
@@ -364,7 +361,7 @@ export const convertRowStylingBoxToPadding = (rowStylingBox?: string | RowStylin
   let stylingBox: RowStylingBoxType;
   if (typeof rowStylingBox === 'string') {
     try {
-      stylingBox = JSON.parse(rowStylingBox);
+      stylingBox = JSON.parse(rowStylingBox) as RowStylingBoxType;
     } catch (e) {
       console.warn('Failed to parse rowStylingBox JSON:', e);
       return undefined;
@@ -378,13 +375,13 @@ export const convertRowStylingBoxToPadding = (rowStylingBox?: string | RowStylin
   let bottom: string | number | undefined;
   let left: string | number | undefined;
 
-  if (stylingBox?.padding) {
+  if (stylingBox.padding) {
     top = stylingBox.padding.top;
     right = stylingBox.padding.right;
     bottom = stylingBox.padding.bottom;
     left = stylingBox.padding.left;
-  } else if (stylingBox?.paddingTop || stylingBox?.paddingRight ||
-    stylingBox?.paddingBottom || stylingBox?.paddingLeft) {
+  } else if (stylingBox.paddingTop || stylingBox.paddingRight ||
+    stylingBox.paddingBottom || stylingBox.paddingLeft) {
     top = stylingBox.paddingTop;
     right = stylingBox.paddingRight;
     bottom = stylingBox.paddingBottom;

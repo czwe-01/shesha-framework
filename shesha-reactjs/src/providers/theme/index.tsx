@@ -156,7 +156,7 @@ function useThemeActions(): IThemeActionsContext {
   return context;
 }
 
-function useTheme(): IThemeStateContext & IThemeActionsContext | undefined {
+function useTheme(): IThemeStateContext & IThemeActionsContext {
   return { ...useThemeState(), ...useThemeActions() };
 }
 
