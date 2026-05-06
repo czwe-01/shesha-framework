@@ -103,6 +103,7 @@ import { HEADER_CONFIGURATION, HEADER_PUB_PORTAL_CONFIGURATION } from '@/compone
 import AdvancedFilterButton from '@/designer-components/dataTable/advancedFilterButton/advancedFilterButtonComponent';
 import { getToolboxComponentsVisibility } from '@/utils';
 import ThemeEditorComponent from '@/designer-components/settingsEditor/themeEditor';
+import ComponentDefaultsEditorComponent from '@/designer-components/settingsEditor/componentDefaultsEditor';
 import MainMenuEditorComponent from '@/designer-components/settingsEditor/mainMenuEditor';
 import LabelConfigurator from '@/designer-components/labelConfigurator';
 import SearchableTabs from '@/designer-components/propertiesTabs';
@@ -248,6 +249,7 @@ export const getToolboxComponents = (
       components: [
         PropertyRouterComponent,
         ThemeEditorComponent,
+        ComponentDefaultsEditorComponent,
         MainMenuEditorComponent,
         PermissionAutocompleteComponent,
         ColumnsEditorComponent, // Hidden

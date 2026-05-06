@@ -11,58 +11,16 @@ import { useCalculatedModel, useFormComponentStyles } from '@/hooks/formComponen
 import { useActualContextData, useDeepCompareMemo } from '@/hooks';
 import { stylingUtils } from '@/components/formDesigner/utils/stylingUtils';
 import { useStyles } from './styles/styles';
-import { FormComponentValidationProvider, useValidationErrorsActionsOrDefault, useValidationErrorsStateOrDefault } from '@/providers/validationErrors';
+import { FormComponentValidationProvider, useValidationErrorsStateOrDefault } from '@/providers/validationErrors';
 import { isValidGuid } from './components/utils';
 import { toCamelCase } from '@/utils/string';
 import { useComponentApi } from '@/providers/componentApi/provider';
 import { deepMergeValues, removeUndefinedProps } from '@/utils/object';
 import { CommonComponentApi, IComponentStyle, InputComponentApi } from '../../componentsApi/componentApi';
 import { IBackgroundValue } from '@/designer-components/_settings/utils';
-import { useDeepCompareEffect } from '@/hooks/useDeepCompareEffect';
 
 import apiCode from "../../componentsApi/componentApi.ts?raw";
-
-/**
- * Determines the component category for theme styling based on component type and properties.
- * Priority: 1) Explicit componentCategory from toolbox, 2) isInput flag, 3) Component type matching
- */
-const getComponentCategory = (
-  componentType: string,
-  isInput?: boolean,
-  toolboxComponentCategory?: UseFormComponentStylesOptions['componentCategory'],
-): UseFormComponentStylesOptions['componentCategory'] => {
-  // Priority 1: Use explicit componentCategory from toolbox component if available
-  if (toolboxComponentCategory) {
-    return toolboxComponentCategory;
-  }
-
-  // Priority 2: Input components: isInput = true
-  if (isInput) {
-    return 'inputComponents';
-  }
-
-  // Priority 3: Layout components: container-like components
-  const layoutComponentTypes = [
-    'container', 'card', 'tabs', 'collapsiblePanel', 'panel',
-    'columns', 'sizableColumns', 'dataList', 'dataTable',
-    'drawer', 'wizard', 'sectionSeparator', 'divider',
-  ];
-  if (layoutComponentTypes.includes(componentType)) {
-    return 'layoutComponents';
-  }
-
-  // Priority 4: Inline components: inline elements
-  const inlineComponentTypes = [
-    'button', 'link', 'text', 'icon', 'iconPicker',
-    'refListStatus', 'tag', 'badge',
-  ];
-  if (inlineComponentTypes.includes(componentType)) {
-    return 'inlineComponents';
-  }
-
-  // Standard components: everything else (display components)
-  return 'standardComponents';
-};
+import { useEffectOnce } from '@/hooks/useEffectOnce';
 
 export interface IFormComponentProps {
   componentModel: IConfigurableFormComponent;
@@ -80,9 +38,7 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel: sourceCom
   const getToolboxComponent = useFormDesignerComponentGetter();
   const { anyOfPermissionsGranted } = useSheshaApplication();
   const { activeDevice } = useCanvas();
-  const { getValidation } = useValidationErrorsActionsOrDefault();
-  const { errors } = useValidationErrorsStateOrDefault(); // Get errors map to trigger re-renders when errors change
-  const errorCount = errors.size; // Track size to trigger useMemo
+  const { errors: validationErrors } = useValidationErrorsStateOrDefault(); // Get errors map to trigger re-renders when errors change
 
   const componentApi = useComponentApi();
   const [apiModel, setApiModel] = useState<Partial<IConfigurableFormComponent>>({});
@@ -158,18 +114,27 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel: sourceCom
   if (!toolboxComponent?.isInput && !toolboxComponent?.isOutput)
     actualModel.propertyName = undefined;
 
-  // Determine component category for theme styling
-  const componentCategory = getComponentCategory(componentModel.type, toolboxComponent?.isInput, toolboxComponent?.componentCatergory);
+  const allStyles = useFormComponentStyles(actualModel);
 
-  actualModel.allStyles = useFormComponentStyles(actualModel, { componentCategory });
+  // For input components: Strip margins from fullStyle and jsStyle
+  // Margins are handled by the FormItem wrapper (via allStyles.margins), not the inner component
+  // This prevents double margins (wrapper + component) in both designer and live modes
+  if (toolboxComponent?.isInput) {
+    actualModel.allStyles = {
+      ...allStyles,
+      fullStyle: stylingUtils.stripMargins(allStyles.fullStyle),
+      jsStyle: stylingUtils.stripMargins(allStyles.jsStyle),
+      // margins are preserved for FormItem wrapper use
+    };
+  } else {
+    actualModel.allStyles = allStyles;
+  }
 
   const calculatedModel = useCalculatedModel(actualModel, toolboxComponent?.useCalculateModel, toolboxComponent?.calculateModel);
 
   const actualApiModel = useDeepCompareMemo(() => deepMergeValues(actualModel, apiModel), [actualModel, apiModel]);
 
-  useDeepCompareEffect(() => {
-    if (componentApi === undefined) return undefined;
-
+  if (componentApi !== undefined) {
     // common Api
     componentApi.updateApi<CommonComponentApi>(
       {
@@ -239,8 +204,8 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel: sourceCom
         ],
       );
     }
-    return () => componentApi.removeApi(actualModel.id);
-  }, [toolboxComponent, actualApiModel, componentApi, shaForm.antdForm, setApiModel, setApiStyles, sourceComponentModel, updateApiModel]);
+  };
+  useEffectOnce(() => () => componentApi?.removeApi(actualModel.id));
 
   const control = useMemo(() => {
     if (!toolboxComponent) return null;
@@ -273,7 +238,7 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel: sourceCom
     });
 
     // Collect errors from child components registered via hook
-    const childValidation = getValidation();
+    const childValidation = validationErrors.get(actualModel.id);
     if (childValidation?.hasErrors && childValidation.errors) {
       errors.push(...childValidation.errors);
       // Use the child's validationType if present (prioritize 'error' > 'warning' > 'info')
@@ -298,7 +263,7 @@ const FormComponentInner: FC<IFormComponentProps> = ({ componentModel: sourceCom
     }
 
     return undefined;
-  }, [toolboxComponent, actualModel, getValidation, errorCount]);
+  }, [toolboxComponent, actualModel, validationErrors]);
 
   // Wrap component with error icon if there are validation errors
   // Show error icons only in designer mode

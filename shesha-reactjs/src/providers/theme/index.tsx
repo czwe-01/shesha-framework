@@ -184,6 +184,8 @@ export {
   getInlineComponentThemeDefaults,
   getThemeBaseStyles,
   mergeThemeDefaultsWithComponentDefaults,
+  getComponentSpecificDefaults,
+  mergeComponentStylesWithTheme,
 } from './styleUtils';
 
 export type { IThemeStyleType } from './styleUtils';

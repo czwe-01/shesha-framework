@@ -1,8 +1,8 @@
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { Collapse, Skeleton } from 'antd';
 import { CollapseProps } from 'antd/lib/collapse';
 import classNames from 'classnames';
-import { IStyleType } from '@/index';
+import { IStyleType } from "@/providers/form/models";
 import { useStyles } from './styles/styles';
 
 export type headerType = 'parent' | 'child' | 'default';
@@ -58,9 +58,8 @@ const defaultBodyStyle: React.CSSProperties = {
  *
  */
 
-export const CollapsiblePanel: FC<Omit<ICollapsiblePanelProps, 'radiusLeft' | 'radiusRight'>> = ({
-  expandIconPosition = 'end',
-  accordion,
+export const CollapsiblePanel: FC<PropsWithChildren<Omit<ICollapsiblePanelProps, 'radiusLeft' | 'radiusRight' | 'expandIconPosition' | 'children'>>> = ({
+  expandIconPlacement = 'end',
   onChange,
   header,
   extra,
@@ -91,10 +90,9 @@ export const CollapsiblePanel: FC<Omit<ICollapsiblePanelProps, 'radiusLeft' | 'r
     <Collapse
       defaultActiveKey={collapsedByDefault ? [] : ['1']}
       onChange={onChange}
-      expandIconPosition={expandIconPosition}
+      expandIconPlacement={expandIconPlacement}
       className={classNames(shaCollapsiblePanelStyle, { [styles.hideWhenEmpty]: hideWhenEmpty }, className)}
       ghost={ghost}
-      accordion={accordion}
       items={[
         {
           key: "1",

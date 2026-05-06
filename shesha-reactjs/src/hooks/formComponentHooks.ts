@@ -18,7 +18,7 @@ import {
   useTheme,
   wrapConstantsData,
 } from "..";
-import { getThemeBaseStyles, getHardcodedDefaults, IThemeStyleType, ComponentCategory } from "@/providers/theme/styleUtils";
+import { getThemeBaseStyles, getHardcodedDefaults, IThemeStyleType } from "@/providers/theme/styleUtils";
 import { TouchableProxy, makeTouchableProxy } from "@/providers/form/touchableProxy";
 import { useParentOrUndefined } from "@/providers/parentProvider";
 import { isEqual } from "lodash";
@@ -303,9 +303,9 @@ export const useFormComponentStyles = <TModel>(
     mergeWithThemeDefaults<IShadowValue>(modelShadow, themeDefaults.shadow as IShadowValue),
     hardcodedDefaults?.shadow as IShadowValue,
   );
-  const stylingBox = (!isUnset(modelStylingBox) ? modelStylingBox : undefined)
-    ?? themeDefaults.stylingBox
-    ?? hardcodedDefaults?.stylingBox;
+  const stylingBox = (!isUnset(modelStylingBox) ? modelStylingBox : undefined) ??
+    themeDefaults.stylingBox ??
+    hardcodedDefaults?.stylingBox;
   const overflow = modelOverflow;
 
   const backgroundLocal = getBackgroundStyle(background, jsStyle);

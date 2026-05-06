@@ -1,11 +1,11 @@
-import { Col, Row, Alert, Typography, Space } from 'antd';
+import { Alert, Col, Row, Space, Typography } from 'antd';
 import React, { FC, ReactElement } from 'react';
-import { CollapsiblePanel } from '@/components';
+import { CollapsiblePanel } from '@/components/panel';
 import AlertsExample from './alertsExamples';
 import FormExample from './form';
 import ThemeParameters from './parameters';
 import { useStyles } from './styles/styles';
-import { IConfigurableTheme, useTheme } from '@/index';
+import { IConfigurableTheme, useTheme } from '@/providers/theme';
 import LayoutExample from './layoutsExamples';
 import { InlineComponentsExample } from './inlineComponentsExample';
 

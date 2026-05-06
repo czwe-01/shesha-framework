@@ -1,22 +1,9 @@
-import { Space, Radio, InputNumber, Input, Select, Slider, Switch } from 'antd';
-import React, { FC, useMemo, useState } from 'react';
-import { CollapsiblePanel, ColorPicker } from '@/components';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Col, Form, Input, Radio, Row, Slider, Space, Tooltip, Typography } from 'antd';
+import React, { FC } from 'react';
+import { ColorPicker } from '@/components/colorPicker';
 import { IConfigurableTheme } from '@/providers/theme/contexts';
-import { humanizeString } from '@/utils/string';
-import { BACKGROUND_PRESET_COLORS, TEXT_PRESET_COLORS } from './presetColors';
-import { useStyles } from './styles/styles';
-import Box from '@/designer-components/styleBox/components/box';
-import { borderStyles } from '@/designer-components/_settings/utils/border/utils';
-import Icon from '@/components/icon/Icon';
-import {
-  createThemeUpdaters,
-  createColorConfigs,
-  getThemeValueWithFallback,
-  BORDER_RADIUS_CORNERS,
-  BORDER_SIDES,
-  LABEL_ALIGN_OPTIONS,
-} from './utils';
-import { HeaderContent, RenderInput, RenderColor, RenderDivider } from './components';
+import { ComponentDefaultsPanel } from './componentDefaultsPanel';
 
 export interface ThemeParametersProps {
   value?: IConfigurableTheme;
@@ -24,528 +11,249 @@ export interface ThemeParametersProps {
   readonly?: boolean;
 }
 
+const PRESET_COLORS = [
+  '#1890ff', '#ff4d4f', '#faad14', '#52c41a', '#13c2c2',
+  '#722ed1', '#eb2f96', '#f5222d', '#fa8c16', '#a0d911',
+];
+
+interface ColorCircleProps {
+  color?: string;
+  onChange: (color: string) => void;
+  label: string;
+  readonly?: boolean;
+}
+
+const ColorCircle: FC<ColorCircleProps> = ({ color, onChange, label, readonly }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+    <div
+      style={{
+        width: 40,
+        height: 40,
+        borderRadius: '50%',
+        overflow: 'hidden',
+        border: '2px solid #fff',
+        boxShadow: '0 0 0 1px #d9d9d9',
+      }}
+    >
+      <ColorPicker
+        value={color}
+        onChange={onChange}
+        readOnly={readonly}
+        allowClear
+        presets={[{ label: 'Presets', defaultOpen: true, colors: PRESET_COLORS }]}
+        style={{ width: '100%', height: '100%' }}
+      />
+    </div>
+    <Typography.Text style={{ fontSize: 12 }}>{label}</Typography.Text>
+  </div>
+);
+
 const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, readonly }) => {
-  const { styles } = useStyles();
-
-  // Create theme updater functions
-  const {
-    updateInputComponents,
-    updateLayoutComponents,
-    updateStandardComponents,
-    updateInlineComponents,
-    updateApplication,
-    updateText,
-  } = useMemo(() => createThemeUpdaters(theme, onChange), [theme, onChange]);
-
-  // Create color configurations
-  const { colorConfigs, textConfigs, backgroundConfigs } = useMemo(
-    () => createColorConfigs(updateApplication, updateText, onChange, theme),
-    [theme, onChange],
-  );
-
-  const [formLayout, setFormLayout] = useState({ labelSpan: 6, componentSpan: 18 });
-
-  // Extract settings for easier access
-  const inputSettings = theme?.inputComponents;
-  const layoutSettings = theme?.layoutComponents;
-  const standardSettings = theme?.standardComponents;
-  const inlineSettings = theme?.inlineComponents;
-
-  // Common props
-  const commonInputProps = { readOnly: readonly, jsSetting: false };
-  const commonPanelProps = {
-    expandIconPosition: 'end' as const,
-    className: styles.themeCard,
-    collapsedByDefault: true,
+  const updateTheme = (update: Partial<IConfigurableTheme>): void => {
+    onChange?.({ ...theme, ...update });
   };
 
+  const inputSettings = theme?.inputComponents;
+  const labelSpan = inputSettings?.labelSpan ?? theme?.labelSpan ?? 6;
+  const layout = inputSettings?.labelAlign === 'top' ? 'vertical' : 'horizontal';
+
+  const handleLayoutChange = (val: 'vertical' | 'horizontal'): void => {
+    if (val === 'vertical') {
+      onChange?.({
+        ...theme,
+        inputComponents: {
+          ...inputSettings,
+          labelAlign: 'top',
+          labelSpan: 24,
+          contentSpan: 24,
+        },
+      });
+    } else {
+      onChange?.({
+        ...theme,
+        inputComponents: {
+          ...inputSettings,
+          labelAlign: 'right',
+          labelSpan: 6,
+          contentSpan: 18,
+        },
+      });
+    }
+  };
+
+  const handleSpanChange = (val: number): void => {
+    onChange?.({
+      ...theme,
+      inputComponents: {
+        ...inputSettings,
+        labelSpan: val,
+        contentSpan: 24 - val,
+      },
+    });
+  };
+
+  // Fallback to legacy application colors
+  const primaryColor = theme?.application?.primaryColor;
+  const errorColor = theme?.application?.errorColor;
+  const warningColor = theme?.application?.warningColor;
+  const successColor = theme?.application?.successColor;
+  const infoColor = theme?.application?.infoColor;
+
   return (
-    <div style={{ marginTop: '10px' }}>
-      {/* Theme Colors Section */}
-      <CollapsiblePanel
-        {...commonPanelProps}
-        collapsedByDefault={false}
-        header={<HeaderContent title="Theme Settings" subtitle="Customize the look and feel of your workspace" />}
+    <div style={{ padding: '0 0 24px' }}>
+      <Typography.Title level={4} style={{ marginBottom: 4 }}>Theme Settings</Typography.Title>
+      <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>
+        Customize the look and feel of your workspace.
+      </Typography.Text>
+
+      {/* Theme Mode */}
+      <Typography.Title level={5} style={{ marginBottom: 12 }}>Theme</Typography.Title>
+      <Radio.Group
+        value={theme?.sidebar || 'light'}
+        onChange={(e) => updateTheme({ sidebar: e.target.value })}
+        disabled={readonly}
+        optionType="button"
+        buttonStyle="solid"
       >
-        <Space direction="vertical" align="start" size="middle" className={styles.space}>
-          {/* Sidebar Theme */}
-          <Space direction="vertical" align="start" className={styles.space}>
-            <HeaderContent title="Theme" subtitle="" />
-            <Radio.Group
-              onChange={(e) => onChange({ ...theme, sidebar: e.target.value })}
-              value={theme?.sidebar || 'light'}
-            >
-              <Radio.Button value="dark">Dark</Radio.Button>
-              <Radio.Button value="light">Light</Radio.Button>
-              <Radio.Button value="system">System</Radio.Button>
-            </Radio.Group>
+        <Radio.Button value="light">Light</Radio.Button>
+        <Radio.Button value="dark">Dark</Radio.Button>
+        <Radio.Button value="system">System</Radio.Button>
+      </Radio.Group>
+
+      {/* Colors Row */}
+      <Row gutter={[32, 24]} style={{ marginTop: 32 }}>
+        <Col xs={24} md={8}>
+          <Typography.Title level={5} style={{ marginBottom: 4 }}>Colours</Typography.Title>
+          <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 12 }}>
+            Select a circle below to choose your desired colour.
+          </Typography.Text>
+          <Space size={16} wrap>
+            <ColorCircle color={primaryColor} onChange={(c) => updateTheme({ application: { ...theme?.application, primaryColor: c } })} label="Primary" readonly={readonly} />
+            <ColorCircle color={errorColor} onChange={(c) => updateTheme({ application: { ...theme?.application, errorColor: c } })} label="Error" readonly={readonly} />
+            <ColorCircle color={warningColor} onChange={(c) => updateTheme({ application: { ...theme?.application, warningColor: c } })} label="Warning" readonly={readonly} />
+            <ColorCircle color={successColor} onChange={(c) => updateTheme({ application: { ...theme?.application, successColor: c } })} label="Success" readonly={readonly} />
+            <ColorCircle color={infoColor} onChange={(c) => updateTheme({ application: { ...theme?.application, infoColor: c } })} label="Info" readonly={readonly} />
           </Space>
-          <RenderDivider />
+        </Col>
 
-          {/* Application Colors */}
-          <Space direction="vertical" align="start" size="middle" className={styles.space}>
-            <HeaderContent title="Colours" subtitle="Select a circle below to choose your desired colour" />
-            <Space direction="horizontal" align="center">
-              {colorConfigs.map((config, index) => (
-                <RenderColor
-                  key={`theme_${index}`}
-                  colorName={config.name.replace('Color', '')}
-                  initialColor={theme?.application?.[config.name]}
-                  onChange={config.onChange}
-                  className={styles.themeColorSpace}
-                  colorPickerClassName={styles.themeColorPicker}
-                />
-              ))}
-            </Space>
-            <RenderDivider />
-
-            {/* Text Colors */}
-            <HeaderContent title="Text Colors" subtitle="Customize text colors for your application" />
-            <Space direction="horizontal" align="center">
-              {textConfigs.map((config, index) => (
-                <RenderColor
-                  key={`text_${index}`}
-                  colorName={config.name}
-                  initialColor={theme?.text?.[config.name]}
-                  onChange={config.onChange}
-                  presetColors={TEXT_PRESET_COLORS}
-                  hint={config?.hint}
-                  className={styles.themeColorSpace}
-                  colorPickerClassName={styles.themeColorPicker}
-                />
-              ))}
-            </Space>
-            <RenderDivider />
-
-            {/* Background Colors */}
-            <HeaderContent title="Background Colors" subtitle="Customize background colors for your application" />
-            <Space direction="horizontal" align="center">
-              {backgroundConfigs.map((config, index) => {
-                // Handle legacy layoutBackground property for pageBackground
-                const legacyKey = config.name === 'pageBackground' ? 'layoutBackground' : undefined;
-                const colorValue = getThemeValueWithFallback(theme, config.name, legacyKey);
-
-                return (
-                  <RenderColor
-                    key={`bg_${index}`}
-                    colorName={config.name}
-                    initialColor={colorValue}
-                    onChange={config.onChange}
-                    presetColors={BACKGROUND_PRESET_COLORS}
-                    className={styles.themeColorSpace}
-                    colorPickerClassName={styles.themeColorPicker}
-                  />
-                );
-              })}
-              <RenderColor
-                colorName="Component background"
-                initialColor={inputSettings?.background?.color || theme?.componentBackground || '#ffffff'}
-                className={styles.themeColorSpace}
-                colorPickerClassName={styles.themeColorPicker}
-                presetColors={BACKGROUND_PRESET_COLORS}
-                onChange={(color: any) =>
-                  updateInputComponents({
-                    background: { ...inputSettings?.background, color: color?.toHexString?.() ?? color },
-                  })}
-                readonly={readonly}
-              />
-            </Space>
+        <Col xs={24} md={8}>
+          <Typography.Title level={5} style={{ marginBottom: 4 }}>Text Colours</Typography.Title>
+          <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 12 }}>
+            Select a circle below to choose your desired colour.
+          </Typography.Text>
+          <Space size={16} wrap>
+            <ColorCircle color={theme?.text?.default} onChange={(c) => updateTheme({ text: { ...theme?.text, default: c } })} label="Default" readonly={readonly} />
+            <ColorCircle color={theme?.text?.secondary} onChange={(c) => updateTheme({ text: { ...theme?.text, secondary: c } })} label="Secondary" readonly={readonly} />
           </Space>
+        </Col>
+
+        <Col xs={24} md={8}>
+          <Typography.Title level={5} style={{ marginBottom: 4 }}>Component And Page</Typography.Title>
+          <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 12 }}>
+            Select a circle below to choose your desired colour.
+          </Typography.Text>
+          <Space size={16} wrap>
+            <ColorCircle color={theme?.componentBackground} onChange={(c) => updateTheme({ componentBackground: c })} label="Component" readonly={readonly} />
+            <ColorCircle color={theme?.pageBackground ?? theme?.layoutBackground} onChange={(c) => updateTheme({ pageBackground: c })} label="Page" readonly={readonly} />
+          </Space>
+        </Col>
+      </Row>
+
+      {/* Form Span Settings */}
+      <div style={{ marginTop: 32 }}>
+        <Space align="center" style={{ marginBottom: 4 }}>
+          <Typography.Title level={5} style={{ margin: 0 }}>Form Span Settings</Typography.Title>
+          <Tooltip title="The layout uses a 24-column grid system by default. Choose between vertical or horizontal layout. You can customize how much space each element takes by setting the label span and wrapper span.">
+            <QuestionCircleOutlined style={{ color: '#1890ff', cursor: 'help' }} />
+          </Tooltip>
         </Space>
-      </CollapsiblePanel>
+        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16, fontSize: 12 }}>
+          The layout uses a 24-column grid system by default. Choose between vertical or horizontal layout. You can customize how much space each element takes by setting the label span and wrapper span.
+        </Typography.Text>
 
-      {/* Layout Component Settings Section */}
-      <CollapsiblePanel
-        {...commonPanelProps}
-        header={<HeaderContent title="Layout Component Settings" subtitle="Configure the styling of layout componens such as:  Panels, Cards, Tabs, etc." />}
-      >
-        <Space size="middle" direction="vertical" className={styles.space}>
-          {/* Margin & Padding */}
-          <Space direction="vertical">
-            <HeaderContent title="Margin & Padding" subtitle="Configure layout styling such as margin and padding" />
-            <Box
-              value={layoutSettings?.stylingBox}
-              onChange={(val) => updateLayoutComponents({ stylingBox: val })}
-              readOnly={readonly}
+        <Radio.Group
+          value={layout}
+          onChange={(e) => handleLayoutChange(e.target.value)}
+          disabled={readonly}
+          optionType="button"
+          buttonStyle="solid"
+          style={{ marginBottom: 16 }}
+        >
+          <Radio.Button value="vertical">Vertical</Radio.Button>
+          <Radio.Button value="horizontal">Horizontal</Radio.Button>
+        </Radio.Group>
+
+        {layout === 'horizontal' && (
+          <div style={{ maxWidth: 400 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+              <Typography.Text>0</Typography.Text>
+              <Typography.Text>{labelSpan}</Typography.Text>
+              <Typography.Text>24</Typography.Text>
+            </div>
+            <Slider
+              min={0}
+              max={24}
+              value={labelSpan}
+              onChange={handleSpanChange}
+              disabled={readonly}
+              tooltip={{ formatter: (v) => `Label: ${v}, Control: ${24 - (v ?? 0)}` }}
             />
-          </Space>
-          <RenderDivider />
-
-          {/* Grid Gap */}
-          <Space direction="vertical">
-            <HeaderContent title="Grid Gap" subtitle="Configure layout component styling" />
-            <Space direction="horizontal">
-              <RenderInput
-                value={layoutSettings?.gridGapHorizontal}
-                onChange={(val) => updateLayoutComponents({ gridGapHorizontal: val ?? 0 })}
-                label="Column Gap"
-                disabled={readonly}
-              />
-              <RenderInput
-                value={layoutSettings?.gridGapVertical}
-                onChange={(val) => updateLayoutComponents({ gridGapVertical: val ?? 0 })}
-                label="Row Gap"
-                disabled={readonly}
-              />
-            </Space>
-          </Space>
-          <RenderDivider />
-
-          {/* Background */}
-          <Space direction="vertical">
-            <HeaderContent title="Background" subtitle="Configure background settings" />
-            <RenderColor
-              colorName=""
-              initialColor={layoutSettings?.background?.color || '#ffffff'}
-              onChange={(color: any) =>
-                updateLayoutComponents({
-                  background: { ...layoutSettings?.background, color: color?.toHexString?.() ?? color },
-                })}
-              readonly={readonly}
-            />
-          </Space>
-          <RenderDivider />
-
-          {/* Border */}
-          <Space direction="vertical">
-            <HeaderContent title="Border" subtitle="Configure border settings" />
-            <Space direction="horizontal" size="large" style={{ alignItems: 'flex-start' }}>
-              <Radio.Group
-                value={layoutSettings?.border?.borderType}
-                size="small"
-                onChange={(e) =>
-                  updateLayoutComponents({ border: { ...layoutSettings?.border, borderType: e.target.value } })}
-              >
-                <Radio.Button value="all">
-                  <Icon icon="BorderOutlined" />
-                </Radio.Button>
-                <Radio.Button value="custom">
-                  <Icon icon="BorderOuterOutlined" />
-                </Radio.Button>
-              </Radio.Group>
-
-              {/* All Border Settings */}
-              {layoutSettings?.border?.borderType !== 'custom' && (
-                <Space direction="horizontal">
-                  <Input
-                    placeholder="0"
-                    size="small"
-                    value={layoutSettings?.border?.border?.all?.width}
-                    onChange={(e) =>
-                      updateLayoutComponents({
-                        border: {
-                          ...layoutSettings?.border,
-                          border: {
-                            ...layoutSettings?.border?.border,
-                            all: { ...layoutSettings?.border?.border?.all, width: e.target.value },
-                          },
-                        },
-                      })}
-                    disabled={readonly}
-                    style={{ width: 80 }}
-                  />
-                  <Select
-                    placeholder="Solid"
-                    size="small"
-                    options={borderStyles}
-                    value={layoutSettings?.border?.border?.all?.style}
-                    onChange={(val) =>
-                      updateLayoutComponents({
-                        border: {
-                          ...layoutSettings?.border,
-                          border: {
-                            ...layoutSettings?.border?.border,
-                            all: { ...layoutSettings?.border?.border?.all, style: val },
-                          },
-                        },
-                      })}
-                    disabled={readonly}
-                    style={{ width: 120 }}
-                  />
-                  <ColorPicker
-                    value={layoutSettings?.border?.border?.all?.color}
-                    onChange={(val) =>
-                      updateLayoutComponents({
-                        border: {
-                          ...layoutSettings?.border,
-                          border: {
-                            ...layoutSettings?.border?.border,
-                            all: { ...layoutSettings?.border?.border?.all, color: val?.toString?.() },
-                          },
-                        },
-                      })}
-                    readOnly={readonly}
-                    size="small"
-                  />
-                </Space>
-              )}
-
-              {/* Custom Border Settings */}
-              {layoutSettings?.border?.borderType === 'custom' && (
-                <Space direction="vertical">
-                  {BORDER_SIDES.map((side) => (
-                    <div key={side} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
-                      <span style={{ width: 50 }}>{humanizeString(side)}</span>
-                      <Input
-                        placeholder="0"
-                        size="small"
-                        value={layoutSettings?.border?.border?.[side]?.width}
-                        onChange={(e) =>
-                          updateLayoutComponents({
-                            border: {
-                              ...layoutSettings?.border,
-                              border: {
-                                ...layoutSettings?.border?.border,
-                                [side]: { ...layoutSettings?.border?.border?.[side], width: e.target.value },
-                              },
-                            },
-                          })}
-                        disabled={readonly}
-                        style={{ width: 80 }}
-                      />
-                      <Select
-                        placeholder="Solid"
-                        size="small"
-                        options={borderStyles}
-                        value={layoutSettings?.border?.border?.[side]?.style}
-                        onChange={(val) =>
-                          updateLayoutComponents({
-                            border: {
-                              ...layoutSettings?.border,
-                              border: {
-                                ...layoutSettings?.border?.border,
-                                [side]: { ...layoutSettings?.border?.border?.[side], style: val },
-                              },
-                            },
-                          })}
-                        disabled={readonly}
-                        style={{ width: 120 }}
-                      />
-                      <ColorPicker
-                        value={layoutSettings?.border?.border?.[side]?.color}
-                        onChange={(val) =>
-                          updateLayoutComponents({
-                            border: {
-                              ...layoutSettings?.border,
-                              border: {
-                                ...layoutSettings?.border?.border,
-                                [side]: { ...layoutSettings?.border?.border?.[side], color: val?.toString?.() },
-                              },
-                            },
-                          })}
-                        readOnly={readonly}
-                        size="small"
-                      />
-                    </div>
-                  ))}
-                </Space>
-              )}
-            </Space>
-          </Space>
-          <RenderDivider />
-
-          {/* Border Radius */}
-          <Space direction="vertical">
-            <HeaderContent title="Border Radius" subtitle="Configure border radius settings" />
-            <Space direction="horizontal" size="large">
-              <Radio.Group
-                value={layoutSettings?.border?.radiusType}
-                size="small"
-                onChange={(e) =>
-                  updateLayoutComponents({ border: { ...layoutSettings?.border, radiusType: e.target.value } })}
-              >
-                <Radio.Button value="all">
-                  <Icon icon="ExpandOutlined" />
-                </Radio.Button>
-                <Radio.Button value="custom">
-                  <Icon icon="RadiusUprightOutlined" />
-                </Radio.Button>
-              </Radio.Group>
-
-              {layoutSettings?.border?.radiusType !== 'custom' && (
-                <InputNumber
-                  placeholder="0"
-                  size="small"
-                  value={layoutSettings?.border?.radius?.all}
-                  onChange={(val) =>
-                    updateLayoutComponents({
-                      border: { ...layoutSettings?.border, radius: { ...layoutSettings?.border?.radius, all: val } },
-                    })}
-                  disabled={readonly}
-                  style={{ width: 80 }}
-                />
-              )}
-
-              {layoutSettings?.border?.radiusType === 'custom' && (
-                <Space direction="horizontal">
-                  {BORDER_RADIUS_CORNERS.map(({ key, label, icon }) => (
-                    <RenderInput
-                      key={key}
-                      value={layoutSettings?.border?.radius?.[key]}
-                      icon={icon}
-                      label={label}
-                      onChange={(val) =>
-                        updateLayoutComponents({
-                          border: {
-                            ...layoutSettings?.border,
-                            radius: { ...layoutSettings?.border?.radius, [key]: val },
-                          },
-                        })}
-                      disabled={readonly}
-                    />
-                  ))}
-                </Space>
-              )}
-            </Space>
-          </Space>
-          <RenderDivider />
-
-          {/* Shadow */}
-          <Space direction="vertical">
-            <HeaderContent title="Shadow" subtitle="Configure shadow settings" />
-            <Space direction="horizontal">
-              <RenderInput
-                value={layoutSettings?.shadow?.offsetX}
-                onChange={(val) => updateLayoutComponents({ shadow: { ...layoutSettings?.shadow, offsetX: val } })}
-                label="Position"
-                icon="x"
-                disabled={readonly}
-              />
-              <RenderInput
-                value={layoutSettings?.shadow?.offsetY}
-                onChange={(val) => updateLayoutComponents({ shadow: { ...layoutSettings?.shadow, offsetY: val } })}
-                label=""
-                icon="y"
-                disabled={readonly}
-              />
-            </Space>
-            <Space direction="horizontal">
-              <RenderInput
-                value={layoutSettings?.shadow?.blurRadius}
-                onChange={(val) => updateLayoutComponents({ shadow: { ...layoutSettings?.shadow, blurRadius: val } })}
-                label="Blur"
-                icon="blurIcon"
-                disabled={readonly}
-              />
-              <RenderInput
-                value={layoutSettings?.shadow?.spreadRadius}
-                onChange={(val) =>
-                  updateLayoutComponents({ shadow: { ...layoutSettings?.shadow, spreadRadius: val } })}
-                label="Spread"
-                icon="spreadIcon"
-                disabled={readonly}
-              />
-              <RenderColor
-                colorName="color"
-                initialColor={layoutSettings?.shadow?.color || ''}
-                onChange={(color: any) =>
-                  updateLayoutComponents({ shadow: { ...layoutSettings?.shadow, color: color?.toHexString?.() ?? color } })}
-                readonly={readonly}
-              />
-            </Space>
-          </Space>
-          <RenderDivider />
-        </Space>
-      </CollapsiblePanel>
-
-      {/* Input Component Section */}
-      <CollapsiblePanel
-        {...commonPanelProps}
-        header={<HeaderContent title="Input Component settings" subtitle="Configure the styling of layout componens such as:  TextField, NumberField, TextArea, etc." />}
-      >
-        <Space direction="vertical" size="large">
-          {/* Label Align */}
-          <Space direction="vertical">
-            <HeaderContent
-              title="Label Align"
-              subtitle="Select below to choose your desired input label alignment."
-            />
-            <Radio.Group
-              value={inputSettings?.labelAlign || 'right'}
-              options={LABEL_ALIGN_OPTIONS}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === 'top') {
-                  updateInputComponents({ labelAlign: value, labelSpan: 24, contentSpan: 24 });
-                } else {
-                  updateInputComponents({ labelAlign: value, labelSpan: formLayout.labelSpan, contentSpan: formLayout.componentSpan });
-                }
-              }}
-              defaultValue="left"
-            />
-          </Space>
-          <RenderDivider />
-
-          {/* Label Span */}
-          {inputSettings?.labelAlign !== 'top' && (
-            <Space direction="vertical">
-              <HeaderContent
-                title="Label Span Settings"
-                subtitle="The layout uses a 24-column grid system by default. Adjusting the slider to the right will increase the width of labels."
-              />
-              <Slider
-                min={0}
-                max={24}
-                value={inputSettings?.labelSpan}
-                onChange={(val) => {
-                  updateInputComponents({ labelSpan: val, contentSpan: 24 - val || 0 });
-                  setFormLayout({ labelSpan: val, componentSpan: 24 - val || 0 });
-                }}
-              />
-            </Space>
-          )}
-
-          {/* Label Colon */}
-          <Space direction="vertical">
-            <HeaderContent
-              title="Label Colon"
-              subtitle="When label colon is enabled it will suffix the label with a colon."
-            />
-            <Switch
-              value={inputSettings?.labelColon}
-              onChange={(val) => updateInputComponents({ labelColon: val })}
-              {...commonInputProps}
-            />
-          </Space>
-          <RenderDivider />
-
-          {/* Margin & Padding */}
-          <Box
-            value={inputSettings?.stylingBox}
-            onChange={(val) => updateInputComponents({ stylingBox: val })}
-            readOnly={readonly}
-          />
-        </Space>
-      </CollapsiblePanel>
-
-      {/* Standard Component Settings Section */}
-      <CollapsiblePanel
-        {...commonPanelProps}
-        header={<HeaderContent title="Standard Component Settings" subtitle="Configure the styling of layout componens such as:  Statistic, Charts, KeyInformationBar, etc." />}
-      >
-        <Box
-          value={standardSettings?.stylingBox}
-          onChange={(val) => updateStandardComponents({ stylingBox: val })}
-          readOnly={readonly}
-        />
-      </CollapsiblePanel>
-
-      {/* Inline Component Settings Section */}
-      <CollapsiblePanel
-        {...commonPanelProps}
-        header={(
-          <HeaderContent
-            title="Inline Component Settings"
-            subtitle="Configure the styling of layout componens such as:  Text, Icon, Button, etc."
-          />
+          </div>
         )}
-      >
-        <Box
-          value={inlineSettings?.stylingBox}
-          onChange={(val) => updateInlineComponents({ stylingBox: val })}
-          readOnly={readonly}
-        />
-      </CollapsiblePanel>
+      </div>
+
+      {/* Preview Card */}
+      <div style={{ marginTop: 32 }}>
+        <Typography.Title level={5} style={{ marginBottom: 12 }}>Preview Card</Typography.Title>
+        <Card style={{ background: theme?.pageBackground ?? theme?.layoutBackground ?? '#f0f2f5' }}>
+          <Row gutter={24}>
+            <Col xs={24} md={8}>
+              <Typography.Text strong style={{ display: 'block', marginBottom: 12 }}>Alerts</Typography.Text>
+              <Space orientation="vertical" style={{ width: '100%' }}>
+                <Alert title="Success Alert" type="success" showIcon style={{ height: 32, padding: '4px 8px', alignItems: 'center', display: 'flex' }} />
+                <Alert title="Info Alert" type="info" showIcon style={{ height: 32, padding: '4px 8px', alignItems: 'center', display: 'flex' }} />
+                <Alert title="Warning Alert" type="warning" showIcon style={{ height: 32, padding: '4px 8px', alignItems: 'center', display: 'flex' }} />
+                <Alert title="Error Alert" type="error" showIcon style={{ height: 32, padding: '4px 8px', alignItems: 'center', display: 'flex' }} />
+              </Space>
+            </Col>
+
+            <Col xs={24} md={8}>
+              <Typography.Text strong style={{ display: 'block', marginBottom: 12 }}>Forms</Typography.Text>
+                <Form.Item label="Failed" validateStatus="error" help="Please complete before submission">
+                  <Input placeholder="Placeholder Text" />
+                </Form.Item>
+                <Form.Item label="Warning">
+                  <Input placeholder="Warning Message" prefix={<span style={{ color: '#faad14' }}>⚠</span>} />
+                </Form.Item>
+                <Form.Item label="Validating" help="Please wait while we validate your input">
+                  <Input placeholder="Placeholder Text" />
+                </Form.Item>
+                <Form.Item label="Success">
+                  <Input placeholder="Successful Input" />
+                </Form.Item>
+            </Col>
+
+            <Col xs={24} md={8}>
+              <Typography.Text strong style={{ display: 'block', marginBottom: 12 }}>Buttons</Typography.Text>
+              <Space orientation="vertical" style={{ width: '100%' }} size="small">
+                <Button type="primary" style={{ background: primaryColor, borderColor: primaryColor, width: '100%' }}>Primary</Button>
+                <Button danger style={{ width: '100%' }}>Error</Button>
+                <Button style={{ width: '100%', color: successColor ?? '#52c41a', borderColor: successColor ?? '#52c41a' }}>Secondary</Button>
+                <Button style={{ width: '100%' }}>Default</Button>
+              </Space>
+            </Col>
+          </Row>
+        </Card>
+      </div>
+
+      {/* Component Defaults Section */}
+      <div style={{ marginTop: 48 }}>
+        <Typography.Title level={4} style={{ marginBottom: 4 }}>Component Settings</Typography.Title>
+        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>
+          Configure default appearance styles for individual components. Select a component from the tree to customize its appearance settings.
+        </Typography.Text>
+        <ComponentDefaultsPanel value={theme} onChange={onChange} readonly={readonly} />
+      </div>
     </div>
   );
 };

@@ -1,5 +1,3 @@
-import { IStyleType } from "@/index";
-import { IConfigurableTheme, getInputComponentThemeDefaults } from "@/providers/theme";
 import { nanoid } from '@/utils/uuid';
 import { ReferenceListItemDto } from '@/apis/referenceList';
 import { DataSourceType, ILabelValue } from '@/designer-components/dropdown/model';

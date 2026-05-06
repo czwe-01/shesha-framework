@@ -99,7 +99,6 @@ export const getLayoutComponentThemeDefaults = (
   // Add border if specified in theme
   if (settings.border) {
     defaults.border = {
-      ...defaults.border,
       border: settings.border.border,
       borderType: settings.border.borderType,
       radiusType: settings.border.radiusType,
@@ -156,7 +155,7 @@ export const mergeThemeDefaultsWithComponentDefaults = (
     stylingBox: componentDefaults.stylingBox ?? themeDefaults.stylingBox,
     // For layout components, also merge other theme properties
     ...(themeDefaults.background && !componentDefaults.background && { background: themeDefaults.background }),
-    ...(themeDefaults.border && !componentDefaults.border && { border: { ...componentDefaults.border, ...themeDefaults.border } }),
+    ...(themeDefaults.border && !componentDefaults.border && { border: themeDefaults.border }),
     ...(themeDefaults.shadow && !componentDefaults.shadow && { shadow: themeDefaults.shadow }),
     // Grid gap for layout components
     ...(themeDefaults.gridGapHorizontal && !componentDefaults.gridGapHorizontal && { gridGapHorizontal: themeDefaults.gridGapHorizontal }),
@@ -288,4 +287,92 @@ export const getHardcodedDefaults = (category: ComponentCategory): IStyleType =>
     default:
       return {};
   }
+};
+
+/**
+ * Gets component-specific defaults from theme.componentDefaults
+ * This allows individual component types (e.g., 'button', 'textField') to have their own defaults
+ */
+export const getComponentSpecificDefaults = (
+  theme: IConfigurableTheme | undefined,
+  componentType: string,
+): Partial<IStyleType> => {
+  if (!theme?.componentDefaults || !componentType) return {};
+
+  const compDefaults = theme.componentDefaults[componentType];
+  if (!compDefaults) return {};
+
+  // Convert component defaults format to IStyleType format
+  return {
+    font: compDefaults.font,
+    dimensions: compDefaults.dimensions,
+    border: compDefaults.border,
+    background: compDefaults.background,
+    shadow: compDefaults.shadow,
+    stylingBox: compDefaults.stylingBox,
+    style: compDefaults.style,
+  };
+};
+
+/**
+ * 4-tier merge strategy for component styles:
+ * 1. Explicit component settings (highest priority)
+ * 2. Component-specific theme defaults (e.g., theme.componentDefaults.button)
+ * 3. Component category theme defaults (e.g., theme.inlineComponents)
+ * 4. Hardcoded defaults (lowest priority)
+ */
+export const mergeComponentStylesWithTheme = (
+  componentSettings: IStyleType,
+  theme: IConfigurableTheme | undefined,
+  componentType: string,
+  category: ComponentCategory,
+): IStyleType => {
+  // Tier 4: Hardcoded defaults (base)
+  const hardcoded = getHardcodedDefaults(category);
+
+  // Tier 3: Category-level theme defaults
+  const categoryDefaults = getThemeBaseStyles(theme, category);
+
+  // Tier 2: Component-specific defaults
+  const componentSpecific = getComponentSpecificDefaults(theme, componentType);
+
+  // Tier 1: Explicit component settings (highest priority)
+  // Merge in order: hardcoded → category → component-specific → explicit
+  return {
+    ...hardcoded,
+    ...categoryDefaults,
+    ...componentSpecific,
+    ...componentSettings,
+    // Special handling for nested objects to ensure proper merging
+    font: {
+      ...hardcoded.font,
+      ...categoryDefaults.font,
+      ...componentSpecific.font,
+      ...componentSettings.font,
+    } as IStyleType['font'],
+    dimensions: {
+      ...hardcoded.dimensions,
+      ...categoryDefaults.dimensions,
+      ...componentSpecific.dimensions,
+      ...componentSettings.dimensions,
+    } as IStyleType['dimensions'],
+    border: {
+      ...hardcoded.border,
+      ...categoryDefaults.border,
+      ...componentSpecific.border,
+      ...componentSettings.border,
+    } as IStyleType['border'],
+    background: {
+      ...hardcoded.background,
+      ...categoryDefaults.background,
+      ...componentSpecific.background,
+      ...componentSettings.background,
+    } as IStyleType['background'],
+    shadow: {
+      ...hardcoded.shadow,
+      ...categoryDefaults.shadow,
+      ...componentSpecific.shadow,
+      ...componentSettings.shadow,
+    } as IStyleType['shadow'],
+  };
 };

@@ -4,7 +4,7 @@ import { ICommonContainerProps, IContainerComponentProps } from '@/interfaces';
 import { getStyle, getLayoutStyle, validateConfigurableComponentSettings, useAvailableConstantsData } from '@/providers/form/utils';
 import { getSettings } from './settingsForm';
 import { migrateCustomFunctions, migratePropertyName } from '@/designer-components/_common-migrations/migrateSettings';
-import { useFormData, useGlobalState } from '@/providers';
+import { useFormData, useGlobalState, useTheme } from '@/providers';
 import ComponentsContainer from '@/components/formDesigner/containers/componentsContainer';
 import { migrateVisibility } from '@/designer-components/_common-migrations/migrateVisibility';
 import ParentProvider from '@/providers/parentProvider/index';

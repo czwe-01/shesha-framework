@@ -1,5 +1,5 @@
 import { IBackgroundValue, IBorderValue, IShadowValue } from '@/designer-components/_settings/utils/index';
-import { LabelAlign } from '@/index';
+import { IStyleType, LabelAlign } from '@/providers/form/models';
 import { createNamedContext } from '@/utils/react';
 import { Theme } from 'antd/lib/config-provider/context';
 
@@ -45,6 +45,36 @@ export interface IThemeFormLayoutSettings {
   labelAlign?: 'left' | 'right' | 'top';
 }
 
+/**
+ * Component-specific style defaults
+ * Stores style overrides for individual component types (e.g., 'button', 'checkbox')
+ */
+export interface IComponentDefaults {
+  [componentType: string]: {
+    appearance?: string; // e.g., 'primary', 'default', 'link' for buttons
+    font?: {
+      type?: string;
+      size?: number;
+      weight?: string;
+      color?: string;
+      align?: string;
+    };
+    dimensions?: {
+      width?: string | number;
+      height?: string | number;
+      minWidth?: string | number;
+      minHeight?: string | number;
+      maxWidth?: string | number;
+      maxHeight?: string | number;
+    };
+    border?: IBorderValue;
+    background?: IBackgroundValue;
+    shadow?: IShadowValue;
+    stylingBox?: string;
+    style?: string; // custom CSS
+  };
+}
+
 export interface IConfigurableTheme {
   application?: Theme;
   sidebar?: 'dark' | 'light';
@@ -61,6 +91,9 @@ export interface IConfigurableTheme {
   standardComponents?: IStandardComponentSettings;
   inlineComponents?: IInlineComponentSettings;
   formLayout?: IThemeFormLayoutSettings;
+  // Component-specific defaults (new)
+  componentDefaults?: IComponentDefaults;
+  layoutBackground?: string;
 }
 
 export interface IThemeStateContext {

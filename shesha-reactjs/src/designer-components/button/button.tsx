@@ -22,7 +22,6 @@ export type IActionParameters = [{ key: string; value: string }];
 const ButtonComponent: IToolboxComponent<IButtonComponentProps> = {
   type: 'button',
   isInput: false,
-  componentCatergory: 'inlineComponents',
   name: 'Button',
   /**
    * Custom dimension calculation for designer mode.
