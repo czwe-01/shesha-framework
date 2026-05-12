@@ -1,4 +1,4 @@
-import { Card, Col, Row, Tree } from 'antd';
+import { Card, Col, Menu, Row } from 'antd';
 import React, { FC, useMemo, useState } from 'react';
 import { IConfigurableTheme } from '@/providers/theme/contexts';
 import { useStyles } from './styles/styles';
@@ -8,6 +8,7 @@ import { getComponentDefinitions } from '@/providers/form/defaults/toolboxCompon
 import { IFormSettings } from '@/providers/form/models';
 import { makeFormBuliderFactory } from '@/form-factory/implementation';
 import { nanoid } from 'nanoid';
+import { ItemType } from 'antd/es/menu/interface';
 
 export interface IComponentDefaultsPanelProps {
   value?: IConfigurableTheme;
@@ -16,7 +17,7 @@ export interface IComponentDefaultsPanelProps {
 }
 
 /**
- * Component Defaults Panel - Shows tree of components on left, appearance settings on right
+ * Component Defaults Panel - Shows menu of components on left, appearance settings on right
  */
 export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value: theme, onChange, readonly }) => {
   const { styles } = useStyles();
@@ -48,21 +49,13 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
     onChange(newTheme);
   };
 
-  // Convert tree data to Ant Design Tree format
-  const treeData = useMemo(() => {
-    interface TreeNode {
-      key: string;
-      title: string;
-      icon?: React.ReactNode;
-      children?: TreeNode[];
-      isLeaf: boolean;
-    }
-    const convertNode = (node: IComponentTreeNode): TreeNode => ({
+  // Convert tree data to Ant Design Menu format
+  const menuData = useMemo(() => {
+    const convertNode = (node: IComponentTreeNode): ItemType => ({
       key: node.key,
-      title: node.title,
+      label: node.title,
       icon: node.icon,
       children: node.children?.map(convertNode),
-      isLeaf: !node.children,
     });
     return COMPONENT_TREE.map(convertNode);
   }, []);
@@ -119,7 +112,7 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
 
   return (
     <Row gutter={16}>
-      {/* Left: Component Tree */}
+      {/* Left: Component Menu */}
       <Col xs={24} sm={24} md={6} lg={6} xl={6} xxl={6}>
         <Card
           title="Components"
@@ -127,20 +120,18 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
           style={{ height: '600px', overflowY: 'auto' }}
           className={styles.themeCard}
         >
-          <Tree
-            treeData={treeData}
-            defaultExpandAll
+          <Menu
+            items={menuData}
+            mode="inline"
             selectedKeys={[selectedKey]}
-            showIcon={true}
-            onSelect={(keys) => {
-              if (keys.length > 0) {
-                const key = keys[0] as string;
-                const node = findComponentNode(key, COMPONENT_TREE);
-                // Only select leaf nodes (actual components)
+            styles={{ 
+              list: { background: 'blue'}
+            }}
+            onClick={(item) => {
+                const node = findComponentNode(item.key, COMPONENT_TREE);
                 if (node?.type) {
-                  setSelectedKey(key);
+                  setSelectedKey(item.key);
                 }
-              }
             }}
           />
         </Card>

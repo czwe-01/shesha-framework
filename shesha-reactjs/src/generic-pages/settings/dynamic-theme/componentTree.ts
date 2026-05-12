@@ -1,6 +1,7 @@
 /**
- * Component tree structure for the Components Settings screen
+ * Component hierarchy structure for the Components Settings screen
  * Maps component categories to individual component types
+ * Used to build the navigation menu for component appearance settings
  */
 
 import React from 'react';
@@ -41,7 +42,7 @@ export const getComponentTree = (): IComponentTreeNode[] => {
   return _cachedComponentTree;
 };
 
-// Keep COMPONENT_TREE for backward compatibility, but make it a getter
+// Hierarchical component structure used for building the navigation menu
 export const COMPONENT_TREE: IComponentTreeNode[] = new Proxy([] as IComponentTreeNode[], {
   get(_target, prop) {
     const tree = getComponentTree();
@@ -62,7 +63,7 @@ export const COMPONENT_TREE: IComponentTreeNode[] = new Proxy([] as IComponentTr
 });
 
 /**
- * Find a component node by its key
+ * Find a component node by its key in the component hierarchy
  */
 export const findComponentNode = (key: string, tree?: IComponentTreeNode[]): IComponentTreeNode | null => {
   const searchTree = tree ?? getComponentTree();
@@ -77,7 +78,7 @@ export const findComponentNode = (key: string, tree?: IComponentTreeNode[]): ICo
 };
 
 /**
- * Get all component types (leaf nodes only)
+ * Get all component types (individual components, not categories)
  */
 export const getAllComponentTypes = (tree?: IComponentTreeNode[]): IComponentTreeNode[] => {
   const searchTree = tree ?? getComponentTree();
