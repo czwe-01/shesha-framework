@@ -4,9 +4,10 @@ import { IConfigurableTheme } from '@/providers/theme/contexts';
 import { useStyles } from './styles/styles';
 import { COMPONENT_TREE, findComponentNode, IComponentTreeNode } from './componentTree';
 import { ConfigurableForm } from '@/components/configurableForm';
-import { getComponentDefinitions, getToolboxComponents } from '@/providers/form/defaults/toolboxComponents';
+import { getComponentDefinitions } from '@/providers/form/defaults/toolboxComponents';
 import { IFormSettings } from '@/providers/form/models';
 import { makeFormBuliderFactory } from '@/form-factory/implementation';
+import { nanoid } from 'nanoid';
 
 export interface IComponentDefaultsPanelProps {
   value?: IConfigurableTheme;
@@ -102,14 +103,10 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
 
     if (!appearanceTab?.components) return null;
 
+    console.log("Apprearance :: ", appearanceTab);
     return {
-      components: appearanceTab.components,
-      formSettings: (formSettings || {
-        colon: false,
-        layout: 'vertical' as const,
-        labelCol: { span: 24 },
-        wrapperCol: { span: 24 },
-      }) as IFormSettings,
+      components: appearanceTab.components?.components || appearanceTab.components,
+      formSettings: formSettings as IFormSettings,
     };
   }, [componentType]);
 
@@ -133,6 +130,7 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
             treeData={treeData}
             defaultExpandAll
             selectedKeys={[selectedKey]}
+            showIcon={true}
             onSelect={(keys) => {
               if (keys.length > 0) {
                 const key = keys[0] as string;
@@ -175,6 +173,43 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
               {componentType
                 ? 'This component does not have appearance settings or they cannot be loaded'
                 : 'Select a component from the tree to configure its default appearance'}
+            </div>
+          )}
+        </Card>
+        <Card>
+          {componentType && (
+            <div>
+              <h4 style={{ marginBottom: 4 }}>{selectedNode?.title || 'Select a Component'}</h4>
+              <span style={{ color: '#999', fontSize: '12px' }}>
+                Configure default appearance for {selectedNode?.title?.toLowerCase() || 'components'}
+              </span>
+              <ConfigurableForm
+                mode="edit"
+                markup={{
+                  components: [
+                    {
+                      type: selectedNode?.type,
+                      id: nanoid(),
+                      propertyName: `${selectedNode?.type}Appearance`,
+                      label: `${selectedNode?.title}`,
+                      parentId: 'root',
+                      hidden: false,
+                      desktop: {
+                        ...componentDefaults[selectedNode?.type],
+                      }
+                    }
+                  ],
+                  formSettings: {
+                    colon: false,
+                    layout: 'vertical' as const,
+                    labelCol: { span: 24 },
+                    wrapperCol: { span: 24 },
+                  },
+                }}
+                initialValues={componentDefaults}
+                onValuesChange={handleFormDataChange}
+                className={styles.appearanceForm}
+              />
             </div>
           )}
         </Card>

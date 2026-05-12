@@ -82,6 +82,7 @@ const ContainerComponent: ContainerComponentDefinition = {
       allData,
     ]);
 
+    console.log("Model :: ", model);
     const wrapperStyle = useMemo(() => ({
       ...wrapperStyles,
       alignSelf: model.alignSelf,

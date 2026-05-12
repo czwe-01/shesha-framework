@@ -14,10 +14,11 @@ export const useStyles = createStyles(({ css, cx }) => {
   const appearanceForm = cx(
     'appearance-form',
     css`
-      display: flex;
-      flex-direction: row;
-      gap: 16px;
-
+      > [data-sha-c-type="propertyRouter"] {
+        > .sha-components-container-inner {
+          background: blue !important; 
+        }
+      }
       > .ant-collapse {
         width: 300px !important;
       }

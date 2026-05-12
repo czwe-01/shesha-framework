@@ -8,6 +8,7 @@ import { getToolboxComponents } from "@/providers/form/defaults/toolboxComponent
 export interface IComponentTreeNode {
   key: string;
   title: string;
+  icon?: React.ReactNode;
   type?: string; // The actual component type identifier (e.g., 'button', 'textField')
   children?: IComponentTreeNode[];
   category?: 'inputComponents' | 'layoutComponents' | 'standardComponents' | 'inlineComponents';
