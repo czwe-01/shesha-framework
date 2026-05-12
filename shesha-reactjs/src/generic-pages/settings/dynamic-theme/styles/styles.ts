@@ -12,15 +12,48 @@ export const useStyles = createStyles(({ css, cx }) => {
   );
 
   const appearanceForm = cx(
-    'appearance-form',
+    'sha-appearance-form',
     css`
-      > [data-sha-c-type="propertyRouter"] {
+      [data-sha-c-type="propertyRouter"] {
         > .sha-components-container-inner {
-          background: blue !important; 
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 16px;
+          padding: 16px 0;
+          align-items: start;
         }
       }
-      > .ant-collapse {
-        width: 300px !important;
+
+      /* Adjust form items within the grid panels */
+      .ant-collapse {
+        .sha-components-container-inner {
+          gap: 12px;
+        }
+
+        /* Better spacing for nested containers */
+        .sha-container-component {
+          .sha-components-container-inner {
+            gap: 8px;
+          }
+        }
+      }
+
+      /* Responsive grid - single column on smaller screens */
+      @media (max-width: 768px) {
+        > [data-sha-c-type="propertyRouter"] {
+          > .sha-components-container-inner {
+            grid-template-columns: 1fr;
+          }
+        }
+      }
+
+      /* Two columns on medium screens */
+      @media (min-width: 769px) and (max-width: 1200px) {
+        > [data-sha-c-type="propertyRouter"] {
+          > .sha-components-container-inner {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
       }
     `,
   );

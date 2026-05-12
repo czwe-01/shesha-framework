@@ -3,6 +3,7 @@
  * Maps component categories to individual component types
  */
 
+import React from 'react';
 import { getToolboxComponents } from "@/providers/form/defaults/toolboxComponents";
 
 export interface IComponentTreeNode {
@@ -26,6 +27,7 @@ const buildComponentTree = (): IComponentTreeNode[] => {
         key: component.type,
         title: component.name,
         type: component.type,
+        icon: component.icon,
         category: component.componentCatergory,
       })),
     })

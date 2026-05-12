@@ -53,12 +53,14 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
     interface TreeNode {
       key: string;
       title: string;
+      icon?: React.ReactNode;
       children?: TreeNode[];
       isLeaf: boolean;
     }
     const convertNode = (node: IComponentTreeNode): TreeNode => ({
       key: node.key,
       title: node.title,
+      icon: node.icon,
       children: node.children?.map(convertNode),
       isLeaf: !node.children,
     });
@@ -103,7 +105,6 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
 
     if (!appearanceTab?.components) return null;
 
-    console.log("Apprearance :: ", appearanceTab);
     return {
       components: appearanceTab.components?.components || appearanceTab.components,
       formSettings: formSettings as IFormSettings,
