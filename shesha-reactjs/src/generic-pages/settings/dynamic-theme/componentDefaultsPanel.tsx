@@ -4,7 +4,7 @@ import { IConfigurableTheme } from '@/providers/theme/contexts';
 import { useStyles } from './styles/styles';
 import { COMPONENT_TREE, findComponentNode, IComponentTreeNode } from './componentTree';
 import { ConfigurableForm } from '@/components/configurableForm';
-import { getComponentDefinitions } from '@/providers/form/defaults/toolboxComponents';
+import { getComponentDefinitions, getToolboxComponents } from '@/providers/form/defaults/toolboxComponents';
 import { IFormSettings } from '@/providers/form/models';
 import { makeFormBuliderFactory } from '@/form-factory/implementation';
 
@@ -22,7 +22,7 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
   const [selectedKey, setSelectedKey] = useState<string>('button');
 
   const selectedNode = useMemo(() => findComponentNode(selectedKey), [selectedKey]);
-  const componentType = selectedNode?.componentType;
+  const componentType = selectedNode?.type;
 
   // Get component defaults for selected component
   const componentDefaults = useMemo(() => {
@@ -136,9 +136,9 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
             onSelect={(keys) => {
               if (keys.length > 0) {
                 const key = keys[0] as string;
-                const node = findComponentNode(key);
+                const node = findComponentNode(key, COMPONENT_TREE);
                 // Only select leaf nodes (actual components)
-                if (node?.componentType) {
+                if (node?.type) {
                   setSelectedKey(key);
                 }
               }
@@ -168,6 +168,7 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
               markup={appearanceMarkup}
               initialValues={componentDefaults}
               onValuesChange={handleFormDataChange}
+              className={styles.appearanceForm}
             />
           ) : (
             <div style={{ padding: 16, textAlign: 'center', color: '#999' }}>

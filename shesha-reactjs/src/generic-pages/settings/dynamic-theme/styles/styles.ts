@@ -1,6 +1,49 @@
 import { createStyles, sheshaStyles } from '@/styles';
 
 export const useStyles = createStyles(({ css, cx }) => {
+  const slider = cx(
+    'slider',
+    css`
+      width: 100%;
+      .ant-slider-handle {
+        border-color: #d9d9d9;
+      }
+    `,
+  );
+
+  const appearanceForm = cx(
+    'appearance-form',
+    css`
+      display: flex;
+      flex-direction: row;
+      gap: 16px;
+
+      > .ant-collapse {
+        width: 300px !important;
+      }
+    `,
+  );
+
+  const colorCircle = cx(
+    'color-circle',
+    css`
+    border-radius: 50%;
+    .ant-color-picker-color-block {
+      border-radius: 50%;
+      overflow: hidden;
+      }
+    `,
+  );
+
+  const colorCircleContainer = cx(
+    'color-circle-container',
+    css`
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    `,
+  );
   const themeParameters = cx(
     'theme-parameters',
     css`
@@ -123,5 +166,9 @@ export const useStyles = createStyles(({ css, cx }) => {
     space,
     contentContainer,
     contentColumn,
+    colorCircle,
+    colorCircleContainer,
+    slider,
+    appearanceForm,
   };
 });

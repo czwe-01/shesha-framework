@@ -16,25 +16,25 @@ export const ConfigurableThemeContent: FC<IConfigurableThemePageProps> = ({ valu
   const [themeLevel, setThemeLevel] = useState<number>(1);
 
   return (
-    <Col span={24} className={styles.contentColumn}>
-      <CollapsiblePanel
-        collapsible="disabled"
-        header={(
+      <Col span={24} className={styles.contentColumn}>
+        <CollapsiblePanel
+          collapsible="disabled"
+          header={(
           <Radio.Group
             value={themeLevel}
             onChange={(e) => setThemeLevel(Number(e.target.value))}
             disabled={readonly}
             optionType="button"
-            buttonStyle="outline"
-          >
-            <Radio.Button value={1}>Theme</Radio.Button>
-            <Radio.Button value={2}>Components</Radio.Button>
-          </Radio.Group>
-        )}
-        className={styles.themeParameters}
-      >
-        <ThemeParameters value={value} onChange={onChange} readonly={readonly} themeLevel={themeLevel} />
-      </CollapsiblePanel>
-    </Col>
+            buttonStyle="solid"
+            >
+        <Radio.Button value="1">Theme</Radio.Button>
+        <Radio.Button value="2">Components</Radio.Button>
+      </Radio.Group>
+          )}
+          className={styles.themeParameters}
+        >
+          <ThemeParameters value={value} onChange={onChange} readonly={readonly} themeLevel={themeLevel} />
+        </CollapsiblePanel>
+      </Col>
   );
 };
