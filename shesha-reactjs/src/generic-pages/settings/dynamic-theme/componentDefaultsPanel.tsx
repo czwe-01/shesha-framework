@@ -118,7 +118,7 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
           title="Components"
           size="small"
           style={{ height: '600px', overflowY: 'auto' }}
-          className={styles.themeCard}
+          className={styles.themeCardMenu}
         >
           <Menu
             items={menuData}
@@ -150,7 +150,7 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
           }
           size="small"
           style={{ height: '600px', overflowY: 'auto' }}
-          className={styles.themeCard}
+          className={styles.themeCardSettings}
         >
           {appearanceMarkup && componentType ? (
             <ConfigurableForm

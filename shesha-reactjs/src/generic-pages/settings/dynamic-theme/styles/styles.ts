@@ -139,11 +139,22 @@ export const useStyles = createStyles(({ css, cx }) => {
     `,
   );
 
-  const themeCard = cx(
+  const themeCardSettings = cx(
     'theme-card',
     css`
       margin-bottom: 16px;
-      
+      height: 400px;
+      .ant-card-head {
+        background: #fafafa;
+      }
+    `,
+  );
+
+  const themeCardMenu = cx(
+    'theme-card',
+    css`
+      margin-bottom: 16px;
+      height: 200px
       .ant-card-head {
         background: #fafafa;
       }
@@ -194,7 +205,8 @@ export const useStyles = createStyles(({ css, cx }) => {
     themeParameters,
     themeHeader,
     previewSection,
-    themeCard,
+    themeCardMenu,
+    themeCardSettings,
     themeColorPicker,
     themeColorSpace,
     space,
