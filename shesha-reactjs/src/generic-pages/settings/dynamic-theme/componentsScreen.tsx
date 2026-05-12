@@ -2,6 +2,7 @@ import { Col, Row, Tree, Select, Space, Button, Card } from 'antd';
 import React, { FC, useState, useMemo } from 'react';
 import { CollapsiblePanel } from '@/components/panel';
 import { IConfigurableTheme } from '@/providers/theme/contexts';
+import { useTheme } from '@/providers/theme';
 import { useStyles } from './styles/styles';
 import { COMPONENT_TREE, findComponentNode, BUTTON_APPEARANCES, IComponentTreeNode } from './componentTree';
 import { HeaderContent, RenderInput, RenderColor } from './components';
@@ -28,12 +29,12 @@ interface IComponentPreviewProps {
 }
 
 const ComponentPreview: FC<IComponentPreviewProps> = ({ componentType, defaults }) => {
+  const { theme } = useTheme();
   const font = defaults.font as Record<string, unknown> | undefined;
   const dimensions = defaults.dimensions as Record<string, unknown> | undefined;
   const background = defaults.background as Record<string, unknown> | undefined;
   const border = defaults.border as Record<string, unknown> | undefined;
   const shadow = defaults.shadow as Record<string, unknown> | undefined;
-  const appearance = defaults.appearance as string | undefined;
 
   const previewStyle: React.CSSProperties = {
     fontFamily: font?.type as string | undefined,
@@ -56,13 +57,17 @@ const ComponentPreview: FC<IComponentPreviewProps> = ({ componentType, defaults 
       : undefined,
   };
 
+  const primaryColor = theme?.application?.primaryColor;
+  const successColor = theme?.application?.successColor;
+
   switch (componentType) {
     case 'button':
       return (
-        <Space>
-          <Button type={appearance as 'default' | 'primary' | 'dashed' | 'link' | 'text'} style={previewStyle}>
-            Sample Button
-          </Button>
+        <Space size="small">
+          <Button type="primary" style={{ background: primaryColor, borderColor: primaryColor, ...previewStyle }}>Primary</Button>
+          <Button danger style={previewStyle}>Error</Button>
+          <Button style={{ color: successColor ?? '#52c41a', borderColor: successColor ?? '#52c41a', ...previewStyle }}>Secondary</Button>
+          <Button style={previewStyle}>Default</Button>
         </Space>
       );
     case 'textField':
@@ -171,16 +176,13 @@ export const ComponentsScreen: FC<IComponentsScreenProps> = ({ value: theme, onC
                     collapsedByDefault={false}
                     header={<HeaderContent title="Appearance" subtitle="Button Style" />}
                   >
-                    <Space orientation="vertical" style={{ width: '100%' }}>
-                      <span style={{ color: '#666' }}>Button Style</span>
-                      <Select
-                        style={{ width: '100%' }}
-                        value={componentDefaults.appearance || 'default'}
-                        onChange={(val) => updateComponentDefaults({ appearance: val })}
-                        options={BUTTON_APPEARANCES}
-                        disabled={readonly}
-                      />
-                    </Space>
+                    <Select
+                      style={{ width: '100%' }}
+                      value={componentDefaults.appearance || 'default'}
+                      onChange={(val) => updateComponentDefaults({ appearance: val })}
+                      options={BUTTON_APPEARANCES}
+                      disabled={readonly}
+                    />
                   </CollapsiblePanel>
                 )}
 
@@ -530,7 +532,10 @@ export const ComponentsScreen: FC<IComponentsScreenProps> = ({ value: theme, onC
           </Row>
 
           {/* Preview Card */}
-          <Card title="Preview" size="small" style={{ marginTop: 8 }}>
+          <Card size="small" style={{ marginTop: 8 }}>
+            <div style={{ marginBottom: 12 }}>
+              <strong>{selectedNode?.title || 'Preview'}</strong>
+            </div>
             <ComponentPreview componentType={componentType} defaults={componentDefaults} />
           </Card>
         </div>

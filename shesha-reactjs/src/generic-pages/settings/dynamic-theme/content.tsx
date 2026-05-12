@@ -1,13 +1,9 @@
-import { Alert, Col, Row, Space, Typography } from 'antd';
-import React, { FC, ReactElement } from 'react';
+import { Col, Radio } from 'antd';
+import React, { FC, useState } from 'react';
 import { CollapsiblePanel } from '@/components/panel';
-import AlertsExample from './alertsExamples';
-import FormExample from './form';
 import ThemeParameters from './parameters';
 import { useStyles } from './styles/styles';
-import { IConfigurableTheme, useTheme } from '@/providers/theme';
-import LayoutExample from './layoutsExamples';
-import { InlineComponentsExample } from './inlineComponentsExample';
+import { IConfigurableTheme } from '@/providers/theme';
 
 export interface IConfigurableThemePageProps {
   value?: IConfigurableTheme;
@@ -17,75 +13,28 @@ export interface IConfigurableThemePageProps {
 
 export const ConfigurableThemeContent: FC<IConfigurableThemePageProps> = ({ value, onChange, readonly }) => {
   const { styles } = useStyles();
-  const { theme } = useTheme();
-
-  const GroupWrapper = ({ title, children }): ReactElement => (
-    <Space className={styles.space} direction="vertical" style={{ width: '100%' }}>
-      <h4 style={{ color: '#9d9d9d' }}>{title}</h4>
-      {children}
-    </Space>
-  );
-
-  const previewItems = [
-    {
-      key: 'alerts',
-      label: 'Alerts',
-      children: <GroupWrapper title="Alerts"><AlertsExample /></GroupWrapper>,
-    },
-    {
-      key: 'forms',
-      label: 'Forms',
-      children: <GroupWrapper title="Forms"><FormExample theme={value} /></GroupWrapper>,
-    },
-    {
-      key: 'inline',
-      label: 'Inline components',
-      children: <GroupWrapper title="Inline components"><InlineComponentsExample theme={value} /></GroupWrapper>,
-    },
-    {
-      key: 'layouts',
-      label: 'Layouts',
-      children: <GroupWrapper title="Layouts"><LayoutExample theme={value} /></GroupWrapper>,
-    },
-  ];
+  const [themeLevel, setThemeLevel] = useState<number>(1);
 
   return (
-    <Row gutter={16} className={styles.contentContainer}>
-      <Col xs={24} sm={24} md={14} lg={16} xl={17} xxl={18} className={styles.contentColumn}>
-        <CollapsiblePanel
-          collapsible="disabled"
-          header={(
-            <>
-              <Typography.Text type="secondary" className={styles.themeHeader}>
-                Theme Settings
-              </Typography.Text>
-              <Typography.Text type="secondary" className={styles.themeHeader}>
-                Customize the look and feel of your workspace
-              </Typography.Text>
-            </>
-          )}
-          className={styles.themeParameters}
-        >
-          <Alert
-            type="info"
-            message="Configure your theme settings below. Changes are reflected in real-time in the preview panel."
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-          <ThemeParameters value={value} onChange={onChange} readonly={readonly} />
-        </CollapsiblePanel>
-      </Col>
-
-      <Col xs={24} sm={24} md={10} lg={8} xl={7} xxl={6} className={styles.contentColumn}>
-        <div className={styles.space} style={{ borderRadius: 8 }}>
-          <h3>Preview Card</h3>
-          <Space className={styles.space} size="middle" direction="vertical" style={{ backgroundColor: theme.pageBackground, padding: '16px', paddingTop: 0 }}>
-            {previewItems.map(({ key, children }) => (
-              <React.Fragment key={key}>{children}</React.Fragment>
-            ))}
-          </Space>
-        </div>
-      </Col>
-    </Row>
+    <Col span={24} className={styles.contentColumn}>
+      <CollapsiblePanel
+        collapsible="disabled"
+        header={(
+          <Radio.Group
+            value={themeLevel}
+            onChange={(e) => setThemeLevel(Number(e.target.value))}
+            disabled={readonly}
+            optionType="button"
+            buttonStyle="outline"
+          >
+            <Radio.Button value={1}>Theme</Radio.Button>
+            <Radio.Button value={2}>Components</Radio.Button>
+          </Radio.Group>
+        )}
+        className={styles.themeParameters}
+      >
+        <ThemeParameters value={value} onChange={onChange} readonly={readonly} themeLevel={themeLevel} />
+      </CollapsiblePanel>
+    </Col>
   );
 };

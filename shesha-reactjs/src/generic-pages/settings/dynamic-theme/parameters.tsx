@@ -3,12 +3,13 @@ import { Alert, Button, Card, Col, Form, Input, Radio, Row, Slider, Space, Toolt
 import React, { FC } from 'react';
 import { ColorPicker } from '@/components/colorPicker';
 import { IConfigurableTheme } from '@/providers/theme/contexts';
-import { ComponentDefaultsPanel } from './componentDefaultsPanel';
+import { ComponentsScreen } from './componentsScreen';
 
 export interface ThemeParametersProps {
   value?: IConfigurableTheme;
   onChange?: (theme: IConfigurableTheme) => void;
   readonly?: boolean;
+  themeLevel?: number;
 }
 
 const PRESET_COLORS = [
@@ -48,7 +49,7 @@ const ColorCircle: FC<ColorCircleProps> = ({ color, onChange, label, readonly })
   </div>
 );
 
-const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, readonly }) => {
+const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, readonly, themeLevel = 1 }) => {
   const updateTheme = (update: Partial<IConfigurableTheme>): void => {
     onChange?.({ ...theme, ...update });
   };
@@ -92,12 +93,15 @@ const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, rea
     });
   };
 
-  // Fallback to legacy application colors
   const primaryColor = theme?.application?.primaryColor;
   const errorColor = theme?.application?.errorColor;
   const warningColor = theme?.application?.warningColor;
   const successColor = theme?.application?.successColor;
   const infoColor = theme?.application?.infoColor;
+
+  if (themeLevel === 2) {
+    return <ComponentsScreen value={theme} onChange={onChange} readonly={readonly} />;
+  }
 
   return (
     <div style={{ padding: '0 0 24px' }}>
@@ -113,7 +117,7 @@ const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, rea
         onChange={(e) => updateTheme({ sidebar: e.target.value })}
         disabled={readonly}
         optionType="button"
-        buttonStyle="solid"
+        buttonStyle="outline"
       >
         <Radio.Button value="light">Light</Radio.Button>
         <Radio.Button value="dark">Dark</Radio.Button>
@@ -176,7 +180,7 @@ const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, rea
           onChange={(e) => handleLayoutChange(e.target.value)}
           disabled={readonly}
           optionType="button"
-          buttonStyle="solid"
+          buttonStyle="outline"
           style={{ marginBottom: 16 }}
         >
           <Radio.Button value="vertical">Vertical</Radio.Button>
@@ -219,18 +223,18 @@ const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, rea
 
             <Col xs={24} md={8}>
               <Typography.Text strong style={{ display: 'block', marginBottom: 12 }}>Forms</Typography.Text>
-                <Form.Item label="Failed" validateStatus="error" help="Please complete before submission">
-                  <Input placeholder="Placeholder Text" />
-                </Form.Item>
-                <Form.Item label="Warning">
-                  <Input placeholder="Warning Message" prefix={<span style={{ color: '#faad14' }}>⚠</span>} />
-                </Form.Item>
-                <Form.Item label="Validating" help="Please wait while we validate your input">
-                  <Input placeholder="Placeholder Text" />
-                </Form.Item>
-                <Form.Item label="Success">
-                  <Input placeholder="Successful Input" />
-                </Form.Item>
+              <Form.Item label="Failed" validateStatus="error" help="Please complete before submission">
+                <Input placeholder="Placeholder Text" />
+              </Form.Item>
+              <Form.Item label="Warning">
+                <Input placeholder="Warning Message" prefix={<span style={{ color: '#faad14' }}>⚠</span>} />
+              </Form.Item>
+              <Form.Item label="Validating" help="Please wait while we validate your input">
+                <Input placeholder="Placeholder Text" />
+              </Form.Item>
+              <Form.Item label="Success">
+                <Input placeholder="Successful Input" />
+              </Form.Item>
             </Col>
 
             <Col xs={24} md={8}>
@@ -244,15 +248,6 @@ const ThemeParameters: FC<ThemeParametersProps> = ({ value: theme, onChange, rea
             </Col>
           </Row>
         </Card>
-      </div>
-
-      {/* Component Defaults Section */}
-      <div style={{ marginTop: 48 }}>
-        <Typography.Title level={4} style={{ marginBottom: 4 }}>Component Settings</Typography.Title>
-        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>
-          Configure default appearance styles for individual components. Select a component from the tree to customize its appearance settings.
-        </Typography.Text>
-        <ComponentDefaultsPanel value={theme} onChange={onChange} readonly={readonly} />
       </div>
     </div>
   );
