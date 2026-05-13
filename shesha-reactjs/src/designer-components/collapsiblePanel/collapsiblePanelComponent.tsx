@@ -1,5 +1,6 @@
 import ComponentsContainer from '@/components/formDesigner/containers/componentsContainer';
 import { CollapsiblePanel } from '@/components/panel';
+import { useStyles } from '@/components/panel/styles/styles';
 import { migrateCustomFunctions, migratePropertyName } from '@/designer-components/_common-migrations/migrateSettings';
 import { migrateVisibility } from '@/designer-components/_common-migrations/migrateVisibility';
 import { useFormData } from '@/providers';
@@ -48,7 +49,8 @@ const CollapsiblePanelComponent: CollapsiblePanelComponentDefinition = {
     const headerComponents = model.header?.components ?? [];
     const hasHeaderComponents = headerComponents.length > 0;
 
-    const headerStyles = useFormComponentStyles({ ...{ ...model.headerStyles, border: ghost ? null : model.headerStyles?.border } }, { componentCategory: 'layoutComponents' }).fullStyle;
+    const headerStyles = useFormComponentStyles({ ...{ ...model.headerStyles, border: ghost ? null : model.headerStyles?.border } }).fullStyle;
+    const { styles } = useStyles();
 
     const isIconHidden = expandIconPosition === 'hide';
 
@@ -59,6 +61,7 @@ const CollapsiblePanelComponent: CollapsiblePanelComponentDefinition = {
             <ComponentsContainer
               containerId={model.header?.id}
               dynamicComponents={isDynamic ? headerComponents : []}
+              className={styles.shaHeaderComponentsContainer}
             />
           ) : (
             evaluatedLabel
