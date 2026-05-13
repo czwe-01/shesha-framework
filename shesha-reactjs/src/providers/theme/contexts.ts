@@ -1,5 +1,5 @@
 import { IBackgroundValue, IBorderValue, IShadowValue } from '@/designer-components/_settings/utils/index';
-import { IStyleType, LabelAlign } from '@/providers/form/models';
+import { LabelAlign } from '@/providers/form/models';
 import { createNamedContext } from '@/utils/react';
 import { Theme } from 'antd/lib/config-provider/context';
 

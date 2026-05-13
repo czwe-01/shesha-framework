@@ -151,12 +151,81 @@ export const useStyles = createStyles(({ css, cx }) => {
   );
 
   const themeCardMenu = cx(
-    'theme-card',
+    'theme-card-menu',
     css`
       margin-bottom: 16px;
-      height: 200px
+
       .ant-card-head {
         background: #fafafa;
+        padding: 8px 12px;
+        min-height: 36px;
+      }
+
+      .ant-card-body {
+        padding: 0;
+      }
+
+      /* Compact menu styling */
+      .ant-menu {
+        border-inline-end: none;
+
+        /* Group titles styling */
+        .ant-menu-item-group-title {
+          padding: 6px 12px;
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: #8c8c8c;
+          height: auto;
+          line-height: 1.2;
+        }
+
+        /* Menu items styling */
+        .ant-menu-item {
+          height: 32px;
+          line-height: 32px;
+          padding: 0 12px 0 24px !important;
+          margin: 0;
+          font-size: 13px;
+
+          .ant-menu-title-content {
+            margin-inline-start: 8px;
+          }
+
+          .anticon {
+            font-size: 14px;
+            min-width: 14px;
+          }
+        }
+
+        /* Submenu styling */
+        .ant-menu-submenu {
+          .ant-menu-submenu-title {
+            height: 36px;
+            line-height: 36px;
+            padding: 0 12px !important;
+            margin: 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #595959;
+          }
+
+          .ant-menu-sub {
+            background: #fafafa;
+          }
+        }
+
+        /* Selected item */
+        .ant-menu-item-selected {
+          background-color: #e6f7ff;
+          font-weight: 500;
+        }
+
+        /* Hover state */
+        .ant-menu-item:hover {
+          background-color: #f5f5f5;
+        }
       }
     `,
   );

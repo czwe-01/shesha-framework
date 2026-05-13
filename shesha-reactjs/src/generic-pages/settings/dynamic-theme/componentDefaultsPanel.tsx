@@ -2,7 +2,7 @@ import { Card, Col, Menu, Row } from 'antd';
 import React, { FC, useMemo, useState } from 'react';
 import { IConfigurableTheme } from '@/providers/theme/contexts';
 import { useStyles } from './styles/styles';
-import { COMPONENT_TREE, findComponentNode, IComponentTreeNode } from './componentTree';
+import { findComponentNode, MENU_ITEMS } from './componentTree';
 import { ConfigurableForm } from '@/components/configurableForm';
 import { getComponentDefinitions } from '@/providers/form/defaults/toolboxComponents';
 import { IFormSettings } from '@/providers/form/models';
@@ -49,15 +49,15 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
     onChange(newTheme);
   };
 
-  // Convert tree data to Ant Design Menu format
+  // Convert tree data to Ant Design Menu format with groups
   const menuData = useMemo(() => {
-    const convertNode = (node: IComponentTreeNode): ItemType => ({
-      key: node.key,
-      label: node.title,
-      icon: node.icon,
-      children: node.children?.map(convertNode),
+    const convertComponent = (component): ItemType => ({
+      key: component.key,
+      label: component.title,
+      icon: component.icon,
+      children: component.children?.map(convertComponent),
     });
-    return COMPONENT_TREE.map(convertNode);
+    return MENU_ITEMS.map(convertComponent);
   }, []);
 
   // Get component definition and extract appearance tab components
@@ -124,14 +124,11 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
             items={menuData}
             mode="inline"
             selectedKeys={[selectedKey]}
-            styles={{ 
-              list: { background: 'blue'}
-            }}
             onClick={(item) => {
-                const node = findComponentNode(item.key, COMPONENT_TREE);
-                if (node?.type) {
-                  setSelectedKey(item.key);
-                }
+              const node = findComponentNode(item.key, MENU_ITEMS);
+              if (node?.type) {
+                setSelectedKey(item.key);
+              }
             }}
           />
         </Card>
@@ -149,7 +146,7 @@ export const ComponentDefaultsPanel: FC<IComponentDefaultsPanelProps> = ({ value
             </div>
           }
           size="small"
-          style={{ height: '600px', overflowY: 'auto' }}
+          style={{ height: '450px', overflowY: 'auto' }}
           className={styles.themeCardSettings}
         >
           {appearanceMarkup && componentType ? (

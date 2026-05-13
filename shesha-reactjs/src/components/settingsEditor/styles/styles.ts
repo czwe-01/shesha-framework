@@ -45,28 +45,52 @@ export const useStyles = createStyles(({ css, cx, token, prefixCls, iconPrefixCl
           padding: 8px;
           height: 100%;
           background-color: white;
-      
-          .${prefixCls}-collapse-item {
-            .${prefixCls}-collapse-header {
-              padding: 4px 8px;
-      
-              &:hover {
-                color: ${token.colorPrimary};
-                background-color: ${token.colorPrimaryBgHover};
+
+          .${shaSettingSearch} {
+            margin-bottom: 8px;
+          }
+
+          /* Compact menu styling */
+          .sha-settings-menu.${prefixCls}-menu {
+            border-inline-end: none;
+
+            /* Group titles styling */
+            .${prefixCls}-menu-item-group-title {
+              padding: 6px 12px;
+              font-size: 11px;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              color: #8c8c8c;
+              height: auto;
+              line-height: 1.2;
+            }
+
+            /* Menu items styling */
+            .${prefixCls}-menu-item {
+              height: 32px;
+              line-height: 32px;
+              padding: 0 12px 0 24px !important;
+              margin: 0;
+              font-size: 13px;
+
+              .${prefixCls}-menu-title-content {
+                margin-inline-start: 0;
               }
             }
+
+            /* Selected item */
+            .${prefixCls}-menu-item-selected {
+              background-color: #e6f7ff;
+              font-weight: 500;
+            }
+
+            /* Hover state */
+            .${prefixCls}-menu-item:hover {
+              background-color: #f5f5f5;
+            }
           }
-      
-          .${prefixCls}-menu-item {
-            height: 24px;
-            line-height: 24px;
-            margin-bottom: 4px !important;
-          }
-      
-          .${shaSettingSearch} {
-            margin-bottom: 4px;
-          }
-      
+
           .${shaToolboxPanel} {
             .${prefixCls}-collapse-header-text {
               white-space: nowrap;
@@ -74,12 +98,12 @@ export const useStyles = createStyles(({ css, cx, token, prefixCls, iconPrefixCl
               width: 300px;
               text-overflow: ellipsis;
             }
-      
+
             &.active {
               background-color: #ebf3fb;
             }
           }
-      
+
           .${shaToolboxComponent} {
             display: flex;
             user-select: none;
@@ -91,11 +115,11 @@ export const useStyles = createStyles(({ css, cx, token, prefixCls, iconPrefixCl
             background: #fff;
             margin: 4px 0;
             border: 1px solid #ddd;
-      
+
             .${iconPrefixCls} {
               margin: 5px 10px 5px 10px;
             }
-      
+
             &:hover {
               border-radius: 5px;
               color: ${token.colorPrimary};

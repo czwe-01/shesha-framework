@@ -15,10 +15,8 @@ import {
   useCanvas,
   useDeepCompareMemo,
   useSheshaApplication,
-  useTheme,
   wrapConstantsData,
 } from "..";
-import { getThemeBaseStyles, getHardcodedDefaults, IThemeStyleType } from "@/providers/theme/styleUtils";
 import { TouchableProxy, makeTouchableProxy } from "@/providers/form/touchableProxy";
 import { useParentOrUndefined } from "@/providers/parentProvider";
 import { isEqual } from "lodash";
@@ -31,55 +29,6 @@ import { jsonSafeParse, removeUndefinedProps } from "@/utils/object";
 import { getDimensionsStyle } from "@/designer-components/_settings/utils/dimensions/utils";
 import { getOverflowStyle } from "@/designer-components/_settings/utils/overflow/util";
 import { isNullOrWhiteSpace } from "@/utils/nullables";
-import { IBackgroundValue } from "@/designer-components/_settings/utils/background/interfaces";
-import { IBorderValue } from "@/designer-components/_settings/utils/border/interfaces";
-import { IShadowValue } from "@/designer-components/_settings/utils/shadow/interfaces";
-
-/**
- * Returns true if the value should be treated as "not set" for merge purposes.
- * Empty strings are treated as unset so that clearing a value in the properties panel
- * correctly falls back to theme or hardcoded defaults.
- */
-const isUnset = (val: unknown): boolean =>
-  val === undefined || val === null || val === '';
-
-/**
- * Deep merges two style objects, where `primary` values take precedence over `fallback`.
- * Values that are unset (undefined, null, or empty string) in primary fall back to fallback.
- */
-const mergeWithThemeDefaults = <T extends object>(
-  primary: T | undefined,
-  fallback: T | undefined,
-): T | undefined => {
-  if (!fallback) return primary;
-  if (!primary) return fallback;
-
-  const result = { ...primary } as Record<string, unknown>;
-
-  for (const key of Object.keys(fallback)) {
-    const primaryVal = result[key];
-    const fallbackVal = (fallback as Record<string, unknown>)[key];
-
-    if (isUnset(primaryVal)) {
-      result[key] = fallbackVal;
-    } else if (
-      typeof primaryVal === "object" &&
-      !Array.isArray(primaryVal) &&
-      typeof fallbackVal === "object" &&
-      fallbackVal !== null
-    ) {
-      // Deep merge nested objects
-      result[key] = mergeWithThemeDefaults(
-        primaryVal as Record<string, unknown>,
-        fallbackVal as Record<string, unknown>,
-      );
-    }
-    // Otherwise keep primary value (it takes precedence)
-  }
-
-  return result as T;
-};
-
 
 type MayHaveEditMode<T> = T & {
   editMode?: unknown | undefined;
@@ -249,8 +198,6 @@ export function useActualContextExecutionExecutor<T = unknown, TAdditionalData e
 export interface IUseFormComponentStylesOptions {
   /** Use wrapperStyle instead of style for jsStyle calculation (for container components) */
   useWrapperStyle?: boolean;
-  /** Component category for applying theme defaults */
-  componentCategory?: 'inputComponents' | 'layoutComponents' | 'standardComponents' | 'inlineComponents';
 }
 
 export const useFormComponentStyles = <TModel>(
@@ -258,55 +205,13 @@ export const useFormComponentStyles = <TModel>(
   options?: IUseFormComponentStylesOptions,
 ): IFormComponentStyles => {
   const app = useSheshaApplication();
-  const { useWrapperStyle, componentCategory } = options || {};
-  const themeContext = useTheme();
-  const theme = themeContext?.theme;
-
-  // Get theme defaults based on component category
-  const themeDefaults = useMemo(() => {
-    if (!componentCategory || !theme) return {} as IThemeStyleType;
-    return getThemeBaseStyles(theme, componentCategory);
-  }, [theme, componentCategory]);
-
-  // Get hardcoded defaults as last-resort fallback (tier 3)
-  const hardcodedDefaults = useMemo(() => {
-    if (!componentCategory) return undefined;
-    return getHardcodedDefaults(componentCategory);
-  }, [componentCategory]);
-
+  const { useWrapperStyle } = options || {};
   // For container components, use wrapperStyle instead of style
   const styleSource = useWrapperStyle && model.wrapperStyle ? (model).wrapperStyle : model.style;
   const jsStyle = useActualContextExecution(styleSource, undefined, {}); // use default style if empty or error
   const { designerWidth } = useCanvas();
 
-  // Use model values with theme defaults as fallback (per-key merge)
-  const {
-    dimensions: modelDimensions,
-    border: modelBorder,
-    font: modelFont,
-    shadow: modelShadow,
-    background: modelBackground,
-    stylingBox: modelStylingBox,
-    overflow: modelOverflow,
-  } = model;
-
-  // 3-tier merge: model value → theme value → hardcoded default
-  const background = mergeWithThemeDefaults<IBackgroundValue>(
-    mergeWithThemeDefaults<IBackgroundValue>(modelBackground, themeDefaults.background),
-    hardcodedDefaults?.background,
-  );
-  const border = mergeWithThemeDefaults<IBorderValue>(
-    mergeWithThemeDefaults<IBorderValue>(modelBorder, themeDefaults.border as IBorderValue),
-    hardcodedDefaults?.border,
-  );
-  const shadow = mergeWithThemeDefaults<IShadowValue>(
-    mergeWithThemeDefaults<IShadowValue>(modelShadow, themeDefaults.shadow as IShadowValue),
-    hardcodedDefaults?.shadow as IShadowValue,
-  );
-  const stylingBox = (!isUnset(modelStylingBox) ? modelStylingBox : undefined) ??
-    themeDefaults.stylingBox ??
-    hardcodedDefaults?.stylingBox;
-  const overflow = modelOverflow;
+  const { dimensions, border, font, shadow, background, stylingBox, overflow } = model;
 
   const backgroundLocal = getBackgroundStyle(background, jsStyle);
 
@@ -324,11 +229,9 @@ export const useFormComponentStyles = <TModel>(
   const stylingBoxParsed = useMemo(() => jsonSafeParse<StyleBoxValue>(stylingBox || '{}') ?? {}, [stylingBox]);
 
   const borderStyles = useMemo(() => getBorderStyle(border, jsStyle), [border, jsStyle]);
-  const font = mergeWithThemeDefaults(modelFont, hardcodedDefaults?.font);
   const fontStyles = useMemo(() => getFontStyle(font), [font]);
   const shadowStyles = useMemo(() => getShadowStyle(shadow), [shadow]);
   const stylingBoxAsCSS = useMemo(() => pickStyleFromModel(stylingBoxParsed), [stylingBoxParsed]);
-  const dimensions = mergeWithThemeDefaults(modelDimensions, hardcodedDefaults?.dimensions);
   const dimensionsStyles = useMemo(() => getDimensionsStyle(dimensions, designerWidth, undefined), [dimensions, designerWidth]);
   const overflowStyles = useMemo(() => overflow ? getOverflowStyle(overflow, false) : {}, [overflow]);
 

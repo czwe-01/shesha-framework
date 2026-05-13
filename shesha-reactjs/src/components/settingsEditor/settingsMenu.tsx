@@ -1,4 +1,4 @@
-import { Menu, Collapse, Empty, Spin, Checkbox, Divider } from 'antd';
+import { Menu, Empty, Spin, Checkbox, Divider } from 'antd';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from '@/hooks';
 import SearchBox from './searchBox';
@@ -7,7 +7,6 @@ import { IFrontEndApplication, ISettingConfiguration } from './provider/models';
 import type { MenuProps } from 'antd';
 import { useDevMode } from '@/hooks/useIsDevMode';
 
-const { Panel } = Collapse;
 type MenuItem = Required<MenuProps>['items'][number];
 
 interface ISettingItem {
@@ -40,7 +39,6 @@ const getSettingKey = (config: ISettingConfiguration, app?: IFrontEndApplication
 export const SettingsMenu: FC = () => {
   const [isDevmode, setDevMode] = useDevMode();
 
-  const [openedKeys, setOpenedKeys] = useLocalStorage('settings-editor.openedKeys', {});// ['']);
   const [searchText, setSearchText] = useLocalStorage('settings-editor.search', '');
   const [menuState, setMenuState] = useState<SettingMenuState>({ groups: [], allSettings: {} });
 
@@ -89,10 +87,6 @@ export const SettingsMenu: FC = () => {
     }
   }, [applicationsLoadingState, configsLoadingState, selectedApplication]);
 
-  const onCollapseChange = (key: string | string[]): void => {
-    setOpenedKeys({ ...openedKeys, [selectedApplication?.appKey ?? 'general']: Array.isArray(key) ? key : [key] });
-  };
-
   const filteredGroups = useMemo<ISettingGroup[]>(() => {
     const groups = menuState.groups ?? [];
     if (!Boolean(searchText)) return [...groups];
@@ -118,33 +112,39 @@ export const SettingsMenu: FC = () => {
       selectSetting(selectedItem.config, selectedItem.app);
   };
 
+  const menuItems = useMemo<MenuItem[]>(() => {
+    const items: MenuItem[] = [];
+
+    filteredGroups.forEach((group) => {
+      const visibleSettings = group.settings;
+
+      if (visibleSettings.length > 0) {
+        items.push({
+          type: 'group',
+          label: group.name,
+          children: visibleSettings.map<MenuItem>((item) => ({
+            key: getSettingKey(item.config, item.app),
+            label: item.config.label,
+          })),
+        });
+      }
+    });
+
+    return items;
+  }, [filteredGroups]);
+
   return (
     <div className="sha-settings-editor-toolbox">
       <Spin spinning={configsLoadingState === 'loading'}>
         <SearchBox value={searchText} onChange={setSearchText} placeholder="Search setting" />
         {filteredGroups.length > 0 && (
-          <Collapse activeKey={openedKeys[selectedApplication?.appKey ?? 'general']} onChange={onCollapseChange} accordion>
-            {filteredGroups
-              // .filter(({ visible }) => visible)
-              .map((group, groupIndex) => {
-                const visibleSettings = group.settings;
-
-                const menuItems = visibleSettings.map<MenuItem>((item) => ({
-                  key: getSettingKey(item.config, item.app),
-                  label: item.config.label,
-                }));
-
-                return visibleSettings.length === 0 ? null : (
-                  <Panel header={group.name} key={groupIndex.toString()}>
-                    <Menu
-                      items={menuItems}
-                      selectedKeys={settingSelection ? [getSettingKey(settingSelection.setting, settingSelection.app)] : []}
-                      onSelect={onSelect}
-                    />
-                  </Panel>
-                );
-              })}
-          </Collapse>
+          <Menu
+            mode="inline"
+            items={menuItems}
+            selectedKeys={settingSelection ? [getSettingKey(settingSelection.setting, settingSelection.app)] : []}
+            onSelect={onSelect}
+            className="sha-settings-menu"
+          />
         )}
         {filteredGroups.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Settings not found" />}
         <Divider />

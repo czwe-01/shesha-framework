@@ -7,20 +7,20 @@
 import React from 'react';
 import { getToolboxComponents } from "@/providers/form/defaults/toolboxComponents";
 
-export interface IComponentTreeNode {
+export interface IMenuItem {
   key: string;
   title: string;
   icon?: React.ReactNode;
   type?: string; // The actual component type identifier (e.g., 'button', 'textField')
-  children?: IComponentTreeNode[];
+  children?: IMenuItem[];
   category?: 'inputComponents' | 'layoutComponents' | 'standardComponents' | 'inlineComponents';
 }
 
 // Lazy initialization to avoid circular dependency
-let _cachedComponentTree: IComponentTreeNode[] | null = null;
+let cachedMenuItems: IMenuItem[] | null = null;
 
-const buildComponentTree = (): IComponentTreeNode[] => {
-  return getToolboxComponents(true, { formId: null, formProps: null }).map(
+const buildComponentitems = (): IMenuItem[] => {
+  return getToolboxComponents(false, { formId: null, formProps: null }).map(
     (componentGroup) => ({
       key: componentGroup.name,
       title: componentGroup.name,
@@ -35,39 +35,39 @@ const buildComponentTree = (): IComponentTreeNode[] => {
   );
 };
 
-export const getComponentTree = (): IComponentTreeNode[] => {
-  if (!_cachedComponentTree) {
-    _cachedComponentTree = buildComponentTree();
+export const getMenuItems = (): IMenuItem[] => {
+  if (!cachedMenuItems) {
+    cachedMenuItems = buildComponentitems();
   }
-  return _cachedComponentTree;
+  return cachedMenuItems;
 };
 
 // Hierarchical component structure used for building the navigation menu
-export const COMPONENT_TREE: IComponentTreeNode[] = new Proxy([] as IComponentTreeNode[], {
+export const MENU_ITEMS: IMenuItem[] = new Proxy([] as IMenuItem[], {
   get(_target, prop) {
-    const tree = getComponentTree();
-    return Reflect.get(tree, prop, tree);
+    const items = getMenuItems();
+    return Reflect.get(items, prop, items);
   },
   has(_target, prop) {
-    const tree = getComponentTree();
-    return Reflect.has(tree, prop);
+    const items = getMenuItems();
+    return Reflect.has(items, prop);
   },
   ownKeys() {
-    const tree = getComponentTree();
-    return Reflect.ownKeys(tree);
+    const items = getMenuItems();
+    return Reflect.ownKeys(items);
   },
   getOwnPropertyDescriptor(_target, prop) {
-    const tree = getComponentTree();
-    return Reflect.getOwnPropertyDescriptor(tree, prop);
+    const items = getMenuItems();
+    return Reflect.getOwnPropertyDescriptor(items, prop);
   },
 });
 
 /**
  * Find a component node by its key in the component hierarchy
  */
-export const findComponentNode = (key: string, tree?: IComponentTreeNode[]): IComponentTreeNode | null => {
-  const searchTree = tree ?? getComponentTree();
-  for (const node of searchTree) {
+export const findComponentNode = (key: string, items?: IMenuItem[]): IMenuItem | null => {
+  const searchitems = items ?? getMenuItems();
+  for (const node of searchitems) {
     if (node.key === key) return node;
     if (node.children) {
       const found = findComponentNode(key, node.children);
@@ -80,10 +80,10 @@ export const findComponentNode = (key: string, tree?: IComponentTreeNode[]): ICo
 /**
  * Get all component types (individual components, not categories)
  */
-export const getAllComponentTypes = (tree?: IComponentTreeNode[]): IComponentTreeNode[] => {
-  const searchTree = tree ?? getComponentTree();
-  const result: IComponentTreeNode[] = [];
-  for (const node of searchTree) {
+export const getAllComponentTypes = (items?: IMenuItem[]): IMenuItem[] => {
+  const searchitems = items ?? getMenuItems();
+  const result: IMenuItem[] = [];
+  for (const node of searchitems) {
     if (node.type) {
       result.push(node);
     }
