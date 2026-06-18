@@ -53,7 +53,7 @@ const ConfigurationStudio: FC = () => {
           }}
           >
             <Splitter.Panel
-              collapsible
+              collapsible={{ start: true, showCollapsibleIcon: true }}
               min="5%"
               defaultSize="20%"
               className={styles.csTreeArea}

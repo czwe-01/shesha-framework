@@ -53,6 +53,13 @@ export const useStyles = createStyles(({ css, cx, token, prefixCls, iconPrefixCl
         }
         .${csContent}{
             background-color: ${token.colorBgContainer};
+
+            // Reposition the Splitter collapse arrow near the top of the panel
+            // edge instead of the vertical midpoint, so it is immediately visible.
+            .${prefixCls}-splitter-bar-collapse-bar {
+                top: 24px;
+                transform: translateX(-50%);
+            }
         }
         .${csTreeArea}{
             height: calc(100vh - ${headerHeight}px);
