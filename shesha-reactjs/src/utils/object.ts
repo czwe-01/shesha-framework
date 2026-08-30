@@ -54,6 +54,23 @@ export const unproxyValue = <TValue = unknown>(value: TValue): TValue => {
   return isProxy(result) ? unproxyValue<TValue>(result as TValue) : result as TValue;
 };
 
+/**
+ * True when a value is a reference to an entity, i.e. carries both a string `id` and the
+ * `_className` naming its type.
+ *
+ * Mirrors `isEntityReferenceId` in `utils/entity.ts`, which cannot be imported here: that module
+ * imports from this one (a cycle) and pulls in React and provider code that these pure object
+ * helpers must stay free of. `_className` is required, so a plain `{ id, name }` object is not
+ * treated as a reference and keeps merging as before.
+ */
+const isEntityReferenceValue = (value: unknown): boolean => {
+  if (!isDefined(value) || typeof value !== "object" || Array.isArray(value))
+    return false;
+
+  const candidate = value as { id?: unknown; _className?: unknown };
+  return typeof candidate.id === "string" && typeof candidate._className === "string";
+};
+
 export const deepMergeSkipUndefinedFunc = (objValue: unknown, srcValue: unknown, _key: string): unknown => srcValue === undefined ? objValue : undefined;
 
 export const deepMergeValues = <TObject extends object = object, TSource extends object = object>(
@@ -93,6 +110,17 @@ export const deepMergeValues = <TObject extends object = object, TSource extends
     // handle moemnt objects
     if (moment.isMoment(srcValue)) {
       // save moment object without merging
+      return srcValue;
+    }
+
+    // handle entity references
+    if (isEntityReferenceValue(srcValue)) {
+      // Save the reference as is, without merging. A reference identifies a *whole* entity, so a
+      // new one replaces the old rather than being combined with it: merging key-by-key leaves any
+      // property the previous entity had and the new one lacks (its `id`, `_displayName`, or a
+      // display property fetched alongside it) sitting underneath the new value. That produced
+      // saved payloads carrying the newly selected entity's display text against the previously
+      // selected entity's id.
       return srcValue;
     }
 
