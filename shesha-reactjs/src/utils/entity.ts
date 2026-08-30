@@ -6,19 +6,19 @@ import { getValueByPropertyName, setValueByPropertyName } from "./object";
 import { IEntityTypeIdentifier } from "@/providers/sheshaApplication/publicApi/entities/models";
 import { getEntityTypeIdentifierQueryParams, isEntityTypeIdentifier, isEntityTypeIdEqual } from "@/providers/metadataDispatcher/entities/utils";
 import { IEntityTypeIdentifierQueryParams } from "@/interfaces/metadata";
-import { extractAjaxResponse, IAjaxResponse, IEntityReferenceDto } from "@/interfaces";
+import { extractAjaxResponse, IAjaxResponse } from "@/interfaces";
 import { isDefined, isNullOrWhiteSpace } from "./nullables";
+import { isEntityReference } from "./entityReference";
 import { OwnerEntityReference } from "@/interfaces/entity";
 import { useHttpClient } from "@/providers";
 import { buildUrl } from "./url";
 
-export const isEntityReferenceId = (data: unknown): data is IEntityReferenceDto => {
-  if (!isDefined(data) || typeof data !== "object" || Array.isArray(data))
-    return false;
-
-  const candidate = data as { id?: unknown; _className?: unknown };
-  return typeof candidate.id === "string" && typeof candidate._className === "string";
-};
+/**
+ * @deprecated use `isEntityReference` from `@/utils/entityReference` instead. Kept as an alias so
+ * existing callers keep working; the implementation lives in one place now because
+ * `utils/object.ts` needs the same guard and cannot import from this module (it would be a cycle).
+ */
+export const isEntityReferenceId = isEntityReference;
 
 export interface IUseEntityDisplayTextProps {
   entityType: string | IEntityTypeIdentifier | undefined;
