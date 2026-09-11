@@ -44,7 +44,27 @@ export const useStyles = createStyles(({ css, cx }) => {
       .ant-radio-button-wrapper-checked {
         z-index: 0 !important;
       }
-      
+
+      /* These buttons hold an icon and no text, so antd's text line-height left the glyph sitting low
+         and touching the button's lower edge. Centre it on the button box instead. */
+      .ant-radio-button-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+
+        > span:not(.ant-radio-button) {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          line-height: 1;
+        }
+
+        .anticon {
+          display: block;
+          line-height: 1;
+        }
+      }
       `);
   return {
     inlineInputs,

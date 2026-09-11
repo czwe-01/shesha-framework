@@ -39,8 +39,16 @@ export const useStyles = createStyles(({ css, cx, responsive, token }) => {
             color: darkslategrey;
             font-weight: 500;
             position: relative;
-            
-            
+            /* Long labels ("Interaction Mode") used to run into the control below them in a narrow
+               settings column. Keeping them on one line and letting the overflow ellipsise means the
+               row keeps its height and the icons underneath stay clear of the text. */
+            line-height: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+
+
             +.ant-form-item-tooltip {
             align-self: center !important;
             position: relative;
@@ -51,16 +59,25 @@ export const useStyles = createStyles(({ css, cx, responsive, token }) => {
   const jsSwitch = cx(css`
             position: absolute;
             right: 0;
-            top: 4px;
+            /* The button is 20px tall and sits against a 20px label line; anchoring it to the top of that
+               line rather than 4px into it is what puts the JS icon level with the label text. */
+            top: 0;
             font-size: 12px;
             height: 20px;
+            line-height: 1;
+            padding: 0;
             max-width: 100%;
             margin-left: 5px;
             margin-right: 0px;
             color: ${token.colorPrimary};
-            display: flex;
+            display: inline-flex;
             justify-content: center;
             align-items: center;
+
+            .anticon {
+              display: block;
+              line-height: 1;
+            }
             ${responsive.mobile} {
                 right: 0;
                 left: auto;

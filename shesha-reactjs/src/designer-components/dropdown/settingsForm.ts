@@ -12,6 +12,10 @@ const customValueHiddenJs = "return getSettingValue(data?.valueFormat) !== 'cust
 const disabledValuesHiddenOrNotRefListJs = "return getSettingValue(data.dataSourceType) !== 'referenceList' || !getSettingValue(data.disableItemValue);";
 const tagsVisibleJs = 'return getSettingValue(data?.displayStyle) === "tags";';
 const tagsHiddenJs = 'return getSettingValue(data?.displayStyle) !== "tags";';
+// Every setting in the Advanced panel is itself conditional on a reference list source or the legacy
+// custom value format. Without this the panel still rendered - as an empty, uncollapsible shell - for the
+// far more common 'Values' source.
+const advancedVisibleJs = "return getSettingValue(data.dataSourceType) === 'referenceList' || getSettingValue(data?.valueFormat) === 'custom';";
 
 export const getSettings: SettingsFormMarkupFactory = ({ fbf, removeStyleRouter }) => {
   const searchableTabsId = nanoid();
@@ -49,7 +53,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf, removeStyleRouter 
         size: 'small',
         tabs: [
           {
-            key: 'common', title: 'Common', id: commonTabId,
+            key: 'common', title: 'Main', id: commonTabId,
             components: [
               ...fbf(commonTabId)
                 .addContextPropertyAutocomplete({ propertyName: 'propertyName', label: 'Property Name', styledLabel: true, size: 'small', validate: { required: true } })
@@ -106,7 +110,7 @@ export const getSettings: SettingsFormMarkupFactory = ({ fbf, removeStyleRouter 
                       { type: 'codeEditor', propertyName: 'incomeCustomJs', label: 'Key Value (legacy)', labelAlign: 'right', tooltip: 'Return key from the value. Legacy setting, retained for forms saved with the removed Custom value format.' },
                       { type: 'codeEditor', propertyName: 'outcomeCustomJs', label: 'Custom Value (legacy)', labelAlign: 'right', tooltip: 'Return value that will be stored as field value. Legacy setting, retained for forms saved with the removed Custom value format.' },
                     ],
-                  }), true)
+                  }), true, advancedVisibleJs)
                 .stdCollapsiblePanel('Validations', (fb) => fb
                   .addSettingsInput({ inputType: 'switch', propertyName: 'validate.required', label: 'Required', size: 'small', layout: 'horizontal', jsSetting: true })
                   .addSettingsInputRow({
