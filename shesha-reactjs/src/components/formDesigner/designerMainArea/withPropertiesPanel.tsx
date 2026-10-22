@@ -4,6 +4,7 @@ import { useFormDesignerFormMode, useFormDesignerSelectedComponent } from '@/pro
 import { ComponentPropertiesPanel } from '../componentPropertiesPanel';
 import { ComponentTitleButtons } from '../componentTitleButtons';
 import { isDefined } from '@/utils';
+import { useFormDesignerComponentGetter } from '@/providers/form/hooks';
 
 export const withPropertiesPanel = <P extends JSX.IntrinsicAttributes>(
   WrappedComponent: ComponentType<P>,
@@ -11,6 +12,7 @@ export const withPropertiesPanel = <P extends JSX.IntrinsicAttributes>(
   return function WithPropertiesPanel(props: P): ReactNode {
     const component = useFormDesignerSelectedComponent();
     const formMode = useFormDesignerFormMode();
+    const getToolboxComponent = useFormDesignerComponentGetter();
     const isDesigner = formMode === 'designer';
     const defaultPanelSize = typeof window !== 'undefined' ? (15 / 100) * window.innerWidth : 350;
 
@@ -18,15 +20,20 @@ export const withPropertiesPanel = <P extends JSX.IntrinsicAttributes>(
       return <WrappedComponent {...props} />;
     }
 
+    const label = isDefined(component) && typeof (component.label) === 'string'
+      ? component.label
+      : 'Properties';
+    const icon = isDefined(component) ? getToolboxComponent(component.type)?.icon : undefined;
+
     return (
       <SplitLayout
         orientation="horizontal"
         position="end"
         panel={<ComponentPropertiesPanel />}
         defaultPanelSize={defaultPanelSize}
-        panelTitle={isDefined(component) && typeof (component.label) === 'string'
-          ? component.label
-          : 'Properties'}
+        panelTitle={isDefined(icon)
+          ? <><span style={{ marginInlineEnd: 6 }}>{icon}</span>{label}</>
+          : label}
         panelExtra={<ComponentTitleButtons />}
       >
         <WrappedComponent {...props} />
