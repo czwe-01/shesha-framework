@@ -1,5 +1,5 @@
 import ComponentsContainer from '@/components/formDesigner/containers/componentsContainer';
-import { IToolboxComponent } from '@/interfaces';
+import { IConfigurableFormComponent, IToolboxComponent } from '@/interfaces';
 import { useForm } from '@/providers/form';
 
 import ParentProvider from '@/providers/parentProvider/index';
@@ -78,6 +78,32 @@ const CardComponent: IToolboxComponent<ICardComponentProps> = {
   }),
   getDefaultStyles: defaultStyles,
   settingsFormMarkup: getSettings,
+  // antd only renders a card's body when it has content, so an empty card has nowhere to show its
+  // padding. The theme preview gives it sample content so the configured padding (and the margins
+  // around a card that has a body) are visible.
+  previewConfiguration: {
+    type: 'card',
+    id: 'card-preview',
+    componentName: 'cardPreview',
+    propertyName: 'cardPreview',
+    label: 'Card',
+    version: 'latest',
+    header: { id: 'card-preview-header', components: [] },
+    content: {
+      id: 'card-preview-content',
+      components: [
+        {
+          type: 'text',
+          id: 'card-preview-text',
+          componentName: 'cardPreviewText',
+          propertyName: 'cardPreviewText',
+          parentId: 'card-preview-content',
+          content: 'Card content',
+          version: 'latest',
+        } as IConfigurableFormComponent,
+      ],
+    },
+  },
 
   customContainerNames: ['header', 'content'],
   migrator: (m) => m

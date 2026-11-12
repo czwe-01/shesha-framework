@@ -13,6 +13,27 @@ const hiddenUnlessHorizontal = { _code: 'return getSettingValue(data?.layout) !=
 
 type FormLayoutModel = Pick<IConfigurableTheme, 'layout' | 'labelSpan' | 'labelAlign' | 'colon' | 'labelFont'>;
 
+/**
+ * The theme with the Form Span settings form's values applied. The form reports all of its current values
+ * on every change, not only the edited one, so every field it reports is applied - handling one of them and
+ * stopping would drop the others (the label font's fields are always present, so stopping after them lost
+ * every Layout/Span/Align/Colon edit).
+ */
+export const applyFormLayoutChange = (theme: IConfigurableTheme, values: Partial<FormLayoutModel>): IConfigurableTheme => {
+  const { labelFont, labelSpan, ...rest } = values;
+  const next: IConfigurableTheme = { ...theme, ...rest };
+  if ('labelFont' in values)
+    // Merge so a change to one font part never drops the others.
+    next.labelFont = { ...theme.labelFont, ...labelFont };
+  if ('labelSpan' in values) {
+    // Keep the control's span in step with the label's so the two always fill the grid.
+    const span = typeof labelSpan === 'number' ? labelSpan : undefined;
+    next.labelSpan = span;
+    next.componentSpan = span !== undefined ? GRID_COLUMNS - span : undefined;
+  }
+  return next;
+};
+
 export interface IFormLayoutSettingsPanelProps {
   value: IConfigurableTheme;
   onChange: (theme: IConfigurableTheme) => void;
@@ -85,31 +106,16 @@ export const FormLayoutSettingsPanel: FC<IFormLayoutSettingsPanelProps> = ({ val
   }), [fbf]);
 
   const initialModel = useMemo((): FormLayoutModel => ({
-    layout: theme.layout,
+    // An unset theme layout is what forms fall back to (see resolveFormLayout), so show that rather than nothing.
+    layout: theme.layout ?? 'horizontal',
     labelSpan: theme.labelSpan ?? DEFAULT_LABEL_SPAN,
     labelAlign: theme.labelAlign,
     colon: theme.colon ?? true,
     labelFont: theme.labelFont,
   }), [theme.layout, theme.labelSpan, theme.labelAlign, theme.colon, theme.labelFont]);
 
-  const handleChange = (changedValues: FormLayoutModel): void => {
-    if ('labelFont' in changedValues) {
-      // Merge so a change to one font part never drops the others.
-      onChange({ ...theme, labelFont: { ...theme.labelFont, ...changedValues.labelFont } });
-      return;
-    }
-    if (!('labelSpan' in changedValues)) {
-      onChange({ ...theme, ...changedValues });
-      return;
-    }
-    // Keep the control's span in step with the label's so the two always fill the grid.
-    const labelSpan = typeof changedValues.labelSpan === 'number' ? changedValues.labelSpan : undefined;
-    onChange({
-      ...theme,
-      ...changedValues,
-      labelSpan,
-      componentSpan: labelSpan !== undefined ? GRID_COLUMNS - labelSpan : undefined,
-    });
+  const handleChange = (changedValues: Partial<FormLayoutModel>): void => {
+    onChange(applyFormLayoutChange(theme, changedValues));
   };
 
   return (

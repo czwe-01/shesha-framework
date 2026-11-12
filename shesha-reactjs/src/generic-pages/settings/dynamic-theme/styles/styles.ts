@@ -217,12 +217,14 @@ export const useStyles = createStyles(({ css, cx }, theme?: IConfigurableTheme) 
       border: 1px solid ${CANVAS_PREVIEW_BORDER};
       color: ${CANVAS_PREVIEW_TEXT};
 
-      .ant-card-head {
+      /* Only this frame's own head and body: a previewed Card component sits inside it and must keep
+         its configured appearance. */
+      > .ant-card-head {
         color: ${CANVAS_PREVIEW_TEXT};
         border-bottom-color: ${CANVAS_PREVIEW_BORDER};
       }
 
-      .ant-card-body {
+      > .ant-card-body {
         background: transparent;
       }
     `,
